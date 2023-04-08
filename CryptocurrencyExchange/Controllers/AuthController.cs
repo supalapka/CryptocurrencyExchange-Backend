@@ -1,5 +1,7 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using CryptocurrencyExchange.Data;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -7,34 +9,44 @@ using System.Security.Cryptography;
 
 namespace CryptocurrencyExchange.Controllers
 {
-    [Route("[controller]")]
     [ApiController]
     public class AuthController : ControllerBase
     {
-        public static User user = new User();
-
         public readonly IConfiguration _configuration;
+        private readonly DataContext _dataContext;
 
-        public AuthController(IConfiguration configuration)
+        public AuthController(IConfiguration configuration, DataContext dataContext)
         {
             _configuration = configuration;
+            _dataContext = dataContext;
         }
 
+
         [HttpPost("register")]
-        public async Task<ActionResult<User>> Register(UserDto userDto)
+        public async Task<ActionResult> Register(UserDto userDto)
         {
+             var user = await _dataContext.User.FirstOrDefaultAsync(u => u.Email == userDto.Email);
+            if (user != null)
+                return BadRequest("User with this email already exits");
+
+            user = new User();
             user.Email = userDto.Email;
             CreatePasswordHash(userDto.Password, out byte[] PasswordHash, out byte[] PasswordSalt);
             user.PasswordHash = PasswordHash;
             user.PasswordSalt = PasswordSalt;
 
-            return Ok(user);
+            await _dataContext.User.AddAsync(user);
+            await _dataContext.SaveChangesAsync();  
+            return Ok($"{user.Email} successfully registered");
         }
+
 
         [HttpPost("login")]
         public async Task<ActionResult<User>> Login(UserDto userDto)
         {
-            if (user.Email != userDto.Email)
+            var user = await _dataContext.User.FirstOrDefaultAsync(u => u.Email == userDto.Email);
+
+            if (user == null)
                 return BadRequest("User not found");
 
             if (!VerifyPasswordHash(userDto.Password, user.PasswordHash, user.PasswordSalt))
@@ -44,18 +56,18 @@ namespace CryptocurrencyExchange.Controllers
             return Ok(jwt);
         }
 
+
         private string CreateToken(User user)
         {
             List<Claim> claims = new List<Claim>()
             {
-                new Claim(ClaimTypes.Email, user.Email)
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())
             };
 
             var key = new SymmetricSecurityKey(System.Text.Encoding.UTF8
                 .GetBytes(_configuration.GetSection("AppSettings:Token").Value));
 
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
-
             var token = new JwtSecurityToken(
                 claims: claims,
                 expires: DateTime.Now.AddDays(5),
@@ -66,6 +78,7 @@ namespace CryptocurrencyExchange.Controllers
 
         }
 
+
         private void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
         {
             using (var hmac = new HMACSHA512())
@@ -74,6 +87,7 @@ namespace CryptocurrencyExchange.Controllers
                 passwordHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
             }
         }
+
 
         private bool VerifyPasswordHash(string password, byte[] passwordHash, byte[] passwordSalt)
         {
