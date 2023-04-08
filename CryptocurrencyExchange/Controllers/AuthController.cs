@@ -1,0 +1,87 @@
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Security.Cryptography;
+
+namespace CryptocurrencyExchange.Controllers
+{
+    [Route("[controller]")]
+    [ApiController]
+    public class AuthController : ControllerBase
+    {
+        public static User user = new User();
+
+        public readonly IConfiguration _configuration;
+
+        public AuthController(IConfiguration configuration)
+        {
+            _configuration = configuration;
+        }
+
+        [HttpPost("register")]
+        public async Task<ActionResult<User>> Register(UserDto userDto)
+        {
+            user.Email = userDto.Email;
+            CreatePasswordHash(userDto.Password, out byte[] PasswordHash, out byte[] PasswordSalt);
+            user.PasswordHash = PasswordHash;
+            user.PasswordSalt = PasswordSalt;
+
+            return Ok(user);
+        }
+
+        [HttpPost("login")]
+        public async Task<ActionResult<User>> Login(UserDto userDto)
+        {
+            if (user.Email != userDto.Email)
+                return BadRequest("User not found");
+
+            if (!VerifyPasswordHash(userDto.Password, user.PasswordHash, user.PasswordSalt))
+                return BadRequest("Wrond password");
+
+            string jwt = CreateToken(user);
+            return Ok(jwt);
+        }
+
+        private string CreateToken(User user)
+        {
+            List<Claim> claims = new List<Claim>()
+            {
+                new Claim(ClaimTypes.Email, user.Email)
+            };
+
+            var key = new SymmetricSecurityKey(System.Text.Encoding.UTF8
+                .GetBytes(_configuration.GetSection("AppSettings:Token").Value));
+
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
+
+            var token = new JwtSecurityToken(
+                claims: claims,
+                expires: DateTime.Now.AddDays(5),
+                signingCredentials:creds);
+
+            var jwt = new  JwtSecurityTokenHandler().WriteToken(token);
+            return jwt; 
+
+        }
+
+        private void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
+        {
+            using (var hmac = new HMACSHA512())
+            {
+                passwordSalt = hmac.Key;
+                passwordHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
+            }
+        }
+
+        private bool VerifyPasswordHash(string password, byte[] passwordHash, byte[] passwordSalt)
+        {
+            using(var hmac = new HMACSHA512(passwordSalt))
+            {
+                var computeHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
+                return computeHash.SequenceEqual(passwordHash);
+            }
+        }
+    }
+}
