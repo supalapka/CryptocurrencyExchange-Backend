@@ -3,6 +3,7 @@ using CryptocurrencyExchange.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CryptocurrencyExchange.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20230408235311_added_wallet")]
+    partial class added_wallet
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -43,7 +46,7 @@ namespace CryptocurrencyExchange.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Users");
+                    b.ToTable("User");
                 });
 
             modelBuilder.Entity("CryptocurrencyExchange.Models.WalletItem", b =>
@@ -68,7 +71,7 @@ namespace CryptocurrencyExchange.Migrations
 
                     b.HasIndex("UsersId");
 
-                    b.ToTable("WalletItems");
+                    b.ToTable("WalletItem");
                 });
 
             modelBuilder.Entity("CryptocurrencyExchange.Models.WalletItem", b =>
