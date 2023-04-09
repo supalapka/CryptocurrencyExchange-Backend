@@ -1,4 +1,5 @@
 ﻿using CryptocurrencyExchange.Data;
+using CryptocurrencyExchange.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -25,7 +26,7 @@ namespace CryptocurrencyExchange.Controllers
         [HttpPost("register")]
         public async Task<ActionResult> Register(UserDto userDto)
         {
-             var user = await _dataContext.User.FirstOrDefaultAsync(u => u.Email == userDto.Email);
+             var user = await _dataContext.Users.FirstOrDefaultAsync(u => u.Email == userDto.Email);
             if (user != null)
                 return BadRequest("User with this email already exits");
 
@@ -35,7 +36,7 @@ namespace CryptocurrencyExchange.Controllers
             user.PasswordHash = PasswordHash;
             user.PasswordSalt = PasswordSalt;
 
-            await _dataContext.User.AddAsync(user);
+            await _dataContext.Users.AddAsync(user);
             await _dataContext.SaveChangesAsync();  
             return Ok($"{user.Email} successfully registered");
         }
@@ -44,7 +45,7 @@ namespace CryptocurrencyExchange.Controllers
         [HttpPost("login")]
         public async Task<ActionResult<User>> Login(UserDto userDto)
         {
-            var user = await _dataContext.User.FirstOrDefaultAsync(u => u.Email == userDto.Email);
+            var user = await _dataContext.Users.FirstOrDefaultAsync(u => u.Email == userDto.Email);
 
             if (user == null)
                 return BadRequest("User not found");
