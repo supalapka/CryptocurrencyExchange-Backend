@@ -61,13 +61,13 @@ namespace CryptocurrencyExchange.Services
 
         public async Task<List<WalletItem>> GetFullWalletAsync(int userId)
         {
-            return await _dataContext.WalletItems.Where(x => x.Users.Id == userId).ToListAsync();
+            return await _dataContext.WalletItems.Where(x => x.Users.Id == userId && x.Amount > 0).ToListAsync();
         }
 
         public async Task<WalletItem> GeWalletItemAsync(int userId, string symbol)
         {
             return await _dataContext.WalletItems.Where(x => x.Users.Id == userId 
-            && x.Symbol == symbol && x.Amount > 0).FirstAsync();
+            && x.Symbol == symbol).FirstAsync();
         }
 
         public async Task SellAsync(int userId, string coinSymbol, double amount)
