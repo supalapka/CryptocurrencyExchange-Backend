@@ -67,7 +67,7 @@ namespace CryptocurrencyExchange.Services
         public async Task<WalletItem> GeWalletItemAsync(int userId, string symbol)
         {
             return await _dataContext.WalletItems.Where(x => x.Users.Id == userId 
-            && x.Symbol == symbol).FirstAsync();
+            && x.Symbol == symbol && x.Amount > 0).FirstAsync();
         }
 
         public async Task SellAsync(int userId, string coinSymbol, double amount)
