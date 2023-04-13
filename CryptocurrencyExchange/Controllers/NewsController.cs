@@ -20,7 +20,7 @@ namespace CryptocurrencyExchange.Controllers
         {
             var newsList = new List<News>();
 
-            var url = "https://cryptonews.com/#news";
+            var url = "https://cryptonews.com/";
 
             var httpClient = new HttpClient();
             var html = await httpClient.GetStringAsync(url);
