@@ -3,8 +3,6 @@ using CryptocurrencyExchange.Models;
 using CryptocurrencyExchange.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json.Linq;
 using System.Security.Claims;
 
 namespace CryptocurrencyExchange.Controllers
@@ -31,6 +29,7 @@ namespace CryptocurrencyExchange.Controllers
             return await _walletService.GetFullWalletAsync(userId);
         }
 
+
         [Authorize]
         [HttpPost("auth/coin-amount")]
         public async Task<ActionResult<double>> GetCoinAmount([FromBody] CoinAmountRequest request)
@@ -38,12 +37,7 @@ namespace CryptocurrencyExchange.Controllers
             string userIdClaimValue = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             int userId = int.Parse(userIdClaimValue);
 
-             return await _walletService.GetCoinAmountAsync(userId,request.Symbol);
-        }
-
-        public class CoinAmountRequest
-        {
-            public string Symbol { get; set; }
+            return await _walletService.GetCoinAmountAsync(userId, request.Symbol);
         }
 
 
@@ -59,10 +53,7 @@ namespace CryptocurrencyExchange.Controllers
             {
                 await _walletService.BuyAsync(userId, buyCryptoModel.CoinSymbol, usdAmount);
             }
-            catch(Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            catch (Exception ex) { return BadRequest(ex.Message); }
             return Ok();
         }
 
@@ -79,13 +70,33 @@ namespace CryptocurrencyExchange.Controllers
             {
                 await _walletService.SellAsync(userId, buyCryptoModel.CoinSymbol, coinAmount);
             }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            catch (Exception ex) { return BadRequest(ex.Message); }
             return Ok();
         }
 
+
+        [HttpPost("auth/send")]
+        [Authorize]
+        public async Task<IActionResult> SendCrypto([FromBody] SendCryptoModel model)
+        {
+            string userIdClaimValue = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            int userId = int.Parse(userIdClaimValue);
+
+            try
+            {
+                await _walletService.SendCryptoAsync(userId, model.symbol, model.amount, model.receiver);
+            }
+            catch (Exception ex) { return BadRequest(ex.Message); }
+
+            return Ok();
+        }
+
+        public class SendCryptoModel
+        {
+            public string symbol { get; set; } = string.Empty;
+            public double amount { get; set; }
+            public int receiver { get; set; }
+        }
 
         public class BuySellCryptoModel
         {
@@ -93,6 +104,11 @@ namespace CryptocurrencyExchange.Controllers
             public double Amount { get; set; }
             //if buy -> usd amount.
             //if sell -> coin amount
+        }
+
+        public class CoinAmountRequest
+        {
+            public string Symbol { get; set; }
         }
     }
 }

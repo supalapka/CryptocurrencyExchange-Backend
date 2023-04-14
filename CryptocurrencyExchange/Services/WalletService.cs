@@ -16,6 +16,7 @@ namespace CryptocurrencyExchange.Services
             _dataContext = context;
         }
 
+
         public async Task BuyAsync(int userId, string coinSymbol, double usd)
         {
             coinSymbol = coinSymbol.ToLower();
@@ -29,7 +30,7 @@ namespace CryptocurrencyExchange.Services
             decimal coinPrice = await GetPrice(coinSymbol);
             var amountToBuy = (decimal)usd / coinPrice;
 
-            var coinToBuy = await GeWalletItemAsync(userId, coinSymbol);
+            var coinToBuy =  GeWalletItem(userId, coinSymbol);
             if (coinToBuy == null)
             {
                 coinToBuy = new WalletItem()
@@ -59,21 +60,24 @@ namespace CryptocurrencyExchange.Services
             return walletItem.Amount;
         }
 
+
         public async Task<List<WalletItem>> GetFullWalletAsync(int userId)
         {
             return await _dataContext.WalletItems.Where(x => x.Users.Id == userId && x.Amount > 0).ToListAsync();
         }
 
-        public async Task<WalletItem> GeWalletItemAsync(int userId, string symbol)
+
+        public WalletItem GeWalletItem(int userId, string symbol)
         {
-            return await _dataContext.WalletItems.Where(x => x.Users.Id == userId 
-            && x.Symbol == symbol).FirstAsync();
+            return _dataContext.WalletItems.Where(x => x.Users.Id == userId 
+            && x.Symbol == symbol).FirstOrDefault();
         }
+
 
         public async Task SellAsync(int userId, string coinSymbol, double amount)
         {
-            var coinToSell = await GeWalletItemAsync(userId, coinSymbol);
-            var usdtWalletItem = await GeWalletItemAsync(userId, "usdt");
+            var coinToSell = GeWalletItem(userId, coinSymbol);
+            var usdtWalletItem = GeWalletItem(userId, "usdt");
 
             if (coinToSell == null || coinToSell.Amount < amount)
                 throw new Exception($"Not enough balance in {coinSymbol.ToUpper()}");
@@ -86,6 +90,39 @@ namespace CryptocurrencyExchange.Services
 
             await _dataContext.SaveChangesAsync();
         }
+
+
+        public async Task SendCryptoAsync(int senderId, string symbol, double amount, int receiverId)
+        {
+            var receiver = await _dataContext.Users.Where(x => x.Id == receiverId).FirstAsync();
+            if (receiver == null)
+                throw new Exception($"Receiver id not found");
+
+            var walletSenderItem = await _dataContext.WalletItems.Where(x => x.Users.Id == senderId
+            && x.Symbol == symbol).FirstAsync();
+
+            if (walletSenderItem == null || walletSenderItem.Amount < amount)
+                throw new Exception($"Not enough balance in {symbol.ToUpper()} to send");
+
+            var walletReceiverItem = await _dataContext.WalletItems.Where(x => x.Users.Id == receiverId
+            && x.Symbol == symbol).FirstAsync();
+
+            if (walletReceiverItem == null)
+            {
+                walletReceiverItem = new WalletItem()
+                {
+                    Amount = 0,
+                    Symbol = symbol,
+                    Users = receiver
+                };
+                _dataContext.WalletItems.Add(walletReceiverItem);
+            }
+            walletSenderItem.Amount -= amount;
+            walletReceiverItem.Amount += amount;
+
+            await _dataContext.SaveChangesAsync();
+        }
+
 
         private async Task<decimal> GetPrice(string coinSymbol)
         {
