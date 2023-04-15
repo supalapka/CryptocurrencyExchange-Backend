@@ -1,19 +1,19 @@
-﻿using Azure.Core;
-using CryptocurrencyExchange.Data;
+﻿using CryptocurrencyExchange.Data;
 using CryptocurrencyExchange.Models;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json.Linq;
-using System.Security.Claims;
 
 namespace CryptocurrencyExchange.Services
 {
     public class WalletService : IWalletService
     {
         private readonly DataContext _dataContext;
+        private readonly INotificationService _notificationService;
 
-        public WalletService(DataContext context)
+        public WalletService(DataContext context, INotificationService notificatinService)
         {
             _dataContext = context;
+            _notificationService = notificatinService;
         }
 
 
@@ -30,7 +30,7 @@ namespace CryptocurrencyExchange.Services
             decimal coinPrice = await GetPrice(coinSymbol);
             var amountToBuy = (decimal)usd / coinPrice;
 
-            var coinToBuy =  GeWalletItem(userId, coinSymbol);
+            var coinToBuy = GeWalletItem(userId, coinSymbol);
             if (coinToBuy == null)
             {
                 coinToBuy = new WalletItem()
@@ -69,7 +69,7 @@ namespace CryptocurrencyExchange.Services
 
         public WalletItem GeWalletItem(int userId, string symbol)
         {
-            return _dataContext.WalletItems.Where(x => x.Users.Id == userId 
+            return _dataContext.WalletItems.Where(x => x.Users.Id == userId
             && x.Symbol == symbol).FirstOrDefault();
         }
 
@@ -104,8 +104,8 @@ namespace CryptocurrencyExchange.Services
             if (walletSenderItem == null || walletSenderItem.Amount < amount)
                 throw new Exception($"Not enough balance in {symbol.ToUpper()} to send");
 
-            var walletReceiverItem = await _dataContext.WalletItems.Where(x => x.Users.Id == receiverId
-            && x.Symbol == symbol).FirstAsync();
+            var walletReceiverItem = _dataContext.WalletItems.Where(x => x.Users.Id == receiverId
+            && x.Symbol == symbol).FirstOrDefault();
 
             if (walletReceiverItem == null)
             {
@@ -120,9 +120,11 @@ namespace CryptocurrencyExchange.Services
             walletSenderItem.Amount -= amount;
             walletReceiverItem.Amount += amount;
 
+            await _notificationService.CreateNotification($"You have received a transfer of " +
+                $"{amount} {symbol}. Please check you wallet.", receiverId);
+
             await _dataContext.SaveChangesAsync();
         }
-
 
         private async Task<decimal> GetPrice(string coinSymbol)
         {
