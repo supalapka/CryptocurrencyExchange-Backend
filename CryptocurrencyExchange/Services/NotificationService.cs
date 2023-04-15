@@ -33,9 +33,11 @@ namespace CryptocurrencyExchange.Services
             return last;
         }
 
-        public Task MarkAsRead(int notificationId)
+        public async Task MarkAsRead(int notificationId)
         {
-            throw new NotImplementedException();
+            var notification = _dataContext.Notifications.Find(notificationId);
+            notification.IsRead = true;
+            await _dataContext.SaveChangesAsync();
         }
     }
 }
