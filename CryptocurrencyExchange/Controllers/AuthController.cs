@@ -58,6 +58,21 @@ namespace CryptocurrencyExchange.Controllers
         }
 
 
+        [Authorize]
+        [HttpGet("email")]
+        public async Task<ActionResult<User>> GetUserEmail()
+        {
+            string userIdClaimValue = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            int userId = int.Parse(userIdClaimValue);
+
+            var user = _dataContext.Users.Where(x => x.Id == userId).FirstOrDefault();
+            if (user == null)
+                return BadRequest("Invalid or miss jwt");
+
+            return Ok(user.Email);
+        }
+
+
         private string CreateToken(User user)
         {
             List<Claim> claims = new List<Claim>()
