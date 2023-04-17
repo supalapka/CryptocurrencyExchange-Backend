@@ -10,5 +10,6 @@ namespace CryptocurrencyExchange.Services
         Task<List<WalletItem>> GetFullWalletAsync(int userId);
         WalletItem GeWalletItem(int userId, string symbol);
         Task SendCryptoAsync(int senderId, string symbol, double amount, int receiver);
+        Task<decimal> GetPrice(string coinSymbol);
     }
 }

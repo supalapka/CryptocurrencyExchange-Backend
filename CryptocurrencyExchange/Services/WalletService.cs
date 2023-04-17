@@ -126,12 +126,14 @@ namespace CryptocurrencyExchange.Services
             await _dataContext.SaveChangesAsync();
         }
 
-        private async Task<decimal> GetPrice(string coinSymbol)
+        public async Task<decimal> GetPrice(string coinSymbol)
         {
             var baseUrl = "https://api.binance.com";
             var httpClient = new HttpClient { BaseAddress = new Uri(baseUrl) };
-            var symbolUSDT = coinSymbol.ToUpper() + "USDT";
-            var endpoint = $"/api/v3/ticker/price?symbol={symbolUSDT}";
+            coinSymbol = coinSymbol.ToUpper();
+            if (!coinSymbol.EndsWith("USDT"))
+                coinSymbol += "USDT";
+            var endpoint = $"/api/v3/ticker/price?symbol={coinSymbol}";
             var response = await httpClient.GetAsync(endpoint);
             var content = await response.Content.ReadAsStringAsync();
             var jObject = JObject.Parse(content);

@@ -91,6 +91,12 @@ namespace CryptocurrencyExchange.Controllers
             return Ok();
         }
 
+        [HttpGet("price/{symbol}")]
+        public async Task<decimal> GetPrice(string symbol)
+        {
+            return await _walletService.GetPrice(symbol);
+        }
+
         public class SendCryptoModel
         {
             public string symbol { get; set; } = string.Empty;

@@ -10,5 +10,6 @@ namespace CryptocurrencyExchange.Models
         public byte[] PasswordSalt { get; set; }
 
         public List<Notification> Notifications { get; set; }
+        public List<Future> Futures { get; set; }
     }
 }
