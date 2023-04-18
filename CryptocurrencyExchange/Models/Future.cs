@@ -8,6 +8,7 @@
         public decimal Price { get; set; }
         public int UserId { get; set; }
         public bool IsCompleted { get; set; }
+        public bool IsLiquidated { get; set; }
         public int Leverage { get; set; }
         public PositionType Position { get; set; }
     }
