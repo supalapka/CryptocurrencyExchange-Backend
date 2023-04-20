@@ -1,13 +1,10 @@
-﻿using CryptocurrencyExchange.Data;
-using CryptocurrencyExchange.Models;
+﻿using CryptocurrencyExchange.Models;
 using CryptocurrencyExchange.Services;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
 namespace CryptocurrencyExchange.Controllers
 {
-    [Authorize]
     public class FuturesController : Controller
     {
 
@@ -19,7 +16,7 @@ namespace CryptocurrencyExchange.Controllers
         }
 
         [HttpPost("/futures/create")]
-        public async Task<ActionResult> CreateFuture([FromBody]FutureDto future)
+        public async Task<ActionResult> CreateFuture([FromBody] FutureDto future)
         {
             string userIdClaimValue = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             int userId = int.Parse(userIdClaimValue);
@@ -37,6 +34,30 @@ namespace CryptocurrencyExchange.Controllers
 
             return _futuresService.GetFuturePositions(userId);
         }
-      
+
+
+        [HttpGet("futures/liquidate/")]
+        public async Task LiquidatePosition(int id, double markPrice)
+        {
+            await _futuresService.LiquidatePosition(id, markPrice);
+        }
+
+
+        [HttpGet("futures/close")]
+        public async Task LiquidatePosition(int id, double pnl, double markPrice)
+        {
+            await _futuresService.ClosePosition(id, pnl, markPrice);
+        }
+
+
+        [HttpGet("futures/history")]
+        public List<FutureHIstoryOutput> GetHistory()
+        {
+           // string userIdClaimValue = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+       //     int userId = int.Parse(userIdClaimValue);
+
+            return _futuresService.GetHistory(1);
+        }
+
     }
 }

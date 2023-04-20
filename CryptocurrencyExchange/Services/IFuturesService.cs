@@ -6,5 +6,8 @@ namespace CryptocurrencyExchange.Services
     {
         Task CreateFutureAsync(FutureDto futureDto, int userId);
         List<FutureDto> GetFuturePositions(int userId);
+        Task LiquidatePosition(int id, double markPrice);
+        Task ClosePosition(int id, double pnl, double makrPrice);
+        List<FutureHIstoryOutput> GetHistory(int userId);
     }
 }

@@ -18,7 +18,7 @@ namespace CryptocurrencyExchange.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Symbol = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Margin = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    Price = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Price = table.Column<decimal>(type: "decimal(18,6)", nullable: false),
                     UserId = table.Column<int>(type: "int", nullable: false),
                     IsCompleted = table.Column<bool>(type: "bit", nullable: false),
                     Leverage = table.Column<int>(type: "int", nullable: false),

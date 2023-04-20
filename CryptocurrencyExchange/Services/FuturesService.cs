@@ -23,7 +23,7 @@ namespace CryptocurrencyExchange.Services
 
             var future = new Future();
             future.Symbol = futureDto.Symbol;
-            future.Price = futureDto.Price;
+            future.Price = (double) futureDto.Price;
             future.Margin = futureDto.Margin;
             future.UserId = userId;
             future.IsCompleted = false;
@@ -32,9 +32,10 @@ namespace CryptocurrencyExchange.Services
 
             userUsdt.Amount -= (double)futureDto.Margin;
 
-            _dataContext.Futures.Add(future);
+            await _dataContext.Futures.AddAsync(future);
             await _dataContext.SaveChangesAsync();
         }
+
 
         public List<FutureDto> GetFuturePositions(int userId)
         {
@@ -48,7 +49,7 @@ namespace CryptocurrencyExchange.Services
                 {
                     Leverage = position.Leverage,
                     Position = position.Position,
-                    Price = position.Price,
+                    Price = Convert.ToDecimal(position.Price),
                     Margin = position.Margin,
                     Id = position.Id,
                     Symbol = position.Symbol,
@@ -56,6 +57,71 @@ namespace CryptocurrencyExchange.Services
                 result.Add(futureDto);
             }
 
+            return result;
+        }
+
+
+        public async Task LiquidatePosition(int id, double markPrice)
+        {
+            var position = _dataContext.Futures.Find(id);
+            position.IsCompleted = true;
+
+            var futureHistiry = new FutureHistory()
+            {
+                FutureId = position.Id,
+                Id = position.Id, //futureHistiry.id must be position.id 
+                IsLiquidated = true,
+                MarkPrice = markPrice,
+            };
+            await _dataContext.FutureHistory.AddAsync(futureHistiry);
+
+            await _dataContext.SaveChangesAsync();
+        }
+
+
+        public async Task ClosePosition(int id, double pnl, double markPrice)
+         {
+            var position = _dataContext.Futures.Find(id);
+            position.IsCompleted = true;
+
+            var futureHistiry = new FutureHistory()
+            {
+                FutureId = position.Id,
+                Id = position.Id, //futureHistiry.id must be position.id 
+                IsLiquidated = false,
+                MarkPrice = markPrice,
+            };
+            await _dataContext.FutureHistory.AddAsync(futureHistiry);
+
+            var userUsdt = _dataContext.WalletItems.Where(x => x.Users.Id == position.UserId 
+            && x.Symbol == "usdt").First();
+            userUsdt.Amount += (double)position.Margin;
+            userUsdt.Amount += pnl;
+
+            await _dataContext.SaveChangesAsync();
+        }
+
+        public List<FutureHIstoryOutput> GetHistory(int userId)
+        {
+           var positions = _dataContext.Futures.Where(x=>x.UserId== userId).ToList();
+            List<FutureHIstoryOutput> result = new List<FutureHIstoryOutput>();
+
+            foreach(var position in positions)
+            {
+                var outputPosition = new FutureHIstoryOutput()
+                {
+                    IsLiquidated = _dataContext.FutureHistory.
+                    Where(x=>x.Id == position.Id).Single().IsLiquidated,
+                    Leverage = position.Leverage,
+                    Margin = position.Margin,
+                    Position = position.Position,
+                    Price = position.Price,
+                    MarkPrice = _dataContext.FutureHistory.
+                    Where(x => x.Id == position.Id).Single().MarkPrice,
+                    Symbol = position.Symbol,
+                };
+                result.Add(outputPosition);
+            }
             return result;
         }
     }
