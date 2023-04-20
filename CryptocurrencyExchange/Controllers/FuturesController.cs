@@ -53,8 +53,8 @@ namespace CryptocurrencyExchange.Controllers
         [HttpGet("futures/history")]
         public List<FutureHIstoryOutput> GetHistory()
         {
-           // string userIdClaimValue = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-       //     int userId = int.Parse(userIdClaimValue);
+            string userIdClaimValue = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            int userId = int.Parse(userIdClaimValue);
 
             return _futuresService.GetHistory(1);
         }
