@@ -20,8 +20,7 @@ namespace CryptocurrencyExchange.Controllers
         [HttpGet("auth/notifications/last")]
         public  Notification GetLastNotification()
         {
-            string userIdClaimValue = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            int userId = int.Parse(userIdClaimValue);
+            int userId = Convert.ToInt32(HttpContext.Items["UserId"]);
 
             return _notificatinService.GetLastNotification(userId);
         }

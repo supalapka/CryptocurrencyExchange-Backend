@@ -23,8 +23,7 @@ namespace CryptocurrencyExchange.Controllers
         [HttpGet("auth/get-wallet")]
         public async Task<ActionResult<List<WalletItem>>> GetFullWallet()
         {
-            string userIdClaimValue = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            int userId = int.Parse(userIdClaimValue);
+            int userId = Convert.ToInt32(HttpContext.Items["UserId"]);
 
             return await _walletService.GetFullWalletAsync(userId);
         }
@@ -34,8 +33,7 @@ namespace CryptocurrencyExchange.Controllers
         [HttpPost("auth/coin-amount")]
         public async Task<ActionResult<double>> GetCoinAmount([FromBody] CoinAmountRequest request)
         {
-            string userIdClaimValue = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            int userId = int.Parse(userIdClaimValue);
+            int userId = Convert.ToInt32(HttpContext.Items["UserId"]);
 
             return await _walletService.GetCoinAmountAsync(userId, request.Symbol);
         }
@@ -45,8 +43,7 @@ namespace CryptocurrencyExchange.Controllers
         [Authorize]
         public async Task<ActionResult> Buy([FromBody] BuySellCryptoModel buyCryptoModel)
         {
-            string userIdClaimValue = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            int userId = int.Parse(userIdClaimValue);
+            int userId = Convert.ToInt32(HttpContext.Items["UserId"]);
             var usdAmount = buyCryptoModel.Amount;
 
             try
@@ -62,9 +59,8 @@ namespace CryptocurrencyExchange.Controllers
         [Authorize]
         public async Task<ActionResult> Sell([FromBody] BuySellCryptoModel buyCryptoModel)
         {
+            int userId = Convert.ToInt32(HttpContext.Items["UserId"]);
             var coinAmount = buyCryptoModel.Amount;
-            string userIdClaimValue = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            int userId = int.Parse(userIdClaimValue);
 
             try
             {
@@ -79,8 +75,7 @@ namespace CryptocurrencyExchange.Controllers
         [Authorize]
         public async Task<IActionResult> SendCrypto([FromBody] SendCryptoModel model)
         {
-            string userIdClaimValue = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            int userId = int.Parse(userIdClaimValue);
+            int userId = Convert.ToInt32(HttpContext.Items["UserId"]);
 
             try
             {

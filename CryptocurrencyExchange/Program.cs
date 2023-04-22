@@ -1,4 +1,5 @@
 using CryptocurrencyExchange.Data;
+using CryptocurrencyExchange.Middleware;
 using CryptocurrencyExchange.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -59,6 +60,8 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 
 app.UseAuthorization();
+
+app.UseMiddleware<JwtMiddleware>();
 
 app.MapControllers();
 
