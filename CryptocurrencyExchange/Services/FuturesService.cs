@@ -23,7 +23,7 @@ namespace CryptocurrencyExchange.Services
 
             var future = new Future();
             future.Symbol = futureDto.Symbol;
-            future.Price = (double) futureDto.Price;
+            future.EntryPrice = (double) futureDto.EntryPrice;
             future.Margin = futureDto.Margin;
             future.UserId = userId;
             future.IsCompleted = false;
@@ -49,7 +49,7 @@ namespace CryptocurrencyExchange.Services
                 {
                     Leverage = position.Leverage,
                     Position = position.Position,
-                    Price = Convert.ToDecimal(position.Price),
+                    EntryPrice = Convert.ToDecimal(position.EntryPrice),
                     Margin = position.Margin,
                     Id = position.Id,
                     Symbol = position.Symbol,
@@ -103,7 +103,8 @@ namespace CryptocurrencyExchange.Services
 
         public List<FutureHIstoryOutput> GetHistory(int userId)
         {
-           var positions = _dataContext.Futures.Where(x=>x.UserId== userId).ToList();
+           var positions = _dataContext.Futures.Where(x=>x.UserId == userId
+           && x.IsCompleted == true).ToList();
             List<FutureHIstoryOutput> result = new List<FutureHIstoryOutput>();
 
             foreach(var position in positions)
@@ -115,7 +116,7 @@ namespace CryptocurrencyExchange.Services
                     Leverage = position.Leverage,
                     Margin = position.Margin,
                     Position = position.Position,
-                    Price = position.Price,
+                    EntryPrice = position.EntryPrice,
                     MarkPrice = _dataContext.FutureHistory.
                     Where(x => x.Id == position.Id).Single().MarkPrice,
                     Symbol = position.Symbol,
