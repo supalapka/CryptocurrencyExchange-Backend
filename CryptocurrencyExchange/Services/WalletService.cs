@@ -22,7 +22,7 @@ namespace CryptocurrencyExchange.Services
             coinSymbol = coinSymbol.ToLower();
 
             var USDTWalletItem = await _dataContext.WalletItems
-              .Where(x => x.Users.Id == userId && x.Symbol == "usdt").FirstAsync();
+              .Where(x => x.UserId == userId && x.Symbol == "usdt").FirstAsync();
 
             if (USDTWalletItem.Amount < usd)
                 throw new Exception("Not enough balance in USDT");
@@ -37,7 +37,7 @@ namespace CryptocurrencyExchange.Services
                 {
                     Symbol = coinSymbol,
                     Amount = 0,
-                    Users = await _dataContext.Users.Where(x => x.Id == userId).FirstAsync()
+                    User = await _dataContext.Users.Where(x => x.Id == userId).FirstAsync()
                 };
                 await _dataContext.WalletItems.AddAsync(coinToBuy);
             }
@@ -54,7 +54,7 @@ namespace CryptocurrencyExchange.Services
             try
             {
                 walletItem = await _dataContext.WalletItems
-                 .Where(x => x.Users.Id == userId && x.Symbol == symbol)
+                 .Where(x => x.UserId == userId && x.Symbol == symbol)
                  .FirstAsync();
             }
             catch (Exception e)
@@ -71,7 +71,7 @@ namespace CryptocurrencyExchange.Services
 
         public async Task<List<WalletItem>> GetFullWalletAsync(int userId)
         {
-            return await _dataContext.WalletItems.Where(x => x.Users.Id == userId && x.Amount > 0).ToListAsync();
+            return await _dataContext.WalletItems.Where(x => x.UserId == userId && x.Amount > 0).ToListAsync();
         }
 
 
@@ -79,7 +79,7 @@ namespace CryptocurrencyExchange.Services
         {
             try
             {
-                return _dataContext.WalletItems.Where(x => x.Users.Id == userId
+                return _dataContext.WalletItems.Where(x => x.UserId == userId
                     && x.Symbol == symbol).First();
             }
             catch (Exception e)
@@ -114,13 +114,13 @@ namespace CryptocurrencyExchange.Services
             if (receiver == null)
                 throw new Exception($"Receiver id not found");
 
-            var walletSenderItem = await _dataContext.WalletItems.Where(x => x.Users.Id == senderId
+            var walletSenderItem = await _dataContext.WalletItems.Where(x => x.UserId == senderId
             && x.Symbol == symbol).FirstAsync();
 
             if (walletSenderItem == null || walletSenderItem.Amount < amount)
                 throw new Exception($"Not enough balance in {symbol.ToUpper()} to send");
 
-            var walletReceiverItem = _dataContext.WalletItems.Where(x => x.Users.Id == receiverId
+            var walletReceiverItem = _dataContext.WalletItems.Where(x => x.UserId == receiverId
             && x.Symbol == symbol).FirstOrDefault();
 
             if (walletReceiverItem == null)
@@ -129,7 +129,7 @@ namespace CryptocurrencyExchange.Services
                 {
                     Amount = 0,
                     Symbol = symbol,
-                    Users = receiver
+                    UserId = receiverId
                 };
                 _dataContext.WalletItems.Add(walletReceiverItem);
             }

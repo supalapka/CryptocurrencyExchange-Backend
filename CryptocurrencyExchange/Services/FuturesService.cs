@@ -16,7 +16,7 @@ namespace CryptocurrencyExchange.Services
 
         public async Task CreateFutureAsync(FutureDto futureDto, int userId)
         {
-            var userUsdt = await _dataContext.WalletItems.Where(x => x.Users.Id == userId
+            var userUsdt = await _dataContext.WalletItems.Where(x => x.UserId == userId
             && x.Symbol == "usdt").FirstAsync();
             if (userUsdt.Amount < (double)futureDto.Margin)
                 throw new Exception("Not anough balance in usdt to start future position");
@@ -93,7 +93,7 @@ namespace CryptocurrencyExchange.Services
             };
             await _dataContext.FutureHistory.AddAsync(futureHistiry);
 
-            var userUsdt = _dataContext.WalletItems.Where(x => x.Users.Id == position.UserId
+            var userUsdt = _dataContext.WalletItems.Where(x => x.UserId == position.UserId
             && x.Symbol == "usdt").First();
             userUsdt.Amount += (double)position.Margin;
             userUsdt.Amount += pnl;
