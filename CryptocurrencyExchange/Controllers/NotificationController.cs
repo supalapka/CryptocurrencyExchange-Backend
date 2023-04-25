@@ -1,9 +1,7 @@
-﻿using CryptocurrencyExchange.Data;
-using CryptocurrencyExchange.Models;
+﻿using CryptocurrencyExchange.Models;
 using CryptocurrencyExchange.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 
 namespace CryptocurrencyExchange.Controllers
 {
@@ -18,7 +16,7 @@ namespace CryptocurrencyExchange.Controllers
 
         [Authorize]
         [HttpGet("auth/notifications/last")]
-        public  Notification GetLastNotification()
+        public Notification GetLastNotification()
         {
             int userId = Convert.ToInt32(HttpContext.Items["UserId"]);
 
@@ -30,8 +28,8 @@ namespace CryptocurrencyExchange.Controllers
         [HttpGet("auth/notifications/read/{id}")]
         public async Task<ActionResult> Read(int id)
         {
-           await _notificatinService.MarkAsRead(id);
-            return Ok(); 
+            await _notificatinService.MarkAsRead(id);
+            return Ok();
         }
     }
 }

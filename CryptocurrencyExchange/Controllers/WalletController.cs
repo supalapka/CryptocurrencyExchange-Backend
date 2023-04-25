@@ -30,12 +30,12 @@ namespace CryptocurrencyExchange.Controllers
 
 
         [Authorize]
-        [HttpPost("auth/coin-amount")]
-        public async Task<ActionResult<double>> GetCoinAmount([FromBody] CoinAmountRequest request)
+        [HttpGet("auth/coin-amount/{symbol}")]
+        public async Task<ActionResult<double>> GetCoinAmount(string symbol)
         {
             int userId = Convert.ToInt32(HttpContext.Items["UserId"]);
 
-            return await _walletService.GetCoinAmountAsync(userId, request.Symbol);
+            return await _walletService.GetCoinAmountAsync(userId, symbol);
         }
 
 
@@ -107,9 +107,5 @@ namespace CryptocurrencyExchange.Controllers
             //if sell -> coin amount
         }
 
-        public class CoinAmountRequest
-        {
-            public string Symbol { get; set; }
-        }
     }
 }

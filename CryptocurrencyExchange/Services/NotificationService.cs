@@ -25,13 +25,15 @@ namespace CryptocurrencyExchange.Services
             await _dataContext.SaveChangesAsync();
         }
 
+
         public Notification GetLastNotification(int userId)
         {
-           var last = _dataContext.Notifications.Where(x=>x.UserId== userId
-           && x.IsRead == false)
-                .OrderByDescending(n=>n.Id).FirstOrDefault();
+            var last = _dataContext.Notifications.Where(x => x.UserId == userId
+            && x.IsRead == false)
+                 .OrderByDescending(n => n.Id).FirstOrDefault();
             return last;
         }
+
 
         public async Task MarkAsRead(int notificationId)
         {

@@ -23,7 +23,7 @@ namespace CryptocurrencyExchange.Services
 
             var future = new Future();
             future.Symbol = futureDto.Symbol;
-            future.EntryPrice = (double) futureDto.EntryPrice;
+            future.EntryPrice = (double)futureDto.EntryPrice;
             future.Margin = futureDto.Margin;
             future.UserId = userId;
             future.IsCompleted = false;
@@ -80,7 +80,7 @@ namespace CryptocurrencyExchange.Services
 
 
         public async Task ClosePosition(int id, double pnl, double markPrice)
-         {
+        {
             var position = _dataContext.Futures.Find(id);
             position.IsCompleted = true;
 
@@ -93,7 +93,7 @@ namespace CryptocurrencyExchange.Services
             };
             await _dataContext.FutureHistory.AddAsync(futureHistiry);
 
-            var userUsdt = _dataContext.WalletItems.Where(x => x.Users.Id == position.UserId 
+            var userUsdt = _dataContext.WalletItems.Where(x => x.Users.Id == position.UserId
             && x.Symbol == "usdt").First();
             userUsdt.Amount += (double)position.Margin;
             userUsdt.Amount += pnl;
@@ -103,16 +103,16 @@ namespace CryptocurrencyExchange.Services
 
         public List<FutureHIstoryOutput> GetHistory(int userId)
         {
-           var positions = _dataContext.Futures.Where(x=>x.UserId == userId
-           && x.IsCompleted == true).ToList();
+            var positions = _dataContext.Futures.Where(x => x.UserId == userId
+            && x.IsCompleted == true).ToList();
             List<FutureHIstoryOutput> result = new List<FutureHIstoryOutput>();
 
-            foreach(var position in positions)
+            foreach (var position in positions)
             {
                 var outputPosition = new FutureHIstoryOutput()
                 {
                     IsLiquidated = _dataContext.FutureHistory.
-                    Where(x=>x.Id == position.Id).Single().IsLiquidated,
+                    Where(x => x.Id == position.Id).Single().IsLiquidated,
                     Leverage = position.Leverage,
                     Margin = position.Margin,
                     Position = position.Position,

@@ -7,6 +7,7 @@ using System.Security.Claims;
 namespace CryptocurrencyExchange.Controllers
 {
     [Authorize]
+    [Route("futures")]
     public class FuturesController : Controller
     {
 
@@ -17,7 +18,7 @@ namespace CryptocurrencyExchange.Controllers
             _futuresService = futuresService;
         }
 
-        [HttpPost("/futures/create")]
+        [HttpPost("create")]
         public async Task<ActionResult> CreateFuture([FromBody] FutureDto future)
         {
             int userId = Convert.ToInt32(HttpContext.Items["UserId"]);
@@ -27,7 +28,7 @@ namespace CryptocurrencyExchange.Controllers
         }
 
 
-        [HttpGet("futures/list")]
+        [HttpGet("list")]
         public List<FutureDto> GetFutureList()
         {
             int userId = Convert.ToInt32(HttpContext.Items["UserId"]);
@@ -36,21 +37,21 @@ namespace CryptocurrencyExchange.Controllers
         }
 
 
-        [HttpGet("futures/liquidate/")]
+        [HttpGet("liquidate")]
         public async Task LiquidatePosition(int id, double markPrice)
         {
             await _futuresService.LiquidatePosition(id, markPrice);
         }
 
 
-        [HttpGet("futures/close")]
+        [HttpGet("close")]
         public async Task LiquidatePosition(int id, double pnl, double markPrice)
         {
             await _futuresService.ClosePosition(id, pnl, markPrice);
         }
 
 
-        [HttpGet("futures/history")]
+        [HttpGet("history")]
         public List<FutureHIstoryOutput> GetHistory()
         {
             int userId = Convert.ToInt32(HttpContext.Items["UserId"]);

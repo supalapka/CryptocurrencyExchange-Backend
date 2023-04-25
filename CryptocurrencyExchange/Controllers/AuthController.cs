@@ -26,7 +26,7 @@ namespace CryptocurrencyExchange.Controllers
         [HttpPost("register")]
         public async Task<ActionResult> Register(UserDto userDto)
         {
-             var user = await _dataContext.Users.FirstOrDefaultAsync(u => u.Email == userDto.Email);
+            var user = await _dataContext.Users.FirstOrDefaultAsync(u => u.Email == userDto.Email);
             if (user != null)
                 return BadRequest("User with this email already exits");
 
@@ -37,7 +37,7 @@ namespace CryptocurrencyExchange.Controllers
             user.PasswordSalt = PasswordSalt;
 
             await _dataContext.Users.AddAsync(user);
-            await _dataContext.SaveChangesAsync();  
+            await _dataContext.SaveChangesAsync();
             return Ok($"{user.Email} successfully registered");
         }
 
@@ -86,10 +86,10 @@ namespace CryptocurrencyExchange.Controllers
             var token = new JwtSecurityToken(
                 claims: claims,
                 expires: DateTime.Now.AddDays(5),
-                signingCredentials:creds);
+                signingCredentials: creds);
 
-            var jwt = new  JwtSecurityTokenHandler().WriteToken(token);
-            return jwt; 
+            var jwt = new JwtSecurityTokenHandler().WriteToken(token);
+            return jwt;
 
         }
 
@@ -106,7 +106,7 @@ namespace CryptocurrencyExchange.Controllers
 
         private bool VerifyPasswordHash(string password, byte[] passwordHash, byte[] passwordSalt)
         {
-            using(var hmac = new HMACSHA512(passwordSalt))
+            using (var hmac = new HMACSHA512(passwordSalt))
             {
                 var computeHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
                 return computeHash.SequenceEqual(passwordHash);

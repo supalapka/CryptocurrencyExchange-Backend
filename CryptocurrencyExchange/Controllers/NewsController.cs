@@ -33,7 +33,7 @@ namespace CryptocurrencyExchange.Controllers
 
             foreach (var node in newsHeadlineNodes)
             {
-                News news= new News();
+                News news = new News();
 
                 var imgNode = node.SelectSingleNode(".//div[@class='img-sized']/img");
                 string image = imgNode.GetAttributeValue("src", "");

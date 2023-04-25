@@ -50,9 +50,17 @@ namespace CryptocurrencyExchange.Services
 
         public async Task<double> GetCoinAmountAsync(int userId, string symbol)
         {
-            var walletItem = await _dataContext.WalletItems
+            WalletItem walletItem;
+            try
+            {
+                walletItem = await _dataContext.WalletItems
                  .Where(x => x.Users.Id == userId && x.Symbol == symbol)
-                 .SingleOrDefaultAsync();
+                 .FirstAsync();
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
 
             if (walletItem == null)
                 return 0;
@@ -69,8 +77,16 @@ namespace CryptocurrencyExchange.Services
 
         public WalletItem GeWalletItem(int userId, string symbol)
         {
-            return _dataContext.WalletItems.Where(x => x.Users.Id == userId
-            && x.Symbol == symbol).FirstOrDefault();
+            try
+            {
+                return _dataContext.WalletItems.Where(x => x.Users.Id == userId
+                    && x.Symbol == symbol).First();
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+
         }
 
 
