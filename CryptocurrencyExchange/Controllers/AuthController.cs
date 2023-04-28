@@ -36,8 +36,19 @@ namespace CryptocurrencyExchange.Controllers
             user.PasswordHash = PasswordHash;
             user.PasswordSalt = PasswordSalt;
 
+
+            WalletItem usdt = new WalletItem() // starter pack 5000 usdt
+            {
+                Symbol = "usdt",
+                Amount = 5000,
+                UserId = user.Id,
+            };
+
+
             await _dataContext.Users.AddAsync(user);
+            await _dataContext.WalletItems.AddAsync(usdt);
             await _dataContext.SaveChangesAsync();
+
             return Ok($"{user.Email} successfully registered");
         }
 
