@@ -16,9 +16,15 @@ namespace CryptocurrencyExchange.Middleware
             string? token = context.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
             if (token != null)
             {
-                string userIdClaimValue = context.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                int userId = int.Parse(userIdClaimValue);
-                context.Items["UserId"] = userId;
+                try
+                {
+                    string userIdClaimValue = context.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                    int userId = int.Parse(userIdClaimValue);
+                    context.Items["UserId"] = userId;
+                }catch(Exception ex)
+                {
+
+                }
             }
 
             await _next(context);
