@@ -21,7 +21,7 @@ namespace CryptocurrencyExchange.Controllers
             var url = $"https://api.binance.com/api/v3/klines?symbol={request.Symbol}&interval={request.Timeframe}&limit={request.Limit}";
             var response = await httpClient.GetAsync(url);
             var jsonResponse = await response.Content.ReadAsStringAsync();
-            var candles = JsonConvert.DeserializeObject<List<dynamic>>(jsonResponse);
+            var candles = JArray.Parse(jsonResponse);
             var candlesData = candles.Select(c => new {
                 OpenTime = c[0].ToObject<long>(),
                 Open = c[1].ToObject<decimal>(),
