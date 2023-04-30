@@ -36,6 +36,8 @@ namespace CryptocurrencyExchange.Controllers
             user.PasswordHash = PasswordHash;
             user.PasswordSalt = PasswordSalt;
 
+            await _dataContext.Users.AddAsync(user);
+            await _dataContext.SaveChangesAsync(); //save changes for generate user.id
 
             WalletItem usdt = new WalletItem() // starter pack 5000 usdt
             {
@@ -44,8 +46,6 @@ namespace CryptocurrencyExchange.Controllers
                 UserId = user.Id,
             };
 
-
-            await _dataContext.Users.AddAsync(user);
             await _dataContext.WalletItems.AddAsync(usdt);
             await _dataContext.SaveChangesAsync();
 
