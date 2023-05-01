@@ -1,32 +1,32 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+﻿using CryptocurrencyExchange.Services;
+using Microsoft.AspNetCore.Mvc;
 
 namespace CryptocurrencyExchange.Controllers
 {
     [Route("market")]
     public class MarketController : Controller
     {
-        [HttpGet("list")]
-        public IActionResult GetSymbolsByPage() //composite to service later
+        private readonly IMarketService _marketService;
+
+        public MarketController(IMarketService marketService)
         {
-            HttpClient client = new HttpClient();
-            client.BaseAddress = new Uri("https://api.binance.com/api/v3/");
-            HttpResponseMessage response = client.GetAsync("ticker/24hr").Result;
-            string responseBody = response.Content.ReadAsStringAsync().Result;
+            _marketService = marketService;
+        }
 
-            List<string> symbols = new List<string>();
-
-            JArray marketData = JArray.Parse(responseBody);
-            foreach(JObject market in marketData)
-            {
-                symbols.Add(market["symbol"].ToString());
-            }
-
-            symbols = symbols.Where(x => x.Contains("USDT")).Take(100).ToList();
+        [HttpGet("list")]
+        public IActionResult GetSymbolsByPage()
+        {
+            var symbols = _marketService.GetSymbolsByPage();
             return Ok(symbols);
         }
-       
+
+
+        [HttpGet("price/{symbol}")]
+        public async Task<decimal> GetPrice(string symbol)
+        {
+            return await _marketService.GetPrice(symbol);
+        }
+
     }
 }
 

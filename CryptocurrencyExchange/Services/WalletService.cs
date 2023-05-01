@@ -9,11 +9,14 @@ namespace CryptocurrencyExchange.Services
     {
         private readonly DataContext _dataContext;
         private readonly INotificationService _notificationService;
+        private readonly IMarketService _marketService;
 
-        public WalletService(DataContext context, INotificationService notificatinService)
+
+        public WalletService(DataContext context, INotificationService notificatinService, IMarketService marketService)
         {
             _dataContext = context;
             _notificationService = notificatinService;
+            _marketService = marketService;
         }
 
 
@@ -27,7 +30,7 @@ namespace CryptocurrencyExchange.Services
             if (USDTWalletItem.Amount < usd)
                 throw new Exception("Not enough balance in USDT");
 
-            decimal coinPrice = await GetPrice(coinSymbol);
+            decimal coinPrice = await _marketService.GetPrice(coinSymbol);
             var amountToBuy = (decimal)usd / coinPrice;
 
             var coinToBuy = GeWalletItem(userId, coinSymbol);
@@ -84,7 +87,7 @@ namespace CryptocurrencyExchange.Services
             if (coinToSell == null || coinToSell.Amount < amount)
                 throw new Exception($"Not enough balance in {coinSymbol.ToUpper()}");
 
-            var coinPrice = await GetPrice(coinSymbol);
+            var coinPrice = await _marketService.GetPrice(coinSymbol);
             var usdtAmount = (double)coinPrice * amount;
 
             coinToSell.Amount -= amount;
@@ -128,19 +131,6 @@ namespace CryptocurrencyExchange.Services
             await _dataContext.SaveChangesAsync();
         }
 
-        public async Task<decimal> GetPrice(string coinSymbol)
-        {
-            var baseUrl = "https://api.binance.com";
-            var httpClient = new HttpClient { BaseAddress = new Uri(baseUrl) };
-            coinSymbol = coinSymbol.ToUpper();
-            if (!coinSymbol.EndsWith("USDT"))
-                coinSymbol += "USDT";
-            var endpoint = $"/api/v3/ticker/price?symbol={coinSymbol}";
-            var response = await httpClient.GetAsync(endpoint);
-            var content = await response.Content.ReadAsStringAsync();
-            var jObject = JObject.Parse(content);
-
-            return (decimal)jObject["price"];
-        }
+       
     }
 }
