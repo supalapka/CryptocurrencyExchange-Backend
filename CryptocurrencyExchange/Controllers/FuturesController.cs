@@ -2,7 +2,6 @@
 using CryptocurrencyExchange.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 
 namespace CryptocurrencyExchange.Controllers
 {
@@ -51,12 +50,12 @@ namespace CryptocurrencyExchange.Controllers
         }
 
 
-        [HttpGet("history")]
-        public List<FutureHIstoryOutput> GetHistory()
+        [HttpGet("history/{page}")]
+        public List<FutureHIstoryOutput> GetHistory(int page)
         {
             int userId = Convert.ToInt32(HttpContext.Items["UserId"]);
 
-            return _futuresService.GetHistory(userId);
+            return _futuresService.GetHistory(userId, page);
         }
 
     }

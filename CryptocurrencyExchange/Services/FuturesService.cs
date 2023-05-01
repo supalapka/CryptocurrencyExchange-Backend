@@ -16,32 +16,32 @@ namespace CryptocurrencyExchange.Services
 
         public async Task CreateFutureAsync(FutureDto futureDto, int userId)
         {
-             using var transaction = await _dataContext.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable);
-            await _dataContext.Database.ExecuteSqlRawAsync($"SELECT * FROM WalletItems WITH (TABLOCKX) WHERE UserId = {userId} AND Symbol = 'usdt'");;
+            using var transaction = await _dataContext.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable);
+            await _dataContext.Database.ExecuteSqlRawAsync($"SELECT * FROM WalletItems WITH (TABLOCKX) WHERE UserId = {userId} AND Symbol = 'usdt'"); ;
 
             var userUsdt = await _dataContext.WalletItems
                         .Where(x => x.UserId == userId && x.Symbol == "usdt")
                         .FirstAsync();
 
-                    if (userUsdt.Amount < (double)futureDto.Margin)
-                    {
-                        throw new Exception("Not enough balance in usdt to start future position");
-                    }
+            if (userUsdt.Amount < (double)futureDto.Margin)
+            {
+                throw new Exception("Not enough balance in usdt to start future position");
+            }
 
-                    var future = new Future();
-                    future.Symbol = futureDto.Symbol;
-                    future.EntryPrice = (double)futureDto.EntryPrice;
-                    future.Margin = futureDto.Margin;
-                    future.UserId = userId;
-                    future.IsCompleted = false;
-                    future.Leverage = futureDto.Leverage;
-                    future.Position = futureDto.Position;
+            var future = new Future();
+            future.Symbol = futureDto.Symbol;
+            future.EntryPrice = (double)futureDto.EntryPrice;
+            future.Margin = futureDto.Margin;
+            future.UserId = userId;
+            future.IsCompleted = false;
+            future.Leverage = futureDto.Leverage;
+            future.Position = futureDto.Position;
 
-                    userUsdt.Amount -= (double)futureDto.Margin;
+            userUsdt.Amount -= (double)futureDto.Margin;
 
-                     _dataContext.Futures.Add(future);
-                     _dataContext.SaveChanges();
-                     await transaction.CommitAsync();
+            _dataContext.Futures.Add(future);
+            _dataContext.SaveChanges();
+            await transaction.CommitAsync();
         }
 
 
@@ -118,10 +118,13 @@ namespace CryptocurrencyExchange.Services
         }
 
 
-        public List<FutureHIstoryOutput> GetHistory(int userId)
+        public List<FutureHIstoryOutput> GetHistory(int userId, int page)
         {
-            var positions = _dataContext.Futures.Where(x => x.UserId == userId
-            && x.IsCompleted == true).ToList();
+            const int positionsPerPage = 5;
+            var positions = _dataContext.Futures.OrderByDescending(x=>x.Id).Where(x => x.UserId == userId
+            && x.IsCompleted == true)
+                .Skip(positionsPerPage * (page - 1))
+                .Take(positionsPerPage).ToList();
             List<FutureHIstoryOutput> result = new List<FutureHIstoryOutput>();
 
             foreach (var position in positions)

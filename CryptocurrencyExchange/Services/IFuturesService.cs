@@ -8,6 +8,6 @@ namespace CryptocurrencyExchange.Services
         List<FutureDto> GetFuturePositions(int userId);
         Task LiquidatePosition(int id, double markPrice);
         Task ClosePosition(int id, double pnl, double makrPrice);
-        List<FutureHIstoryOutput> GetHistory(int userId);
+        List<FutureHIstoryOutput> GetHistory(int userId, int page);
     }
 }
