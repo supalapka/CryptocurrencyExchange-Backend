@@ -13,13 +13,14 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddDbContext<DataContext>(options =>
 {
-    options.UseSqlServer(builder.Configuration.GetConnectionString("AzureConnection"));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
 
 builder.Services.AddScoped<IWalletService, WalletService>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IFuturesService, FuturesService>();
-builder.Services.AddScoped<IMarketService, MarketService> ();
+builder.Services.AddScoped<IMarketService, MarketService>();
+builder.Services.AddScoped<IStakingService, StakingService>();
 
 builder.Services.AddCors(options =>
 {
