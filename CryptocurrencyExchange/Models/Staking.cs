@@ -8,7 +8,7 @@
         public StakingCoin StakingCoin { get; set; }
         public float Amount { get; set; }
         public DateTime StartDate { get; set; }
-        public int DurationInDays { get; set; }
+        public int DurationInMonth { get; set; }
         public bool IsCompleted { get; set; }
     }
 }
