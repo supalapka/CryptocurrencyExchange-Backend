@@ -12,5 +12,7 @@ namespace CryptocurrencyExchange.Data
         public DbSet<Notification> Notifications { get; set; }
         public DbSet<Future> Futures { get; set; }
         public DbSet<FutureHistory> FutureHistory { get; set; }
+        public DbSet<StakingCoin> StakingCoins { get; set; }
+        public DbSet<Staking> Staking { get; set; }
     }
 }
