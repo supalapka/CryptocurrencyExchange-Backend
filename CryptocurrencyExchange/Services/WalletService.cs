@@ -1,7 +1,7 @@
 ﻿using CryptocurrencyExchange.Data;
 using CryptocurrencyExchange.Models;
+using CryptocurrencyExchange.Utilities;
 using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json.Linq;
 
 namespace CryptocurrencyExchange.Services
 {
@@ -33,6 +33,9 @@ namespace CryptocurrencyExchange.Services
             decimal coinPrice = await _marketService.GetPrice(coinSymbol);
             var amountToBuy = (decimal)usd / coinPrice;
 
+            amountToBuy = UtilFunstions.RoundCoinAmountUpTo1USD(amountToBuy, coinPrice);
+
+
             var coinToBuy = GeWalletItem(userId, coinSymbol);
             if (coinToBuy == null)
             {
@@ -54,9 +57,9 @@ namespace CryptocurrencyExchange.Services
         public async Task<double> GetCoinAmountAsync(int userId, string symbol)
         {
             WalletItem walletItem;
-                walletItem =  _dataContext.WalletItems
-                 .Where(x => x.UserId == userId && x.Symbol == symbol)
-                 .FirstOrDefault();
+            walletItem = _dataContext.WalletItems
+             .Where(x => x.UserId == userId && x.Symbol == symbol)
+             .FirstOrDefault();
 
             if (walletItem == null)
                 return 0;
@@ -73,8 +76,8 @@ namespace CryptocurrencyExchange.Services
 
         public WalletItem GeWalletItem(int userId, string symbol)
         {
-                return _dataContext.WalletItems.Where(x => x.UserId == userId
-                    && x.Symbol == symbol).FirstOrDefault();
+            return _dataContext.WalletItems.Where(x => x.UserId == userId
+                && x.Symbol == symbol).FirstOrDefault();
 
         }
 
@@ -131,6 +134,6 @@ namespace CryptocurrencyExchange.Services
             await _dataContext.SaveChangesAsync();
         }
 
-       
+
     }
 }
