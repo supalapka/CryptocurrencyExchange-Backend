@@ -1,13 +1,11 @@
-﻿using CryptocurrencyExchange.Data;
-using CryptocurrencyExchange.Services;
+﻿using CryptocurrencyExchange.Services;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CryptocurrencyExchange.Controllers
 {
     [Route("staking")]
-    [Authorize]
+    //[Authorize]
     [ApiController]
     public class StakingController : ControllerBase
     {
@@ -18,12 +16,42 @@ namespace CryptocurrencyExchange.Controllers
             _stakingService = stakingService;
         }
 
+        [HttpGet("available-coins")]
+        public IActionResult GetCoins()
+        {
+            return Ok(_stakingService.GetCoins());
+        }
+
+
+        [HttpGet("user-coins")]
+        [Authorize]
+        public IActionResult GetUserStakings()
+        {
+            int userId = Convert.ToInt32(HttpContext.Items["UserId"]);
+            return Ok(_stakingService.GetStakingsByUser(userId));
+        }
+
 
         [HttpPost("create")]
+        [Authorize]
         public async Task<IActionResult> CreateStaking(StakingInput input)
         {
             int userId = Convert.ToInt32(HttpContext.Items["UserId"]);
-            await _stakingService.CreateStakingCoin(userId, input.stakingCoinId, input.Amount, input.DurationInDays);
+            try
+            {
+                await _stakingService.CreateUserStaking(userId, input.stakingCoinId, input.Amount, input.DurationInMonth);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            return Ok();
+        }
+
+        [HttpGet("check")]
+        public IActionResult CheckIfExpired()
+        {
+            _stakingService.CheckForExpiredStakings();
             return Ok();
         }
 
@@ -31,7 +59,7 @@ namespace CryptocurrencyExchange.Controllers
         {
             public int stakingCoinId { get; set; }
             public float Amount { get; set; }
-            public int DurationInDays { get; set; }
+            public int DurationInMonth { get; set; }
         }
     }
 }

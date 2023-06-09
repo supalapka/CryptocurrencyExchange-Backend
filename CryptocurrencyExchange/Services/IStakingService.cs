@@ -1,11 +1,14 @@
-﻿namespace CryptocurrencyExchange.Services
+﻿using CryptocurrencyExchange.Models;
+
+namespace CryptocurrencyExchange.Services
 {
     public interface IStakingService
     {
-        Task CreateStakingCoin(int userId, int stakingCoinId, float amount, int durationIdDays);
-        Task GetAllStakingCoinsForUser(int userId);
-        Task GetStakingCoinById(int id);
-        Task CheckForExpiredStaking();
+        Task CreateUserStaking(int userId, int stakingCoinId, float amount, int durationIdDays);
+        List<Staking> GetStakingsByUser(int userId);
+        StakingCoin GetStakingCoinById(int id);
+        List<StakingCoin> GetCoins();
+        Task CheckForExpiredStakings();
         Task PayStakingReward(int stakingId);
 
     }
