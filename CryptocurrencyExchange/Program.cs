@@ -1,6 +1,7 @@
 using CryptocurrencyExchange.Data;
 using CryptocurrencyExchange.Middleware;
 using CryptocurrencyExchange.Services;
+using CryptocurrencyExchange.Services.Shcedulers;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -21,6 +22,9 @@ builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IFuturesService, FuturesService>();
 builder.Services.AddScoped<IMarketService, MarketService>();
 builder.Services.AddScoped<IStakingService, StakingService>();
+
+builder.Services.AddHostedService<StakingScheduler>();
+
 
 builder.Services.AddCors(options =>
 {
@@ -55,6 +59,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+
+
 app.UseCors();
 
 app.UseHttpsRedirection();
