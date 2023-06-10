@@ -1,10 +1,6 @@
-﻿using CryptocurrencyExchange.Data;
-using CryptocurrencyExchange.Models;
-using CryptocurrencyExchange.Services;
-using Microsoft.EntityFrameworkCore;
+﻿using CryptocurrencyExchange.Services;
 using Moq;
 using NUnit.Framework;
-using System.Text;
 
 namespace CryptocurrencyExchange.Tests.ServicesTests
 {
@@ -16,46 +12,30 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
         {
             // Arrange
             int coinPrice = 50;
-            var options = new DbContextOptionsBuilder<DataContext>()
-                .UseInMemoryDatabase(databaseName: "WithEnoughBalance")
-                .Options;
+            var userId = 1;
+            var coinSymbol = "btc";
+            var usdToBuy = 100;
 
-            using (var dbContext = new DataContext(options))
-            {
-                var userId = 1;
-                var coinSymbol = "btc";
-                var usdToBuy = 100;
+            var ctx = DatabaseService.CreateDbContext("WithEnoughBalance");
 
-                var usdtWalletItem = new WalletItem
-                {
-                    UserId = userId,
-                    Symbol = "usdt",
-                    Amount = 5000
-                };
+            var coinToBuy = DatabaseService.CreateWalletItem(userId, coinSymbol, 0);
+            var usdtWalletItem = DatabaseService.CreateWalletItem(userId, "usdt", 5000);
 
-                var coinToBuy = new WalletItem
-                {
-                    UserId = userId,
-                    Symbol = coinSymbol,
-                    Amount = 0
-                };
+            ctx.WalletItems.Add(usdtWalletItem);
+            ctx.WalletItems.Add(coinToBuy);
+            await ctx.SaveChangesAsync();
 
-                dbContext.WalletItems.Add(usdtWalletItem);
-                dbContext.WalletItems.Add(coinToBuy);
-                await dbContext.SaveChangesAsync();
+            var marketServiceMock = new Mock<IMarketService>();
+            marketServiceMock.Setup(x => x.GetPrice(coinSymbol)).ReturnsAsync(coinPrice);
 
-                var marketServiceMock = new Mock<IMarketService>();
-                marketServiceMock.Setup(x => x.GetPrice(coinSymbol)).ReturnsAsync(coinPrice);
+            var walletService = new WalletService(ctx, marketServiceMock.Object);
 
-                var walletService = new WalletService(dbContext, marketServiceMock.Object);
+            // Act
+            await walletService.BuyAsync(userId, coinSymbol, usdToBuy);
 
-                // Act
-                await walletService.BuyAsync(userId, coinSymbol, usdToBuy);
-
-                // Assert
-                Assert.AreEqual(4900, usdtWalletItem.Amount);
-                Assert.AreEqual(usdToBuy / coinPrice, coinToBuy.Amount);
-            }
+            // Assert
+            Assert.AreEqual(4900, usdtWalletItem.Amount);
+            Assert.AreEqual(usdToBuy / coinPrice, coinToBuy.Amount);
         }
 
 
@@ -63,44 +43,27 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
         public async Task BuyAsync_NotEnoughBalance_ThrowsException()
         {
             // Arrange
-            int coinPrice = 50;
-            var options = new DbContextOptionsBuilder<DataContext>()
-                .UseInMemoryDatabase(databaseName: "NotEnoughBalance")
-                .Options;
+            var coinPrice = 50;
+            var userId = 1;
+            var coinSymbol = "btc";
+            var usdToBuy = 100;
 
-            using (var dbContext = new DataContext(options))
-            {
-                var userId = 1;
-                var coinSymbol = "btc";
-                var usdToBuy = 100;
+            var ctx = DatabaseService.CreateDbContext("NotEnoughBalance");
 
-                var usdtWalletItem = new WalletItem
-                {
-                    UserId = userId,
-                    Symbol = "usdt",
-                    Amount = 0 //set zero user balance
-                };
+            var coinToBuy = DatabaseService.CreateWalletItem(userId, coinSymbol, 0);
+            var usdtWalletItem = DatabaseService.CreateWalletItem(userId, "usdt", 0);  //set balance less then usdToBuy
 
-                var coinToBuy = new WalletItem
-                {
-                    UserId = userId,
-                    Symbol = coinSymbol,
-                    Amount = 0
-                };
+            ctx.WalletItems.Add(usdtWalletItem);
+            ctx.WalletItems.Add(coinToBuy);
+            await ctx.SaveChangesAsync();
 
-                dbContext.WalletItems.Add(usdtWalletItem);
-                dbContext.WalletItems.Add(coinToBuy);
-                await dbContext.SaveChangesAsync();
+            var marketServiceMock = new Mock<IMarketService>();
+            marketServiceMock.Setup(x => x.GetPrice(coinSymbol)).ReturnsAsync(coinPrice);
 
-                var marketServiceMock = new Mock<IMarketService>();
-                marketServiceMock.Setup(x => x.GetPrice(coinSymbol)).ReturnsAsync(coinPrice);
+            var walletService = new WalletService(ctx, marketServiceMock.Object);
 
-                var walletService = new WalletService(dbContext, marketServiceMock.Object);
-
-
-                // Act & Assert
-                Assert.ThrowsAsync<Exception>(async () => await walletService.BuyAsync(userId, coinSymbol, usdToBuy));
-            }
+            // Act & Assert
+            Assert.ThrowsAsync<Exception>(async () => await walletService.BuyAsync(userId, coinSymbol, usdToBuy));
         }
 
 
@@ -108,47 +71,31 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
         public async Task SellAsync_CoinSold()
         {
             // Arrange
-            var options = new DbContextOptionsBuilder<DataContext>()
-                .UseInMemoryDatabase(databaseName: "CoinSold")
-                .Options;
+            int coinPrice = 100;
+            var userId = 1;
+            var coinSymbol = "btc";
+            var amount = 1.0;
 
-            using (var dbContext = new DataContext(options))
-            {
-                int coinPrice = 100;
-                var userId = 1;
-                var coinSymbol = "btc";
-                var amount = 1.0;
+            var ctx = DatabaseService.CreateDbContext("CoinSold");
 
-                var coinToSell = new WalletItem
-                {
-                    UserId = userId,
-                    Symbol = coinSymbol,
-                    Amount = amount
-                };
+            var coinToSell = DatabaseService.CreateWalletItem(userId, coinSymbol, amount);
+            var usdtWalletItem = DatabaseService.CreateWalletItem(userId, "usdt", 0);
 
-                var usdtWalletItem = new WalletItem
-                {
-                    UserId = userId,
-                    Symbol = "usdt",
-                    Amount = 0,
-                };
+            ctx.WalletItems.Add(usdtWalletItem);
+            ctx.WalletItems.Add(coinToSell);
+            await ctx.SaveChangesAsync();
 
-                dbContext.WalletItems.Add(usdtWalletItem);
-                dbContext.WalletItems.Add(coinToSell);
-                await dbContext.SaveChangesAsync();
+            var marketServiceMock = new Mock<IMarketService>();
+            marketServiceMock.Setup(x => x.GetPrice(coinSymbol)).ReturnsAsync(coinPrice);
 
-                var marketServiceMock = new Mock<IMarketService>();
-                marketServiceMock.Setup(x => x.GetPrice(coinSymbol)).ReturnsAsync(coinPrice);
+            var walletService = new WalletService(ctx, marketServiceMock.Object);
 
-                var walletService = new WalletService(dbContext, marketServiceMock.Object);
+            // Act
+            await walletService.SellAsync(userId, coinSymbol, coinToSell.Amount);
 
-                // Act
-                await walletService.SellAsync(userId, coinSymbol, coinToSell.Amount);
-
-                // Assert
-                Assert.AreEqual(0, coinToSell.Amount);
-                Assert.AreEqual(usdtWalletItem.Amount, coinPrice * amount);
-            }
+            // Assert
+            Assert.AreEqual(0, coinToSell.Amount);
+            Assert.AreEqual(usdtWalletItem.Amount, coinPrice * amount);
         }
 
         [Test]
@@ -160,61 +107,35 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
             var symbol = "btc";
             var amount = 1.0;
 
-            var options = new DbContextOptionsBuilder<DataContext>()
-                .UseInMemoryDatabase(databaseName: "SuccessfulSent")
-                .Options;
+            var ctx = DatabaseService.CreateDbContext("SuccessfulSent");
 
-            using (var dbContext = new DataContext(options))
-            {
-                var sender = new User
-                {
-                    Id = senderId,
-                    PasswordHash = Encoding.UTF8.GetBytes("qwe"),
-                    PasswordSalt = Encoding.UTF8.GetBytes("qwe"),
-                };
-                var receiver = new User
-                {
-                    Id = receiverId,
-                    PasswordHash = Encoding.UTF8.GetBytes("qwe"),
-                    PasswordSalt = Encoding.UTF8.GetBytes("qwe"),
-                };
+            var sender = DatabaseService.CreateUser(senderId);
+            var receiver = DatabaseService.CreateUser(receiverId);
 
-                var senderWalletItem = new WalletItem
-                {
-                    UserId = senderId,
-                    Symbol = symbol,
-                    Amount = amount
-                };
+            var senderWalletItem = DatabaseService.CreateWalletItem(senderId, symbol, amount);
+            var receiverWalletItem = DatabaseService.CreateWalletItem(senderId, symbol, amount);
 
-                var receiverWalletItem = new WalletItem
-                {
-                    UserId = receiverId,
-                    Symbol = symbol,
-                    Amount = 0
-                };
+            ctx.Users.Add(sender);
+            ctx.Users.Add(receiver);
+            ctx.WalletItems.Add(senderWalletItem);
+            ctx.WalletItems.Add(receiverWalletItem);
+            await ctx.SaveChangesAsync();
 
-                dbContext.Users.Add(sender);
-                dbContext.Users.Add(receiver);
-                dbContext.WalletItems.Add(senderWalletItem);
-                dbContext.WalletItems.Add(receiverWalletItem);
-                await dbContext.SaveChangesAsync();
+            var marketServiceMock = new Mock<IMarketService>();
+            var notificationServiceMock = new Mock<INotificationService>();
 
-                var marketServiceMock = new Mock<IMarketService>();
-                var notificationServiceMock = new Mock<INotificationService>();
+            var walletService = new WalletService(ctx, notificationServiceMock.Object, marketServiceMock.Object);
 
-                var walletService = new WalletService(dbContext, notificationServiceMock.Object, marketServiceMock.Object);
+            // Act
+            await walletService.SendCryptoAsync(senderId, symbol, amount, receiverId);
 
-                // Act
-                await walletService.SendCryptoAsync(senderId, symbol, amount, receiverId);
-
-                // Assert
-                Assert.AreEqual(amount, receiverWalletItem.Amount);
-                Assert.AreEqual(0, senderWalletItem.Amount);
-            }
+            // Assert
+            Assert.AreEqual(amount, receiverWalletItem.Amount);
+            Assert.AreEqual(0, senderWalletItem.Amount);
         }
 
         [Test]
-        public async Task SendCryptoAsync_NotEnoughBalanceToSend() //fix code reapiting later
+        public async Task SendCryptoAsync_NotEnoughBalanceToSend()
         {
             // Arrange
             var senderId = 1;
@@ -222,64 +143,27 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
             var symbol = "btc";
             var amount = 1.0;
 
-            var options = new DbContextOptionsBuilder<DataContext>()
-                .UseInMemoryDatabase(databaseName: "NotEnoughBalanceToSend")
-                .Options;
+            var ctx = DatabaseService.CreateDbContext("NotEnoughBalanceToSend");
 
-            using (var dbContext = new DataContext(options))
-            {
-                var sender = new User
-                {
-                    Id = senderId,
-                    PasswordHash = Encoding.UTF8.GetBytes("qwe"),
-                    PasswordSalt = Encoding.UTF8.GetBytes("qwe"),
-                };
-                var receiver = new User
-                {
-                    Id = receiverId,
-                    PasswordHash = Encoding.UTF8.GetBytes("qwe"),
-                    PasswordSalt = Encoding.UTF8.GetBytes("qwe"),
-                };
+            var sender = DatabaseService.CreateUser(senderId);
+            var receiver = DatabaseService.CreateUser(receiverId);
 
-                var senderWalletItem = new WalletItem
-                {
-                    UserId = senderId,
-                    Symbol = symbol,
-                    Amount = amount
-                };
+            var senderWalletItem = DatabaseService.CreateWalletItem(senderId, symbol, amount);
+            var receiverWalletItem = DatabaseService.CreateWalletItem(senderId, symbol, amount);
 
-                var receiverWalletItem = new WalletItem
-                {
-                    UserId = receiverId,
-                    Symbol = symbol,
-                    Amount = 0
-                };
+            ctx.Users.Add(sender);
+            ctx.Users.Add(receiver);
+            ctx.WalletItems.Add(senderWalletItem);
+            ctx.WalletItems.Add(receiverWalletItem);
+            await ctx.SaveChangesAsync();
 
-                dbContext.Users.Add(sender);
-                dbContext.Users.Add(receiver);
-                dbContext.WalletItems.Add(senderWalletItem);
-                dbContext.WalletItems.Add(receiverWalletItem);
-                await dbContext.SaveChangesAsync();
+            var marketServiceMock = new Mock<IMarketService>();
+            var notificationServiceMock = new Mock<INotificationService>();
 
-                var marketServiceMock = new Mock<IMarketService>();
-                var notificationServiceMock = new Mock<INotificationService>();
+            var walletService = new WalletService(ctx, notificationServiceMock.Object, marketServiceMock.Object);
 
-                var walletService = new WalletService(dbContext, notificationServiceMock.Object, marketServiceMock.Object);
-
-                // Act & Assert
-                Assert.ThrowsAsync<Exception>(async () => await walletService.SendCryptoAsync(senderId, symbol, amount * 2, receiverId));
-            }
-        }
-
-
-        private static DbSet<T> MockDbSet<T>(IQueryable<T> data) where T : class
-        {
-            var mockSet = new Mock<DbSet<T>>();
-            mockSet.As<IQueryable<T>>().Setup(m => m.Provider).Returns(data.Provider);
-            mockSet.As<IQueryable<T>>().Setup(m => m.Expression).Returns(data.Expression);
-            mockSet.As<IQueryable<T>>().Setup(m => m.ElementType).Returns(data.ElementType);
-            mockSet.As<IQueryable<T>>().Setup(m => m.GetEnumerator()).Returns(data.GetEnumerator());
-            return mockSet.Object;
+            // Act & Assert
+            Assert.ThrowsAsync<Exception>(async () => await walletService.SendCryptoAsync(senderId, symbol, amount * 2, receiverId));
         }
     }
 }
