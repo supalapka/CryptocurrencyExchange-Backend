@@ -19,6 +19,12 @@ namespace CryptocurrencyExchange.Services
             _marketService = marketService;
         }
 
+        public WalletService(DataContext context, IMarketService marketService)
+        {
+            _dataContext = context;
+            _marketService = marketService;
+        }
+
 
         public async Task BuyAsync(int userId, string coinSymbol, double usd)
         {
