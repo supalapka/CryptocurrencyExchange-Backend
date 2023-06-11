@@ -13,20 +13,8 @@ namespace CryptocurrencyExchange.Controllers
             _marketService = marketService;
         }
 
-        [HttpGet("list")]
-        public IActionResult GetSymbolsByPage()
-        {
-            var symbols = _marketService.GetSymbolsByPage();
-            return Ok(symbols);
-        }
-
-
         [HttpGet("price/{symbol}")]
-        public async Task<decimal> GetPrice(string symbol)
-        {
-            return await _marketService.GetPrice(symbol);
-        }
-
+        public async Task<decimal> GetPrice(string symbol) => await _marketService.GetPrice(symbol);
     }
 }
 

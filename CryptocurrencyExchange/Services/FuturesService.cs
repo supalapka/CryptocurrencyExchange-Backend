@@ -20,13 +20,10 @@ namespace CryptocurrencyExchange.Services
             await _dataContext.Database.ExecuteSqlRawAsync($"SELECT * FROM WalletItems WITH (TABLOCKX) WHERE UserId = {userId} AND Symbol = 'usdt'"); ;
 
             var userUsdt = await _dataContext.WalletItems
-                        .Where(x => x.UserId == userId && x.Symbol == "usdt")
-                        .FirstAsync();
-
+                        .FirstAsync(x => x.UserId == userId && x.Symbol == "usdt");
+                        
             if (userUsdt.Amount < (double)futureDto.Margin)
-            {
                 throw new Exception("Not enough balance in usdt to start future position");
-            }
 
             var future = new Future();
             future.Symbol = futureDto.Symbol;

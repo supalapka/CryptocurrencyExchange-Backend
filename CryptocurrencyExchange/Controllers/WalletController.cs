@@ -3,10 +3,10 @@ using CryptocurrencyExchange.Models;
 using CryptocurrencyExchange.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 
 namespace CryptocurrencyExchange.Controllers
 {
+    [Authorize]
     public class WalletController : Controller
     {
         private readonly DataContext _dataContext;
@@ -19,7 +19,6 @@ namespace CryptocurrencyExchange.Controllers
         }
 
 
-        [Authorize]
         [HttpGet("auth/get-wallet")]
         public async Task<ActionResult<List<WalletItem>>> GetFullWallet()
         {
@@ -29,7 +28,6 @@ namespace CryptocurrencyExchange.Controllers
         }
 
 
-        [Authorize]
         [HttpGet("auth/coin-amount/{symbol}")]
         public async Task<ActionResult<double>> GetCoinAmount(string symbol)
         {
@@ -40,7 +38,6 @@ namespace CryptocurrencyExchange.Controllers
 
 
         [HttpPost("auth/buy")]
-        [Authorize]
         public async Task<ActionResult> Buy([FromBody] BuySellCryptoModel buyCryptoModel)
         {
             int userId = Convert.ToInt32(HttpContext.Items["UserId"]);
@@ -56,7 +53,6 @@ namespace CryptocurrencyExchange.Controllers
 
 
         [HttpPost("auth/sell")]
-        [Authorize]
         public async Task<ActionResult> Sell([FromBody] BuySellCryptoModel buyCryptoModel)
         {
             int userId = Convert.ToInt32(HttpContext.Items["UserId"]);
@@ -72,7 +68,6 @@ namespace CryptocurrencyExchange.Controllers
 
 
         [HttpPost("auth/send")]
-        [Authorize]
         public async Task<IActionResult> SendCrypto([FromBody] SendCryptoModel model)
         {
             int userId = Convert.ToInt32(HttpContext.Items["UserId"]);

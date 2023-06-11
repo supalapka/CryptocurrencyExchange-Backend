@@ -1,6 +1,6 @@
 ﻿namespace CryptocurrencyExchange.Utilities
 {
-    public static class UtilFunstions
+    public static class UtilFunсtions
     {
         public static decimal RoundCoinAmountUpTo1USD(decimal amount, decimal coinPrice)
         {

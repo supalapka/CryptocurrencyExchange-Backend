@@ -21,7 +21,6 @@ namespace CryptocurrencyExchange.Controllers
         public async Task<ActionResult> CreateFuture([FromBody] FutureDto future)
         {
             int userId = Convert.ToInt32(HttpContext.Items["UserId"]);
-
             await _futuresService.CreateFutureAsync(future, userId);
             return Ok();
         }
@@ -31,30 +30,22 @@ namespace CryptocurrencyExchange.Controllers
         public List<FutureDto> GetFutureList()
         {
             int userId = Convert.ToInt32(HttpContext.Items["UserId"]);
-
             return _futuresService.GetFuturePositions(userId);
         }
 
 
         [HttpGet("liquidate")]
-        public async Task LiquidatePosition(int id, double markPrice)
-        {
-            await _futuresService.LiquidatePosition(id, markPrice);
-        }
+        public async Task LiquidatePosition(int id, double markPrice) => await _futuresService.LiquidatePosition(id, markPrice);
 
 
         [HttpGet("close")]
-        public async Task LiquidatePosition(int id, double pnl, double markPrice)
-        {
-            await _futuresService.ClosePosition(id, pnl, markPrice);
-        }
+        public async Task LiquidatePosition(int id, double pnl, double markPrice) => await _futuresService.ClosePosition(id, pnl, markPrice);
 
 
         [HttpGet("history/{page}")]
         public List<FutureHIstoryOutput> GetHistory(int page)
         {
             int userId = Convert.ToInt32(HttpContext.Items["UserId"]);
-
             return _futuresService.GetHistory(userId, page);
         }
 

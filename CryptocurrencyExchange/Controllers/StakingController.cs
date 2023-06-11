@@ -48,12 +48,10 @@ namespace CryptocurrencyExchange.Controllers
             return Ok();
         }
 
+
         [HttpGet("check")]
-        public IActionResult CheckIfExpired()
-        {
-            _stakingService.CheckForExpiredStakings();
-            return Ok();
-        }
+        public void CheckIfExpired() => _stakingService.CheckForExpiredStakings();
+
 
         public class StakingInput
         {

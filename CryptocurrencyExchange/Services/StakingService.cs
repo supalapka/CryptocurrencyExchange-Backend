@@ -19,8 +19,8 @@ namespace CryptocurrencyExchange.Services
         {
             var stakinCoin = _dataContext.StakingCoins.Find(stakingCoinId);
 
-            var coinWalletItem = _dataContext.WalletItems.Where(x => x.UserId == userId
-            && x.Symbol == stakinCoin.Symbol).FirstOrDefault();
+            var coinWalletItem = _dataContext.WalletItems.FirstOrDefault(x => x.UserId == userId
+            && x.Symbol == stakinCoin.Symbol);
             if (coinWalletItem == null)
                 throw new Exception($"Buy {stakinCoin.Symbol} first");
 
@@ -85,7 +85,7 @@ namespace CryptocurrencyExchange.Services
         {
             var staking = _dataContext.Staking.Include(s => s.StakingCoin).First(x => x.Id == stakingId);
             if (staking.IsCompleted == true) return;
-            var userWalletItem = _dataContext.WalletItems.Where(x => x.UserId == staking.UserId && x.Symbol == staking.StakingCoin.Symbol).First();
+            var userWalletItem = _dataContext.WalletItems.First(x => x.UserId == staking.UserId && x.Symbol == staking.StakingCoin.Symbol);
 
             staking.IsCompleted = true;
             float persentageToAdd = staking.StakingCoin.RatePerMonth * staking.DurationInMonth;

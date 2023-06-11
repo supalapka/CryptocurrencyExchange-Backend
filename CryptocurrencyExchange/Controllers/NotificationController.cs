@@ -19,17 +19,13 @@ namespace CryptocurrencyExchange.Controllers
         public Notification GetLastNotification()
         {
             int userId = Convert.ToInt32(HttpContext.Items["UserId"]);
-
             return _notificatinService.GetLastNotification(userId);
         }
 
 
         [Authorize]
         [HttpGet("auth/notifications/read/{id}")]
-        public async Task<ActionResult> Read(int id)
-        {
-            await _notificatinService.MarkAsRead(id);
-            return Ok();
-        }
+        public async Task Read(int id) => await _notificatinService.MarkAsRead(id);
+      
     }
 }
