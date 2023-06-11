@@ -14,11 +14,20 @@ namespace CryptocurrencyExchange.Tests
     public static class DatabaseService
     {
 
-        public static DataContext CreateDbContext(string databaseName)
+        public static DataContext CreateInMemoryDbContext(string databaseName)
         {
             var options = new DbContextOptionsBuilder<DataContext>()
                 .UseInMemoryDatabase(databaseName)
                 .Options;
+
+            return new DataContext(options);
+        }
+
+        public static DataContext CreateDbContext()
+        {
+            var options = new DbContextOptionsBuilder<DataContext>()
+           .UseSqlServer("Data Source=(localdb)\\mssqllocaldb;Initial Catalog=CryptoExchange_Tests;Integrated Security=True;")
+           .Options;
 
             return new DataContext(options);
         }

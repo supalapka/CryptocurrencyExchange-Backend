@@ -16,7 +16,7 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
             var coinSymbol = "btc";
             var usdToBuy = 100;
 
-            var ctx = DatabaseService.CreateDbContext("WithEnoughBalance");
+            var ctx = DatabaseService.CreateInMemoryDbContext("WithEnoughBalance");
 
             var coinToBuy = DatabaseService.CreateWalletItem(userId, coinSymbol, 0);
             var usdtWalletItem = DatabaseService.CreateWalletItem(userId, "usdt", 5000);
@@ -48,7 +48,7 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
             var coinSymbol = "btc";
             var usdToBuy = 100;
 
-            var ctx = DatabaseService.CreateDbContext("NotEnoughBalance");
+            var ctx = DatabaseService.CreateInMemoryDbContext("NotEnoughBalance");
 
             var coinToBuy = DatabaseService.CreateWalletItem(userId, coinSymbol, 0);
             var usdtWalletItem = DatabaseService.CreateWalletItem(userId, "usdt", 0);  //set balance less then usdToBuy
@@ -76,7 +76,7 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
             var coinSymbol = "btc";
             var amount = 1.0;
 
-            var ctx = DatabaseService.CreateDbContext("CoinSold");
+            var ctx = DatabaseService.CreateInMemoryDbContext("CoinSold");
 
             var coinToSell = DatabaseService.CreateWalletItem(userId, coinSymbol, amount);
             var usdtWalletItem = DatabaseService.CreateWalletItem(userId, "usdt", 0);
@@ -107,7 +107,7 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
             var symbol = "btc";
             var amount = 1.0;
 
-            var ctx = DatabaseService.CreateDbContext("SuccessfulSent");
+            var ctx = DatabaseService.CreateInMemoryDbContext("SuccessfulSent");
 
             var sender = DatabaseService.CreateUser(senderId);
             var receiver = DatabaseService.CreateUser(receiverId);
@@ -143,7 +143,7 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
             var symbol = "btc";
             var amount = 1.0;
 
-            var ctx = DatabaseService.CreateDbContext("NotEnoughBalanceToSend");
+            var ctx = DatabaseService.CreateInMemoryDbContext("NotEnoughBalanceToSend");
 
             var sender = DatabaseService.CreateUser(senderId);
             var receiver = DatabaseService.CreateUser(receiverId);
