@@ -18,7 +18,10 @@ namespace CryptocurrencyExchange.Controllers
         public async Task<IActionResult> GetCandles(Request request)
         {
             var httpClient = new HttpClient();
-            var url = $"https://api.binance.com/api/v3/klines?symbol={request.Symbol}&interval={request.Timeframe}&limit={request.Limit}";
+
+            if (!request.Symbol.ToUpper().EndsWith("USDT"))
+                request.Symbol += "USDT";
+            var url = $"https://api.binance.com/api/v3/klines?symbol={request.Symbol.ToUpper()}&interval={request.Timeframe}&limit={request.Limit}";
             var response = await httpClient.GetAsync(url);
             var jsonResponse = await response.Content.ReadAsStringAsync();
             var candles = JArray.Parse(jsonResponse);
