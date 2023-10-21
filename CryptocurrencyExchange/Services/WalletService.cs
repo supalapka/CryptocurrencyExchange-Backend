@@ -54,6 +54,10 @@ namespace CryptocurrencyExchange.Services
             USDTWalletItem.Amount -= usd;
             coinToBuy.Amount += (double)amountToBuy;
 
+            if (USDTWalletItem.Amount < (double)0.1)
+                USDTWalletItem.Amount = 0.0; //beta commission and fix the issue 0.00054993 usd on balance
+
+
             await _dataContext.SaveChangesAsync();
         }
 
@@ -98,6 +102,7 @@ namespace CryptocurrencyExchange.Services
 
             coinToSell.Amount -= amount;
             usdtWalletItem.Amount += usdtAmount;
+            usdtWalletItem.Amount = Math.Round(usdtWalletItem.Amount, 2);
 
             await _dataContext.SaveChangesAsync();
         }
