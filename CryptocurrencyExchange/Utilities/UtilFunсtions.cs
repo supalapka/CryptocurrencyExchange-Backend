@@ -1,4 +1,6 @@
-﻿namespace CryptocurrencyExchange.Utilities
+﻿using Newtonsoft.Json.Linq;
+
+namespace CryptocurrencyExchange.Utilities
 {
     public static class UtilFunсtions
     {
@@ -16,6 +18,24 @@
                    return  roundedAmount;
                 }
             }
+        }
+
+
+        public async static Task<decimal> RoundCoinAmountUpTo1USD(decimal amount, string symbol)
+        {
+            var baseUrl = "https://api.binance.com";
+            var httpClient = new HttpClient { BaseAddress = new Uri(baseUrl) };
+            symbol = symbol.ToUpper();
+            if (!symbol.EndsWith("USDT"))
+                symbol += "USDT";
+            var endpoint = $"/api/v3/ticker/price?symbol={symbol}";
+            var response = await httpClient.GetAsync(endpoint);
+            var content = await response.Content.ReadAsStringAsync();
+            var jObject = JObject.Parse(content);
+
+            decimal coinPrice = (decimal)jObject["price"];
+
+           return RoundCoinAmountUpTo1USD(amount, coinPrice);
         }
     }
 }

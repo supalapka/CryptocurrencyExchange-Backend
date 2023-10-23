@@ -28,6 +28,7 @@ namespace CryptocurrencyExchange.Services
                 throw new Exception($"Not anough balance in {stakinCoin.Symbol}");
 
             coinWalletItem.Amount -= amount;
+            coinWalletItem.Amount = (double)await UtilFunсtions.RoundCoinAmountUpTo1USD((decimal)coinWalletItem.Amount, coinWalletItem.Symbol);
 
             var stakingmodel = new Staking();
             stakingmodel.UserId = userId;
@@ -92,7 +93,7 @@ namespace CryptocurrencyExchange.Services
             var coinsToAdd = staking.Amount;
             float rewards = (staking.Amount / 100) * persentageToAdd;
             coinsToAdd += rewards;
-           // coinsToAdd = UtilFunstions.RoundCoinAmountUpTo1USD(coinsToAdd, coinPrice);
+            // coinsToAdd = UtilFunstions.RoundCoinAmountUpTo1USD(coinsToAdd, coinPrice);
             userWalletItem.Amount += coinsToAdd;
             await _dataContext.SaveChangesAsync();
         }
