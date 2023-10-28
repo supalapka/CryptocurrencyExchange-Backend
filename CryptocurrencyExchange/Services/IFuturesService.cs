@@ -4,7 +4,7 @@ namespace CryptocurrencyExchange.Services
 {
     public interface IFuturesService
     {
-        Task CreateFutureAsync(FutureDto futureDto, int userId);
+        Task<int> CreateFutureAsync(FutureDto futureDto, int userId);
         List<FutureDto> GetFuturePositions(int userId);
         Task LiquidatePosition(int id, double markPrice);
         Task ClosePosition(int id, double pnl, double makrPrice);

@@ -14,7 +14,7 @@ namespace CryptocurrencyExchange.Services
         }
 
 
-        public async Task CreateFutureAsync(FutureDto futureDto, int userId)
+        public async Task<int> CreateFutureAsync(FutureDto futureDto, int userId)
         {
             using var transaction = await _dataContext.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable);
             await _dataContext.Database.ExecuteSqlRawAsync($"SELECT * FROM WalletItems WITH (TABLOCKX) WHERE UserId = {userId} AND Symbol = 'usdt'"); ;
@@ -35,10 +35,13 @@ namespace CryptocurrencyExchange.Services
             future.Position = futureDto.Position;
 
             userUsdt.Amount -= (double)futureDto.Margin;
+            userUsdt.Amount = Math.Round(userUsdt.Amount, 2);
 
             _dataContext.Futures.Add(future);
             _dataContext.SaveChanges();
             await transaction.CommitAsync();
+
+            return future.Id;
         }
 
 
@@ -108,6 +111,7 @@ namespace CryptocurrencyExchange.Services
 
             userUsdt.Amount += (double)position.Margin;
             userUsdt.Amount += pnl;
+            userUsdt.Amount = Math.Round(userUsdt.Amount, 2);
 
             await _dataContext.SaveChangesAsync();
             await transaction.CommitAsync();

@@ -21,8 +21,8 @@ namespace CryptocurrencyExchange.Controllers
         public async Task<ActionResult> CreateFuture([FromBody] FutureDto future)
         {
             int userId = Convert.ToInt32(HttpContext.Items["UserId"]);
-            await _futuresService.CreateFutureAsync(future, userId);
-            return Ok();
+            int futureId = await _futuresService.CreateFutureAsync(future, userId);
+            return Ok(futureId);
         }
 
 
