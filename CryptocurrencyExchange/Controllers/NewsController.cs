@@ -36,7 +36,7 @@ namespace CryptocurrencyExchange.Controllers
                 News news = new News();
 
                 var imgNode = node.SelectSingleNode(".//div[@class='img-sized']/img");
-                string image = imgNode.GetAttributeValue("src", "");
+                string image = imgNode.GetAttributeValue("data-lazy-src", "");
 
                 var linkNode = node.SelectSingleNode(".//a[@class='article__title article__title--lg article__title--featured  mb-20']");
                 string link = url + linkNode.GetAttributeValue("href", "");
