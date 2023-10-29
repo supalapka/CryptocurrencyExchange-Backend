@@ -4,7 +4,7 @@ namespace CryptocurrencyExchange.Services
 {
     public interface IStakingService
     {
-        Task CreateUserStaking(int userId, int stakingCoinId, float amount, int durationIdDays);
+        Task CreateUserStaking(int userId, int stakingCoinId, double amount, int durationIdDays);
         List<Staking> GetStakingsByUser(int userId);
         StakingCoin GetStakingCoinById(int id);
         List<StakingCoin> GetCoins();

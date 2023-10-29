@@ -14,7 +14,7 @@ namespace CryptocurrencyExchange.Controllers
         }
 
         [HttpGet("price/{symbol}")]
-        public async Task<decimal> GetPrice(string symbol) => await _marketService.GetPrice(symbol);
+        public async Task<double> GetPrice(string symbol) => await _marketService.GetPrice(symbol);
     }
 }
 

@@ -56,7 +56,7 @@ namespace CryptocurrencyExchange.Controllers
         public class StakingInput
         {
             public int stakingCoinId { get; set; }
-            public float Amount { get; set; }
+            public double Amount { get; set; }
             public int DurationInMonth { get; set; }
         }
     }

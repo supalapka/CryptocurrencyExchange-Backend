@@ -36,8 +36,8 @@ namespace CryptocurrencyExchange.Services
             if (USDTWalletItem.Amount < usd)
                 throw new Exception("Not enough balance in USDT");
 
-            decimal coinPrice = await _marketService.GetPrice(coinSymbol);
-            var amountToBuy = (decimal)usd / coinPrice;
+            double coinPrice = await _marketService.GetPrice(coinSymbol);
+            var amountToBuy = usd / coinPrice;
             amountToBuy = UtilFunсtions.RoundCoinAmountUpTo1USD(amountToBuy, coinPrice);
 
             var coinToBuy = GeWalletItem(userId, coinSymbol);
@@ -52,11 +52,10 @@ namespace CryptocurrencyExchange.Services
                 await _dataContext.WalletItems.AddAsync(coinToBuy);
             }
             USDTWalletItem.Amount -= usd;
-            coinToBuy.Amount += (double)amountToBuy;
+            coinToBuy.Amount += amountToBuy;
+            coinToBuy.Amount = UtilFunсtions.RoundCoinAmountUpTo1USD(coinToBuy.Amount, coinPrice);
 
-            if (USDTWalletItem.Amount < (double)0.1)
-                USDTWalletItem.Amount = 0.0; //beta commission and fix the issue 0.00054993 usd on balance
-
+            USDTWalletItem.Amount = Math.Round(USDTWalletItem.Amount, 2);
 
             await _dataContext.SaveChangesAsync();
         }
@@ -98,9 +97,11 @@ namespace CryptocurrencyExchange.Services
                 throw new Exception($"Not enough balance in {coinSymbol.ToUpper()}");
 
             var coinPrice = await _marketService.GetPrice(coinSymbol);
-            var usdtAmount = (double)coinPrice * amount;
+            var usdtAmount = coinPrice * amount;
 
             coinToSell.Amount -= amount;
+            coinToSell.Amount = UtilFunсtions.RoundCoinAmountUpTo1USD(coinToSell.Amount, coinPrice);
+
             usdtWalletItem.Amount += usdtAmount;
             usdtWalletItem.Amount = Math.Round(usdtWalletItem.Amount, 2);
 
