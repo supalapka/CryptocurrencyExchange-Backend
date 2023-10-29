@@ -4,7 +4,7 @@ namespace CryptocurrencyExchange.Utilities
 {
     public static class UtilFunсtions
     {
-        public static decimal RoundCoinAmountUpTo1USD(decimal amount, decimal coinPrice)
+        public static double RoundCoinAmountUpTo1USD(double amount, double coinPrice)
         {
             var oneUsdToCoinPrice = 1 / coinPrice;
 
@@ -21,7 +21,7 @@ namespace CryptocurrencyExchange.Utilities
         }
 
 
-        public async static Task<decimal> RoundCoinAmountUpTo1USD(decimal amount, string symbol)
+        public async static Task<double> RoundCoinAmountUpTo1USD(double amount, string symbol)
         {
             var baseUrl = "https://api.binance.com";
             var httpClient = new HttpClient { BaseAddress = new Uri(baseUrl) };
@@ -35,7 +35,7 @@ namespace CryptocurrencyExchange.Utilities
 
             decimal coinPrice = (decimal)jObject["price"];
 
-           return RoundCoinAmountUpTo1USD(amount, coinPrice);
+           return RoundCoinAmountUpTo1USD(amount, (double)coinPrice);
         }
     }
 }

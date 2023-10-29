@@ -27,14 +27,14 @@ namespace CryptocurrencyExchange.Services
 
             var future = new Future();
             future.Symbol = futureDto.Symbol;
-            future.EntryPrice = (double)futureDto.EntryPrice;
+            future.EntryPrice = futureDto.EntryPrice;
             future.Margin = futureDto.Margin;
             future.UserId = userId;
             future.IsCompleted = false;
             future.Leverage = futureDto.Leverage;
             future.Position = futureDto.Position;
 
-            userUsdt.Amount -= (double)futureDto.Margin;
+            userUsdt.Amount -= futureDto.Margin;
             userUsdt.Amount = Math.Round(userUsdt.Amount, 2);
 
             _dataContext.Futures.Add(future);
@@ -57,7 +57,7 @@ namespace CryptocurrencyExchange.Services
                 {
                     Leverage = position.Leverage,
                     Position = position.Position,
-                    EntryPrice = Convert.ToDecimal(position.EntryPrice),
+                    EntryPrice = position.EntryPrice,
                     Margin = position.Margin,
                     Id = position.Id,
                     Symbol = position.Symbol,
@@ -109,7 +109,7 @@ namespace CryptocurrencyExchange.Services
                 .Where(x => x.UserId == position.UserId && x.Symbol == "usdt")
                 .First();
 
-            userUsdt.Amount += (double)position.Margin;
+            userUsdt.Amount += position.Margin;
             userUsdt.Amount += pnl;
             userUsdt.Amount = Math.Round(userUsdt.Amount, 2);
 

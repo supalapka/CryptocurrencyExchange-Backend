@@ -15,7 +15,7 @@ namespace CryptocurrencyExchange.Services
         }
 
 
-        public async Task CreateUserStaking(int userId, int stakingCoinId, float amount, int durationIdMonth)
+        public async Task CreateUserStaking(int userId, int stakingCoinId, double amount, int durationIdMonth)
         {
             var stakinCoin = _dataContext.StakingCoins.Find(stakingCoinId);
 
@@ -28,7 +28,7 @@ namespace CryptocurrencyExchange.Services
                 throw new Exception($"Not anough balance in {stakinCoin.Symbol}");
 
             coinWalletItem.Amount -= amount;
-            coinWalletItem.Amount = (double)await UtilFunсtions.RoundCoinAmountUpTo1USD((decimal)coinWalletItem.Amount, coinWalletItem.Symbol);
+            coinWalletItem.Amount = await UtilFunсtions.RoundCoinAmountUpTo1USD(coinWalletItem.Amount, coinWalletItem.Symbol);
 
             var stakingmodel = new Staking();
             stakingmodel.UserId = userId;
@@ -91,7 +91,7 @@ namespace CryptocurrencyExchange.Services
             staking.IsCompleted = true;
             float persentageToAdd = staking.StakingCoin.RatePerMonth * staking.DurationInMonth;
             var coinsToAdd = staking.Amount;
-            float rewards = (staking.Amount / 100) * persentageToAdd;
+            double rewards = (staking.Amount / 100) * persentageToAdd;
             coinsToAdd += rewards;
             // coinsToAdd = UtilFunstions.RoundCoinAmountUpTo1USD(coinsToAdd, coinPrice);
             userWalletItem.Amount += coinsToAdd;
