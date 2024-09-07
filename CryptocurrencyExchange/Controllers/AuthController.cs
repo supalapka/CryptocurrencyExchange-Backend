@@ -69,7 +69,6 @@ namespace CryptocurrencyExchange.Controllers
         }
 
 
-        [Authorize]
         [HttpGet("email")]
         public async Task<ActionResult<User>> GetUserEmail()
         {
