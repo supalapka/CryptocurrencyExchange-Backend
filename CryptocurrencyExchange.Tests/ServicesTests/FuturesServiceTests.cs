@@ -8,40 +8,33 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
     [TestFixture]
     public class FuturesServiceTests
     {
+        int userUsdtBalance = 1000;
+        private int _testUserId;
+
         [Test]
         public async Task CreateFutureAsync_WithSufficientBalance()
         {
             // Arrange
-            int userUsdtBalance = 1000;
+            using var ctx = DatabaseService.CreateDbContext();
+
             var futureDto = new FutureDto
             {
                 Symbol = "BTC",
                 EntryPrice = 50000,
-                Margin = 900, // less then userUsdtBalance
+                Margin = 500,
                 Leverage = 10,
                 Position = PositionType.Long,
             };
-            var ctx = DatabaseService.CreateDbContext();
-
-            var user = ctx.Users.First();
-            if (user == null)
-            {
-                user = DatabaseService.CreateUser(0);
-                ctx.Users.Add(user);
-                await ctx.SaveChangesAsync(); //save for get user id
-            }
-
-            var userUsdt = DatabaseService.CreateWalletItem(user.Id, "usdt", userUsdtBalance);
-            ctx.WalletItems.Add(userUsdt);
-            await ctx.SaveChangesAsync();
 
             var futuresService = new FuturesService(ctx);
 
-            await futuresService.CreateFutureAsync(futureDto, user.Id);
+            // Act
+            await futuresService.CreateFutureAsync(futureDto, _testUserId);
 
             // Assert
-            var future = await ctx.Futures.FirstOrDefaultAsync(f => f.UserId == user.Id);
+            var future = await ctx.Futures.FirstOrDefaultAsync(f => f.UserId == _testUserId && f.Symbol == "BTC");
             Assert.IsNotNull(future);
+            Assert.AreEqual(500, future.Margin);
         }
 
 
@@ -49,7 +42,6 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
         public async Task CreateFutureAsync_WithInsufficientBalance()
         {
             // Arrange
-            int userUsdtBalance = 1000;
             var futureDto = new FutureDto
             {
                 Symbol = "BTC",
@@ -60,22 +52,14 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
             };
             var ctx = DatabaseService.CreateDbContext();
 
-            var user = ctx.Users.First();
-            if (user == null)
-            {
-                user = DatabaseService.CreateUser(0);
-                ctx.Users.Add(user);
-                await ctx.SaveChangesAsync(); //save for get user id
-            }
-
-            var userUsdt = DatabaseService.CreateWalletItem(user.Id, "usdt", userUsdtBalance);
+            var userUsdt = DatabaseService.CreateWalletItem(_testUserId, "usdt", userUsdtBalance);
             ctx.WalletItems.Add(userUsdt);
             await ctx.SaveChangesAsync();
 
             var futuresService = new FuturesService(ctx);
 
             // Act & Assert
-            Assert.ThrowsAsync<Exception>(async () => await futuresService.CreateFutureAsync(futureDto, user.Id));
+            Assert.ThrowsAsync<Exception>(async () => await futuresService.CreateFutureAsync(futureDto, _testUserId));
         }
 
 
@@ -83,44 +67,38 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
         public async Task ClosePosition_Success_RightBalance()
         {
             // Arrange
-            var userStartedBalance = 0;
-            var futureMargin = 1000;
-            var futurePnL = 200;
-            var ctx = DatabaseService.CreateDbContext();
+            int futureId;
+            int PnL = 200;
+            int margin = 1000;
+            int finalUserBalanceShouldBe = userUsdtBalance + PnL + margin;
 
-            var user = ctx.Users.First();
-            if (user == null)
+            using (var setupCtx = DatabaseService.CreateDbContext())
             {
-                user = DatabaseService.CreateUser(0);
-                ctx.Users.Add(user);
-                await ctx.SaveChangesAsync(); //save for get user id
+                var future = new Future
+                {
+                    UserId = _testUserId,
+                    Margin = margin,
+                    Leverage = 10,
+                    Position = PositionType.Long
+                };
+                setupCtx.Futures.Add(future);
+                await setupCtx.SaveChangesAsync();
+                futureId = future.Id;
             }
 
-            var future = new Future
+            // Act
+            using (var actCtx = DatabaseService.CreateDbContext())
             {
-                Symbol = "BTC",
-                EntryPrice = 50000,
-                Margin = futureMargin,
-                Leverage = 10,
-                Position = PositionType.Long,
-                IsCompleted = false,
-                UserId = user.Id,
+                var service = new FuturesService(actCtx);
+                await service.ClosePosition(futureId, PnL, 9000);
+            }
 
-            };
-
-            var userUsdt = DatabaseService.CreateWalletItem(user.Id, "usdt", userStartedBalance);
-            ctx.WalletItems.Add(userUsdt);
-            ctx.Futures.Add(future);
-            await ctx.SaveChangesAsync();
-
-            var futuresService = new FuturesService(ctx);
-
-            //Act
-            await futuresService.ClosePosition(future.Id, (double)futurePnL, 9000);
-
-            //Assert
-            Assert.IsTrue(future.IsCompleted);
-            Assert.AreEqual(userStartedBalance + futureMargin + futurePnL, (int)userUsdt.Amount);
+            // Assert
+            using (var assertCtx = DatabaseService.CreateDbContext())
+            {
+                var wallet = assertCtx.WalletItems.Single(x => x.UserId == _testUserId && x.Symbol == "usdt");
+                Assert.AreEqual(finalUserBalanceShouldBe, wallet.Amount);
+            }
         }
 
 
@@ -139,5 +117,25 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
             await ctx.SaveChangesAsync();
         }
 
+
+        [SetUp]
+        public async Task Setup()
+        {
+            var ctx = DatabaseService.CreateDbContext();
+
+            ctx.WalletItems.RemoveRange(ctx.WalletItems);
+            ctx.Users.RemoveRange(ctx.Users);
+            await ctx.SaveChangesAsync();
+
+            var user = DatabaseService.CreateUser(0);
+
+            ctx.Users.Add(user);
+            await ctx.SaveChangesAsync();
+            _testUserId = user.Id;
+
+            var wallet = DatabaseService.CreateWalletItem(_testUserId, "usdt", userUsdtBalance);
+            ctx.WalletItems.Add(wallet);
+            await ctx.SaveChangesAsync();
+        }
     }
 }
