@@ -1,6 +1,6 @@
 ﻿using CryptocurrencyExchange.Data;
 using CryptocurrencyExchange.Models;
-using CryptocurrencyExchange.Services;
+using CryptocurrencyExchange.Services.Wallet;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -41,7 +41,7 @@ namespace CryptocurrencyExchange.Controllers
         public async Task<ActionResult> Buy([FromBody] BuySellCryptoModel buyCryptoModel)
         {
             int userId = Convert.ToInt32(HttpContext.Items["UserId"]);
-            var usdAmount = buyCryptoModel.Amount;
+            decimal usdAmount = (decimal)buyCryptoModel.Amount;
 
             try
             {

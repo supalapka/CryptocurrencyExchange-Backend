@@ -2,6 +2,7 @@ using CryptocurrencyExchange.Data;
 using CryptocurrencyExchange.Middleware;
 using CryptocurrencyExchange.Services;
 using CryptocurrencyExchange.Services.Shcedulers;
+using CryptocurrencyExchange.Services.Wallet;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;

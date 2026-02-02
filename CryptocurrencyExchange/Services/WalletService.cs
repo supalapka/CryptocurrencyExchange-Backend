@@ -1,5 +1,8 @@
 ﻿using CryptocurrencyExchange.Data;
+using CryptocurrencyExchange.Exceptions;
 using CryptocurrencyExchange.Models;
+using CryptocurrencyExchange.Services.Interfaces;
+using CryptocurrencyExchange.Services.Wallet;
 using CryptocurrencyExchange.Utilities;
 using Microsoft.EntityFrameworkCore;
 
@@ -8,56 +11,46 @@ namespace CryptocurrencyExchange.Services
     public class WalletService : IWalletService
     {
         private readonly DataContext _dataContext;
-        private readonly INotificationService _notificationService;
+        //private readonly INotificationService _notificationService;
         private readonly IMarketService _marketService;
+        private readonly IWalletItemRepository _walletItemRepository;
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IWalletDomainService _walletDomainService;
 
-
-        public WalletService(DataContext context, INotificationService notificatinService, IMarketService marketService)
+        public WalletService(
+            INotificationService notificatinService,
+            IMarketService marketService,
+            IWalletItemRepository walletItemRepository,
+            IUnitOfWork unitOfWork,
+            IWalletDomainService walletDomainService)
         {
-            _dataContext = context;
-            _notificationService = notificatinService;
+            //  _dataContext = context;
+            // _notificationService = notificatinService;
             _marketService = marketService;
+            _walletItemRepository = walletItemRepository;
+            _unitOfWork = unitOfWork;
+            _walletDomainService = walletDomainService;
         }
 
-        public WalletService(DataContext context, IMarketService marketService)
-        {
-            _dataContext = context;
-            _marketService = marketService;
-        }
 
-
-        public async Task BuyAsync(int userId, string coinSymbol, double usd)
+        public async Task BuyAsync(int userId, string coinSymbol, decimal usd)
         {
             coinSymbol = coinSymbol.ToLower();
 
-            var USDTWalletItem = await _dataContext.WalletItems
-                .FirstAsync(x => x.UserId == userId && x.Symbol == "usdt");
+            var usdt = await _walletItemRepository.GetAsync(userId, "usdt")
+            ?? throw new WalletItemNotFoundException("USDT in wallet not found");
 
-            if (USDTWalletItem.Amount < usd)
-                throw new Exception("Not enough balance in USDT");
+            if ((decimal)usdt.Amount < usd)
+                throw new InsufficientFundsException();
 
-            double coinPrice = await _marketService.GetPrice(coinSymbol);
-            var amountToBuy = usd / coinPrice;
-            amountToBuy = UtilFunсtions.RoundCoinAmountUpTo1USD(amountToBuy, coinPrice);
+            var coin = await _walletItemRepository.GetAsync(userId, coinSymbol)
+             ?? throw new WalletItemNotFoundException($"{coinSymbol}in wallet not found");
 
-            var coinToBuy = GeWalletItem(userId, coinSymbol);
-            if (coinToBuy == null)
-            {
-                coinToBuy = new WalletItem()
-                {
-                    Symbol = coinSymbol,
-                    Amount = 0,
-                    User = await _dataContext.Users.FirstAsync(x => x.Id == userId)
-                };
-                await _dataContext.WalletItems.AddAsync(coinToBuy);
-            }
-            USDTWalletItem.Amount -= usd;
-            coinToBuy.Amount += amountToBuy;
-            coinToBuy.Amount = UtilFunсtions.RoundCoinAmountUpTo1USD(coinToBuy.Amount, coinPrice);
+            var coinPrice = await _marketService.GetPrice(coinSymbol);
 
-            USDTWalletItem.Amount = Math.Round(USDTWalletItem.Amount, 2);
+            _walletDomainService.Buy(usdt, coin, usd, coinPrice);
 
-            await _dataContext.SaveChangesAsync();
+            await _unitOfWork.CommitAsync();
         }
 
 
@@ -80,18 +73,30 @@ namespace CryptocurrencyExchange.Services
         }
 
 
-        public WalletItem GeWalletItem(int userId, string symbol)
+        public async Task<WalletItem> GeWalletItem(int userId, string symbol)
         {
-            return _dataContext.WalletItems.FirstOrDefault(x => x.UserId == userId
+            var item = _dataContext.WalletItems.FirstOrDefault(x => x.UserId == userId
                 && x.Symbol == symbol);
 
+            if (item == null)
+            {
+                item = new WalletItem()
+                {
+                    Symbol = symbol,
+                    Amount = 0,
+                    User = await _dataContext.Users.FirstAsync(x => x.Id == userId)
+                };
+                await _dataContext.WalletItems.AddAsync(item);
+            }
+
+            return item;
         }
 
 
         public async Task SellAsync(int userId, string coinSymbol, double amount)
         {
-            var coinToSell = GeWalletItem(userId, coinSymbol);
-            var usdtWalletItem = GeWalletItem(userId, "usdt");
+            var coinToSell = await GeWalletItem(userId, coinSymbol);
+            var usdtWalletItem = await GeWalletItem(userId, "usdt");
 
             if (coinToSell == null || coinToSell.Amount < amount)
                 throw new Exception($"Not enough balance in {coinSymbol.ToUpper()}");
@@ -137,8 +142,8 @@ namespace CryptocurrencyExchange.Services
             walletSenderItem.Amount -= amount;
             walletReceiverItem.Amount += amount;
 
-            await _notificationService.CreateNotification($"You have received a transfer of " +
-                $"{amount} {symbol}. Please check your wallet.", receiverId);
+            //await _notificationService.CreateNotification($"You have received a transfer of " +
+            //    $"{amount} {symbol}. Please check your wallet.", receiverId);
 
             await _dataContext.SaveChangesAsync();
         }
