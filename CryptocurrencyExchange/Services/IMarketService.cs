@@ -2,7 +2,7 @@
 {
     public interface IMarketService
     {
-        Task<double> GetPrice(string coinSymbol);
+        Task<decimal> GetPrice(string coinSymbol);
         List<string> GetSymbolsByPage();
     }
 }

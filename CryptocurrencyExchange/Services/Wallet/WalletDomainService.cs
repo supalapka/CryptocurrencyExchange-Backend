@@ -7,29 +7,29 @@ namespace CryptocurrencyExchange.Services.Wallet
 {
     public class WalletDomainService : IWalletDomainService
     {
-        public void Buy(WalletItem usdt, WalletItem coin, decimal usd, double coinPrice)
+        public void Buy(WalletItem usdt, WalletItem coin, decimal usd, decimal coinPrice)
         {
-            if ((decimal)usdt.Amount < usd)
+            if (usdt.Amount < usd)
                 throw new InsufficientFundsException("USDT");
 
-            var amountToBuy = usd / (decimal)coinPrice;
-            amountToBuy = (decimal)UtilFunсtions.RoundCoinAmountUpTo1USD((double)amountToBuy, coinPrice);
+            var amountToBuy = usd / coinPrice;
+            amountToBuy = MoneyPolicyUtils.RoundCoinAmountUpTo1USD(amountToBuy, coinPrice);
 
-            usdt.Amount -= (double)usd;
+            usdt.Amount -= usd;
             usdt.Amount = Math.Round(usdt.Amount, 2);
 
-            coin.Amount += (double)amountToBuy;
-            coin.Amount = UtilFunсtions.RoundCoinAmountUpTo1USD(coin.Amount, coinPrice);
+            coin.Amount += amountToBuy;
+            coin.Amount = MoneyPolicyUtils.RoundCoinAmountUpTo1USD(coin.Amount, coinPrice);
         }
 
         public void Sell(WalletItem usdt, WalletItem coinToSell, decimal amount, decimal coinPrice)
         {
             var usdtAmount = coinPrice * amount;
 
-            coinToSell.Amount -= (double)amount;
-            coinToSell.Amount = UtilFunсtions.RoundCoinAmountUpTo1USD(coinToSell.Amount, (double)coinPrice);
+            coinToSell.Amount -= amount;
+            coinToSell.Amount = MoneyPolicyUtils.RoundCoinAmountUpTo1USD(coinToSell.Amount, coinPrice);
 
-            usdt.Amount += (double)usdtAmount;
+            usdt.Amount += usdtAmount;
             usdt.Amount = Math.Round(usdt.Amount, 2);
         }
     }

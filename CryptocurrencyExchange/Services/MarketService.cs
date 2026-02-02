@@ -4,7 +4,7 @@ namespace CryptocurrencyExchange.Services
 {
     public class MarketService : IMarketService
     {
-        public async Task<double> GetPrice(string coinSymbol)
+        public async Task<decimal> GetPrice(string coinSymbol)
         {
             var baseUrl = "https://api.binance.com";
             var httpClient = new HttpClient { BaseAddress = new Uri(baseUrl) };
@@ -16,7 +16,7 @@ namespace CryptocurrencyExchange.Services
             var content = await response.Content.ReadAsStringAsync();
             var jObject = JObject.Parse(content);
 
-            return (double)jObject["price"];
+            return (decimal)jObject["price"];
         }
 
         public List<string> GetSymbolsByPage()

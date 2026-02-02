@@ -6,6 +6,6 @@
         public int UserId { get; set; }
         public User User { get; set; }
         public string Symbol { get; set; } = string.Empty;
-        public double Amount { get; set; }
+        public decimal Amount { get; set; }
     }
 }

@@ -97,7 +97,7 @@ namespace CryptocurrencyExchange.Services
         }
 
 
-        public async Task ClosePosition(int id, double pnl, double markPrice)
+        public async Task ClosePosition(int id, decimal pnl, double markPrice)
         {
             var position = _dataContext.Futures.Find(id);
 
@@ -160,13 +160,13 @@ namespace CryptocurrencyExchange.Services
         }
 
 
-        internal static void EnsureSufficientBalance(double balance, double margin)
+        internal static void EnsureSufficientBalance(decimal balance, decimal margin)
         {
             if (balance < margin)
                 throw new InsufficientFundsException();
         }
 
-        internal static double CalculateBalanceAfterClose(double currentBalance, double margin, double pnl)
+        internal static decimal CalculateBalanceAfterClose(decimal currentBalance, decimal margin, decimal pnl)
         {
             return Math.Round(currentBalance + margin + pnl, 2);
         }

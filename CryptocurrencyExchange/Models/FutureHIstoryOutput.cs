@@ -3,7 +3,7 @@
     public class FutureHIstoryOutput
     {
         public string Symbol { get; set; } = string.Empty;
-        public double Margin { get; set; }
+        public decimal Margin { get; set; }
         public double EntryPrice { get; set; }
         public double MarkPrice { get; set; }
         public int Leverage { get; set; }

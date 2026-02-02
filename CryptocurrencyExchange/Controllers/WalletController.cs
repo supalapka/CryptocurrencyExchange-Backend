@@ -29,7 +29,7 @@ namespace CryptocurrencyExchange.Controllers
 
 
         [HttpGet("auth/coin-amount/{symbol}")]
-        public async Task<ActionResult<double>> GetCoinAmount(string symbol)
+        public async Task<ActionResult<decimal>> GetCoinAmount(string symbol)
         {
             int userId = Convert.ToInt32(HttpContext.Items["UserId"]);
 
@@ -85,14 +85,14 @@ namespace CryptocurrencyExchange.Controllers
         public class SendCryptoModel
         {
             public string symbol { get; set; } = string.Empty;
-            public double amount { get; set; }
+            public decimal amount { get; set; }
             public int receiver { get; set; }
         }
 
         public class BuySellCryptoModel
         {
             public string CoinSymbol { get; set; } = string.Empty;
-            public double Amount { get; set; }
+            public decimal Amount { get; set; }
             //if buy -> usd amount.
             //if sell -> coin amount
         }

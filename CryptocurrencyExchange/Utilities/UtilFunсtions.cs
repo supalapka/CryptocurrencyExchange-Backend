@@ -2,9 +2,9 @@
 
 namespace CryptocurrencyExchange.Utilities
 {
-    public static class UtilFunсtions
+    public static class MoneyPolicyUtils
     {
-        public static double RoundCoinAmountUpTo1USD(double amount, double coinPrice)
+        public static decimal RoundCoinAmountUpTo1USD(decimal amount, decimal coinPrice)
         {
             var oneUsdToCoinPrice = 1 / coinPrice;
 
@@ -15,13 +15,13 @@ namespace CryptocurrencyExchange.Utilities
                 var roundAmuntUpTo1Dollar = amount - roundedAmount;
                 if (oneUsdToCoinPrice >= roundAmuntUpTo1Dollar)
                 {
-                   return  roundedAmount;
+                    return roundedAmount;
                 }
             }
         }
 
 
-        public async static Task<double> RoundCoinAmountUpTo1USD(double amount, string symbol)
+        public async static Task<decimal> RoundCoinAmountUpTo1USD(decimal amount, string symbol)
         {
             var baseUrl = "https://api.binance.com";
             var httpClient = new HttpClient { BaseAddress = new Uri(baseUrl) };
@@ -35,7 +35,7 @@ namespace CryptocurrencyExchange.Utilities
 
             decimal coinPrice = (decimal)jObject["price"];
 
-           return RoundCoinAmountUpTo1USD(amount, (double)coinPrice);
+            return RoundCoinAmountUpTo1USD(amount, coinPrice);
         }
     }
 }

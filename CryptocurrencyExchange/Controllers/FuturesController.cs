@@ -39,7 +39,7 @@ namespace CryptocurrencyExchange.Controllers
 
 
         [HttpGet("close")]
-        public async Task LiquidatePosition(int id, double pnl, double markPrice) => await _futuresService.ClosePosition(id, pnl, markPrice);
+        public async Task LiquidatePosition(int id, decimal pnl, double markPrice) => await _futuresService.ClosePosition(id, pnl, markPrice);
 
 
         [HttpGet("history/{page}")]

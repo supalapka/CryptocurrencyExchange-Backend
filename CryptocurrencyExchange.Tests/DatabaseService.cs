@@ -47,7 +47,7 @@ namespace CryptocurrencyExchange.Tests
             };
         }
 
-        public static WalletItem CreateWalletItem(int userId, string symbol, double amount)
+        public static WalletItem CreateWalletItem(int userId, string symbol, decimal amount)
         {
             return new WalletItem
             {

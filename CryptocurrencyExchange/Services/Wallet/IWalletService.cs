@@ -5,8 +5,8 @@ namespace CryptocurrencyExchange.Services.Wallet
     public interface IWalletService
     {
         Task BuyAsync(int userId, string coinSymbol, decimal usd);
-        Task SellAsync(int userId, string coinSymbol, double amount);
-        Task<double> GetCoinAmountAsync(int userId, string symbol);
+        Task SellAsync(int userId, string coinSymbol, decimal amount);
+        Task<decimal> GetCoinAmountAsync(int userId, string symbol);
         Task<List<WalletItem>> GetFullWalletAsync(int userId);
         Task<WalletItem> GetOrCreateWalletItem(int userId, string symbol);
     }
