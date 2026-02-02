@@ -67,19 +67,19 @@ namespace CryptocurrencyExchange.Controllers
         }
 
 
-        [HttpPost("auth/send")]
-        public async Task<IActionResult> SendCrypto([FromBody] SendCryptoModel model)
-        {
-            int userId = Convert.ToInt32(HttpContext.Items["UserId"]);
+        //[HttpPost("auth/send")]
+        //public async Task<IActionResult> SendCrypto([FromBody] SendCryptoModel model)
+        //{
+        //    int userId = Convert.ToInt32(HttpContext.Items["UserId"]);
 
-            try
-            {
-                await _walletService.SendCryptoAsync(userId, model.symbol, model.amount, model.receiver);
-            }
-            catch (Exception ex) { return BadRequest(ex.Message); }
+        //    try
+        //    {
+        //        await _walletService.SendCryptoAsync(userId, model.symbol, model.amount, model.receiver);
+        //    }
+        //    catch (Exception ex) { return BadRequest(ex.Message); }
 
-            return Ok();
-        }
+        //    return Ok();
+        //}
 
 
         public class SendCryptoModel

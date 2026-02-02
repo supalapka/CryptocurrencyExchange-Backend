@@ -20,6 +20,12 @@ namespace CryptocurrencyExchange.Data
         {
             await _context.WalletItems.AddAsync(item);
         }
+
+        public Task<List<WalletItem>> GetNonEmptyByUserAsync(int userId)
+        {
+            return _context.WalletItems.Where(x => x.UserId == userId && x.Amount > 0).ToListAsync();
+        }
+
     }
 
 }
