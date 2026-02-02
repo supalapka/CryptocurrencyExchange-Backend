@@ -1,4 +1,5 @@
-﻿using CryptocurrencyExchange.Models;
+﻿using CryptocurrencyExchange.Exceptions;
+using CryptocurrencyExchange.Models;
 using CryptocurrencyExchange.Services.Interfaces;
 using CryptocurrencyExchange.Utilities;
 
@@ -9,7 +10,7 @@ namespace CryptocurrencyExchange.Services.Wallet
         public void Buy(WalletItem usdt, WalletItem coin, decimal usd, double coinPrice)
         {
             if ((decimal)usdt.Amount < usd)
-                throw new InsufficientBalanceException("USDT");
+                throw new InsufficientFundsException("USDT");
 
             var amountToBuy = usd / (decimal)coinPrice;
             amountToBuy = (decimal)UtilFunсtions.RoundCoinAmountUpTo1USD((double)amountToBuy, coinPrice);

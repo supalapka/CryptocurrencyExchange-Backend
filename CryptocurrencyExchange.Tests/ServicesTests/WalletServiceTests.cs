@@ -1,4 +1,5 @@
-﻿using CryptocurrencyExchange.Models;
+﻿using CryptocurrencyExchange.Exceptions;
+using CryptocurrencyExchange.Models;
 using CryptocurrencyExchange.Services;
 using CryptocurrencyExchange.Services.Interfaces;
 using CryptocurrencyExchange.Services.Wallet;
@@ -77,7 +78,7 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
             walletItemRepoMock.Setup(x => x.GetAsync(userId, "usdt")).ReturnsAsync(usdtWalletItem);
 
             // Act + Assert
-            Assert.ThrowsAsync<InsufficientBalanceException>(
+            Assert.ThrowsAsync<InsufficientFundsException>(
                () => walletService.BuyAsync(userId, coinSymbol, usdToBuy)
             );
         }
