@@ -131,32 +131,32 @@ namespace CryptocurrencyExchange.Services
         }
 
 
-        public List<FutureHIstoryOutput> GetHistory(int userId, int page)
+        public async Task<List<FutureHIstoryOutput>> GetHistoryAsync(int userId, int page)
         {
             const int positionsPerPage = 5;
-            var positions = _dataContext.Futures.OrderByDescending(x => x.Id).Where(x => x.UserId == userId
-            && x.IsCompleted == true)
-                .Skip(positionsPerPage * (page - 1))
-                .Take(positionsPerPage).ToList();
-            List<FutureHIstoryOutput> result = new List<FutureHIstoryOutput>();
 
-            foreach (var position in positions)
-            {
-                var outputPosition = new FutureHIstoryOutput()
+            return await _dataContext.Futures
+                .Where(f => f.UserId == userId && f.IsCompleted)
+                .OrderByDescending(f => f.Id)
+                .Skip(positionsPerPage * (page - 1))
+                .Take(positionsPerPage)
+                .Select(f => new FutureHIstoryOutput
                 {
-                    IsLiquidated = _dataContext.FutureHistory.
-                    Where(x => x.Id == position.Id).Single().IsLiquidated,
-                    Leverage = position.Leverage,
-                    Margin = position.Margin,
-                    Position = position.Position,
-                    EntryPrice = position.EntryPrice,
-                    MarkPrice = _dataContext.FutureHistory.
-                    Where(x => x.Id == position.Id).Single().MarkPrice,
-                    Symbol = position.Symbol,
-                };
-                result.Add(outputPosition);
-            }
-            return result;
+                    Symbol = f.Symbol,
+                    EntryPrice = f.EntryPrice,
+                    Margin = f.Margin,
+                    Leverage = f.Leverage,
+                    Position = f.Position,
+                    MarkPrice = _dataContext.FutureHistory
+                        .Where(h => h.FutureId == f.Id)
+                        .Select(h => h.MarkPrice)
+                        .FirstOrDefault(),
+                    IsLiquidated = _dataContext.FutureHistory
+                        .Where(h => h.FutureId == f.Id)
+                        .Select(h => h.IsLiquidated)
+                        .FirstOrDefault()
+                })
+                .ToListAsync();
         }
 
 

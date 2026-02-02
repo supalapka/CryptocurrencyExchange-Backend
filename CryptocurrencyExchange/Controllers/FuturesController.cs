@@ -43,10 +43,10 @@ namespace CryptocurrencyExchange.Controllers
 
 
         [HttpGet("history/{page}")]
-        public List<FutureHIstoryOutput> GetHistory(int page)
+        public async Task<List<FutureHIstoryOutput>> GetHistory(int page)
         {
             int userId = Convert.ToInt32(HttpContext.Items["UserId"]);
-            return _futuresService.GetHistory(userId, page);
+            return await _futuresService.GetHistoryAsync(userId, page);
         }
 
     }
