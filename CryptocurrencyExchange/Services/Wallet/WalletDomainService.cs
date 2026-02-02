@@ -21,5 +21,16 @@ namespace CryptocurrencyExchange.Services.Wallet
             coin.Amount += (double)amountToBuy;
             coin.Amount = UtilFunсtions.RoundCoinAmountUpTo1USD(coin.Amount, coinPrice);
         }
+
+        public void Sell(WalletItem usdt, WalletItem coinToSell, decimal amount, decimal coinPrice)
+        {
+            var usdtAmount = coinPrice * amount;
+
+            coinToSell.Amount -= (double)amount;
+            coinToSell.Amount = UtilFunсtions.RoundCoinAmountUpTo1USD(coinToSell.Amount, (double)coinPrice);
+
+            usdt.Amount += (double)usdtAmount;
+            usdt.Amount = Math.Round(usdt.Amount, 2);
+        }
     }
 }

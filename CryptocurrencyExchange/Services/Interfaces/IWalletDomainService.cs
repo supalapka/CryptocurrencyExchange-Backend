@@ -5,5 +5,6 @@ namespace CryptocurrencyExchange.Services.Interfaces
     public interface IWalletDomainService
     {
         void Buy(WalletItem usdt, WalletItem coin, decimal usd, double coinPrice);
+        void Sell(WalletItem usdt, WalletItem coin, decimal amount, decimal coinPrice);
     }
 }
