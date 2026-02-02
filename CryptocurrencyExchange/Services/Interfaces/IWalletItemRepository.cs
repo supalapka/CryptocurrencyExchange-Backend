@@ -1,4 +1,5 @@
 ﻿using CryptocurrencyExchange.Models;
+using CryptocurrencyExchange.Services.Wallet;
 
 namespace CryptocurrencyExchange.Services.Interfaces
 {
@@ -8,5 +9,6 @@ namespace CryptocurrencyExchange.Services.Interfaces
 
         Task<WalletItem?> GetAsync(int userId, string symbol);
         Task AddAsync(WalletItem item);
+        Task<TradeWalletItems> GetCoinsDataForTradeAsync(int userId, string coinSymbol);
     }
 }

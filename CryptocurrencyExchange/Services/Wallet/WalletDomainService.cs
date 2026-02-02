@@ -24,6 +24,9 @@ namespace CryptocurrencyExchange.Services.Wallet
 
         public void Sell(WalletItem usdt, WalletItem coinToSell, decimal amount, decimal coinPrice)
         {
+            if(coinToSell.Amount < amount)
+                throw new InsufficientFundsException(coinToSell.Symbol.ToUpper());
+
             var usdtAmount = coinPrice * amount;
 
             coinToSell.Amount -= amount;

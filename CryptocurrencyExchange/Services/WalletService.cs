@@ -1,5 +1,4 @@
-﻿using CryptocurrencyExchange.Exceptions;
-using CryptocurrencyExchange.Models;
+﻿using CryptocurrencyExchange.Models;
 using CryptocurrencyExchange.Services.Interfaces;
 using CryptocurrencyExchange.Services.Wallet;
 
@@ -13,7 +12,6 @@ namespace CryptocurrencyExchange.Services
         private readonly IWalletDomainService _walletDomainService;
 
         public WalletService(
-            INotificationService notificatinService,
             IMarketService marketService,
             IWalletItemRepository walletItemRepository,
             IUnitOfWork unitOfWork,
@@ -29,19 +27,11 @@ namespace CryptocurrencyExchange.Services
         public async Task BuyAsync(int userId, string coinSymbol, decimal usd)
         {
             coinSymbol = coinSymbol.ToLower();
+            var tradeCoinPrice = await _marketService.GetPrice(coinSymbol);
 
-            var usdt = await _walletItemRepository.GetAsync(userId, "usdt")
-            ?? throw new WalletItemNotFoundException("USDT in wallet not found");
+            var tradeItems = await _walletItemRepository.GetCoinsDataForTradeAsync(userId, coinSymbol);
 
-            if (usdt.Amount < usd)
-                throw new InsufficientFundsException();
-
-            var coin = await _walletItemRepository.GetAsync(userId, coinSymbol)
-             ?? throw new WalletItemNotFoundException($"{coinSymbol}in wallet not found");
-
-            var coinPrice = await _marketService.GetPrice(coinSymbol);
-
-            _walletDomainService.Buy(usdt, coin, usd, coinPrice);
+            _walletDomainService.Buy(tradeItems.BaseCurrency, tradeItems.TradedCurrency, usd, tradeCoinPrice);
 
             await _unitOfWork.CommitAsync();
         }
@@ -82,18 +72,11 @@ namespace CryptocurrencyExchange.Services
         public async Task SellAsync(int userId, string coinSymbol, decimal amount)
         {
             coinSymbol = coinSymbol.ToLower();
+            var tradeCoinPrice = await _marketService.GetPrice(coinSymbol);
 
-            var coin = await _walletItemRepository.GetAsync(userId, coinSymbol)
-             ?? throw new WalletItemNotFoundException($"{coinSymbol} wallet not found");
+            var tradeItems = await _walletItemRepository.GetCoinsDataForTradeAsync(userId, coinSymbol);
 
-            var usdt = await _walletItemRepository.GetAsync(userId, "usdt")
-              ?? throw new WalletItemNotFoundException("USDT wallet not found");
-
-            if (coin.Amount < amount)
-                throw new InsufficientFundsException($"Not enough balance in {coinSymbol.ToUpper()}");
-
-            var coinPrice = await _marketService.GetPrice(coinSymbol);
-            _walletDomainService.Sell(usdt, coin, amount, coinPrice);
+            _walletDomainService.Sell(tradeItems.BaseCurrency, tradeItems.TradedCurrency, amount, tradeCoinPrice);
             await _unitOfWork.CommitAsync();
         }
     }
