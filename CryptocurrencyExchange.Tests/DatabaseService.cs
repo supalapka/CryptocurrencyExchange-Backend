@@ -1,13 +1,9 @@
 ﻿using CryptocurrencyExchange.Data;
 using CryptocurrencyExchange.Models;
-using CryptocurrencyExchange.Services;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
-using Moq;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace CryptocurrencyExchange.Tests
 {
@@ -18,18 +14,27 @@ namespace CryptocurrencyExchange.Tests
         {
             var options = new DbContextOptionsBuilder<DataContext>()
                 .UseInMemoryDatabase(databaseName)
+                .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))
                 .Options;
 
             return new DataContext(options);
         }
 
-        public static DataContext CreateDbContext()
+        public static DataContext CreateSqliteInMemoryContext(SqliteConnection _connection = null)
         {
-            var options = new DbContextOptionsBuilder<DataContext>()
-           .UseSqlServer("Data Source=(localdb)\\mssqllocaldb;Initial Catalog=CryptoExchange_Tests;Integrated Security=True;")
-           .Options;
+            if (_connection == null)
+            {
+                _connection = new SqliteConnection("DataSource=:memory:");
+                _connection.Open();
+            }
 
-            return new DataContext(options);
+            var options = new DbContextOptionsBuilder<DataContext>()
+                 .UseSqlite(_connection)
+                 .Options;
+
+            var ctx = new DataContext(options);
+            ctx.Database.EnsureCreated();
+            return ctx;
         }
 
         public static User CreateUser(int userId)
