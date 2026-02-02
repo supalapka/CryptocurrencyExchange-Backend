@@ -1,4 +1,5 @@
 ﻿using CryptocurrencyExchange.Data;
+using CryptocurrencyExchange.Exceptions;
 using CryptocurrencyExchange.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -6,6 +7,8 @@ namespace CryptocurrencyExchange.Services
 {
     public class FuturesService : IFuturesService
     {
+        private const string UsdtSymbol = "usdt";
+
         private readonly DataContext _dataContext;
 
         public FuturesService(DataContext context)
@@ -17,28 +20,32 @@ namespace CryptocurrencyExchange.Services
         public async Task<int> CreateFutureAsync(FutureDto futureDto, int userId)
         {
             using var transaction = await _dataContext.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable);
-            await _dataContext.Database.ExecuteSqlRawAsync($"SELECT * FROM WalletItems WITH (TABLOCKX) WHERE UserId = {userId} AND Symbol = 'usdt'"); ;
+
+            if (_dataContext.Database.IsRelational() && _dataContext.Database.ProviderName != "Microsoft.EntityFrameworkCore.Sqlite")
+            {
+                await _dataContext.Database.ExecuteSqlRawAsync($"SELECT * FROM WalletItems WITH (TABLOCKX) WHERE UserId = {userId} AND Symbol = 'usdt'");
+            }
 
             var userUsdt = await _dataContext.WalletItems
-                        .FirstAsync(x => x.UserId == userId && x.Symbol == "usdt");
-                        
-            if (userUsdt.Amount < (double)futureDto.Margin)
-                throw new Exception("Not enough balance in usdt to start future position");
+                                .FirstAsync(x => x.UserId == userId && x.Symbol == UsdtSymbol);
 
-            var future = new Future();
-            future.Symbol = futureDto.Symbol;
-            future.EntryPrice = futureDto.EntryPrice;
-            future.Margin = futureDto.Margin;
-            future.UserId = userId;
-            future.IsCompleted = false;
-            future.Leverage = futureDto.Leverage;
-            future.Position = futureDto.Position;
+            EnsureSufficientBalance(userUsdt.Amount, futureDto.Margin);
 
-            userUsdt.Amount -= futureDto.Margin;
-            userUsdt.Amount = Math.Round(userUsdt.Amount, 2);
+            var future = new Future
+            {
+                Symbol = futureDto.Symbol,
+                EntryPrice = futureDto.EntryPrice,
+                Margin = futureDto.Margin,
+                UserId = userId,
+                IsCompleted = false,
+                Leverage = futureDto.Leverage,
+                Position = futureDto.Position
+            };
+
+            userUsdt.Amount = Math.Round(userUsdt.Amount - futureDto.Margin, 2);
 
             _dataContext.Futures.Add(future);
-            _dataContext.SaveChanges();
+            await _dataContext.SaveChangesAsync(); // Используй Async версию
             await transaction.CommitAsync();
 
             return future.Id;
@@ -72,6 +79,9 @@ namespace CryptocurrencyExchange.Services
         public async Task LiquidatePosition(int id, double markPrice)
         {
             var position = _dataContext.Futures.Find(id);
+
+            EnsureNotCompleted(position.IsCompleted);
+
             position.IsCompleted = true;
 
             var futureHistiry = new FutureHistory()
@@ -90,39 +100,41 @@ namespace CryptocurrencyExchange.Services
         public async Task ClosePosition(int id, double pnl, double markPrice)
         {
             var position = _dataContext.Futures.Find(id);
+
+            EnsureNotCompleted(position.IsCompleted);
+
             position.IsCompleted = true;
 
             using var transaction = await _dataContext.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable);
-            await _dataContext.Database.ExecuteSqlRawAsync($"SELECT * FROM WalletItems WITH (TABLOCKX) WHERE UserId = {position.UserId} AND Symbol = 'usdt'"); ;
+
+            if (_dataContext.Database.IsRelational() && _dataContext.Database.ProviderName != "Microsoft.EntityFrameworkCore.Sqlite")
+            {
+                await _dataContext.Database.ExecuteSqlRawAsync("SELECT * FROM WalletItems WITH (TABLOCKX) WHERE UserId = {0} AND Symbol = 'usdt'", position.UserId);
+            }
 
             var futureHistory = new FutureHistory()
             {
                 FutureId = position.Id,
-                Id = position.Id,
-                IsLiquidated = false,
                 MarkPrice = markPrice,
+                IsLiquidated = false
             };
 
             await _dataContext.FutureHistory.AddAsync(futureHistory);
 
-            var userUsdt = _dataContext.WalletItems
-                .Where(x => x.UserId == position.UserId && x.Symbol == "usdt")
-                .First();
+            var userUsdt = await _dataContext.WalletItems
+                .FirstAsync(x => x.UserId == position.UserId && x.Symbol == UsdtSymbol);
 
-            userUsdt.Amount += position.Margin;
-            userUsdt.Amount += pnl;
-            userUsdt.Amount = Math.Round(userUsdt.Amount, 2);
+            userUsdt.Amount = CalculateBalanceAfterClose(userUsdt.Amount, position.Margin, pnl);
 
             await _dataContext.SaveChangesAsync();
             await transaction.CommitAsync();
-
         }
 
 
         public List<FutureHIstoryOutput> GetHistory(int userId, int page)
         {
             const int positionsPerPage = 5;
-            var positions = _dataContext.Futures.OrderByDescending(x=>x.Id).Where(x => x.UserId == userId
+            var positions = _dataContext.Futures.OrderByDescending(x => x.Id).Where(x => x.UserId == userId
             && x.IsCompleted == true)
                 .Skip(positionsPerPage * (page - 1))
                 .Take(positionsPerPage).ToList();
@@ -145,6 +157,24 @@ namespace CryptocurrencyExchange.Services
                 result.Add(outputPosition);
             }
             return result;
+        }
+
+
+        internal static void EnsureSufficientBalance(double balance, double margin)
+        {
+            if (balance < margin)
+                throw new InsufficientFundsException();
+        }
+
+        internal static double CalculateBalanceAfterClose(double currentBalance, double margin, double pnl)
+        {
+            return Math.Round(currentBalance + margin + pnl, 2);
+        }
+
+        internal static void EnsureNotCompleted(bool isCompleted)
+        {
+            if (isCompleted)
+                throw new InvalidOperationException("Position is already completed.");
         }
     }
 }
