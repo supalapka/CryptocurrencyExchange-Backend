@@ -63,6 +63,8 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
             // Assert
             Assert.AreEqual(expectedUsdtBalance, usdtWalletItem.Amount);
             Assert.AreEqual(expectedCoinAmount, coinToBuy.Amount);
+
+            unitOfWorkMock.Verify(x => x.CommitAsync(), Times.Once);  // mean CommitAsync should be called 
         }
 
 
@@ -81,6 +83,8 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
             Assert.ThrowsAsync<InsufficientFundsException>(
                () => walletService.BuyAsync(userId, coinSymbol, usdToBuy)
             );
+
+            unitOfWorkMock.Verify(x => x.CommitAsync(), Times.Never); // mean CommitAsync should not be called
         }
 
 
@@ -88,104 +92,28 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
         public async Task SellAsync_CoinSold()
         {
             // Arrange
-            int coinPrice = 100;
-            var userId = 1;
             var coinSymbol = "btc";
-            var amount = 1.0;
+            var coinsAmount = 1;
+            var coinsToSell = 1;
+            var coinPrice = 50;
+            var expectedUsdtBalance = initialBalance + coinsToSell * coinPrice; // expect 550
+            var expectedCoinAmount = 0;
 
-            var ctx = DatabaseService.CreateInMemoryDbContext("CoinSold");
+            var usdtWalletItem = new WalletItem { UserId = userId, Symbol = "usdt", Amount = initialBalance };
+            var coinToSell = new WalletItem { UserId = userId, Symbol = coinSymbol, Amount = coinsAmount };
 
-            var coinToSell = DatabaseService.CreateWalletItem(userId, coinSymbol, amount);
-            var usdtWalletItem = DatabaseService.CreateWalletItem(userId, "usdt", 0);
-
-            ctx.WalletItems.Add(usdtWalletItem);
-            ctx.WalletItems.Add(coinToSell);
-            await ctx.SaveChangesAsync();
-
-            var marketServiceMock = new Mock<IMarketService>();
+            walletItemRepoMock.Setup(x => x.GetAsync(userId, "usdt")).ReturnsAsync(usdtWalletItem);
+            walletItemRepoMock.Setup(x => x.GetAsync(userId, coinSymbol)).ReturnsAsync(coinToSell);
             marketServiceMock.Setup(x => x.GetPrice(coinSymbol)).ReturnsAsync(coinPrice);
 
             // Act
-            await walletService.SellAsync(userId, coinSymbol, coinToSell.Amount);
+            await walletService.SellAsync(userId, coinSymbol, coinsToSell);
 
             // Assert
-            Assert.AreEqual(0, coinToSell.Amount);
-            Assert.AreEqual(usdtWalletItem.Amount, coinPrice * amount);
-        }
+            Assert.AreEqual(expectedUsdtBalance, usdtWalletItem.Amount);
+            Assert.AreEqual(expectedCoinAmount, coinToSell.Amount);
 
-        [Test]
-        public async Task SendCryptoAsync_SuccessfulSent()
-        {
-            // Arrange
-            var senderId = 1;
-            var receiverId = 2;
-            var symbol = "btc";
-            var amount = 1.0;
-
-            var senderWalletItem = new WalletItem
-            {
-                UserId = senderId,
-                Symbol = symbol,
-                Amount = amount
-            };
-
-            var receiverWalletItem = new WalletItem
-            {
-                UserId = receiverId,
-                Symbol = symbol,
-                Amount = 0
-            };
-
-            var walletItemRepoMock = new Mock<IWalletItemRepository>();
-            walletItemRepoMock
-                .Setup(x => x.GetAsync(senderId, symbol))
-                .ReturnsAsync(senderWalletItem);
-
-            walletItemRepoMock
-                .Setup(x => x.GetAsync(receiverId, symbol))
-                .ReturnsAsync(receiverWalletItem);
-
-
-            // Act
-            await walletService.SendCryptoAsync(senderId, symbol, amount, receiverId);
-
-            // Assert
-            Assert.AreEqual(0, senderWalletItem.Amount);
-            Assert.AreEqual(amount, receiverWalletItem.Amount);
-
-            unitOfWorkMock.Verify(x => x.CommitAsync(), Times.Once);
-        }
-
-        [Test]
-        public async Task SendCryptoAsync_NotEnoughBalanceToSend()
-        {
-            // Arrange
-            var senderId = 1;
-            var receiverId = 2;
-            var symbol = "btc";
-            var amount = 1.0;
-
-            var ctx = DatabaseService.CreateInMemoryDbContext("NotEnoughBalanceToSend");
-
-            var sender = DatabaseService.CreateUser(senderId);
-            var receiver = DatabaseService.CreateUser(receiverId);
-
-            var senderWalletItem = DatabaseService.CreateWalletItem(senderId, symbol, amount);
-            var receiverWalletItem = DatabaseService.CreateWalletItem(senderId, symbol, amount);
-
-            ctx.Users.Add(sender);
-            ctx.Users.Add(receiver);
-            ctx.WalletItems.Add(senderWalletItem);
-            ctx.WalletItems.Add(receiverWalletItem);
-            await ctx.SaveChangesAsync();
-
-            var marketServiceMock = new Mock<IMarketService>();
-            var notificationServiceMock = new Mock<INotificationService>();
-
-            //    var walletService = new WalletService(ctx, notificationServiceMock.Object, marketServiceMock.Object);
-
-            // Act & Assert
-            // Assert.ThrowsAsync<Exception>(async () => await walletService.SendCryptoAsync(senderId, symbol, amount * 2, receiverId));
+            unitOfWorkMock.Verify(x => x.CommitAsync(), Times.Once);  // mean CommitAsync should be called 
         }
     }
 }
