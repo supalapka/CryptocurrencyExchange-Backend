@@ -17,7 +17,6 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
         private Mock<IUnitOfWork> unitOfWorkMock;
         private Mock<IWalletItemRepository> walletItemRepoMock;
         private Mock<IMarketService> marketServiceMock;
-        private Mock<INotificationService> notificationServiceMock;
         private IWalletDomainService walletDomainService;
 
         private WalletService walletService;
@@ -28,11 +27,9 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
             unitOfWorkMock = new Mock<IUnitOfWork>();
             walletItemRepoMock = new Mock<IWalletItemRepository>();
             marketServiceMock = new Mock<IMarketService>();
-            notificationServiceMock = new Mock<INotificationService>();
             walletDomainService = new WalletDomainService();
 
             walletService = new WalletService(
-                notificationServiceMock.Object,
                 marketServiceMock.Object,
                 walletItemRepoMock.Object,
                 unitOfWorkMock.Object,
@@ -56,6 +53,8 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
             walletItemRepoMock.Setup(x => x.GetAsync(userId, "usdt")).ReturnsAsync(usdtWalletItem);
             walletItemRepoMock.Setup(x => x.GetAsync(userId, coinSymbol)).ReturnsAsync(coinToBuy);
             marketServiceMock.Setup(x => x.GetPrice(coinSymbol)).ReturnsAsync(coinPrice);
+            walletItemRepoMock.Setup(x => x.GetCoinsDataForTradeAsync(userId, coinSymbol))
+               .ReturnsAsync(new TradeWalletItems(usdtWalletItem, coinToBuy));
 
             // Act
             await walletService.BuyAsync(userId, coinSymbol, usdToBuy);
@@ -69,15 +68,20 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
 
 
         [Test]
-        public async Task BuyAsync_NotEnoughBalance_InsufficientBalanceException()
+        public async Task BuyAsync_NotEnoughBalance_ThrowsInsufficientFundsException()
         {
             // Arrange
             var coinSymbol = "btc";
             var usdToBuy = initialBalance + 100;
 
-            var usdtWalletItem = new WalletItem { UserId = userId, Symbol = "usdt", Amount = initialBalance };
+            var usdt = new WalletItem { UserId = userId, Symbol = "usdt", Amount = initialBalance };
+            var btc = new WalletItem { UserId = userId, Symbol = "btc", Amount = 0 };
 
-            walletItemRepoMock.Setup(x => x.GetAsync(userId, "usdt")).ReturnsAsync(usdtWalletItem);
+            walletItemRepoMock.Setup(x => x.GetAsync(userId, "usdt")).ReturnsAsync(usdt);
+            walletItemRepoMock.Setup(x => x.GetAsync(userId, coinSymbol)).ReturnsAsync(btc);
+            marketServiceMock.Setup(x => x.GetPrice(coinSymbol)).ReturnsAsync(50000);
+            walletItemRepoMock.Setup(x=> x.GetCoinsDataForTradeAsync(userId, coinSymbol))
+                .ReturnsAsync(new TradeWalletItems(usdt, btc));
 
             // Act + Assert
             Assert.ThrowsAsync<InsufficientFundsException>(
@@ -105,6 +109,9 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
             walletItemRepoMock.Setup(x => x.GetAsync(userId, "usdt")).ReturnsAsync(usdtWalletItem);
             walletItemRepoMock.Setup(x => x.GetAsync(userId, coinSymbol)).ReturnsAsync(coinToSell);
             marketServiceMock.Setup(x => x.GetPrice(coinSymbol)).ReturnsAsync(coinPrice);
+
+            walletItemRepoMock.Setup(x => x.GetCoinsDataForTradeAsync(userId, coinSymbol))
+              .ReturnsAsync(new TradeWalletItems(usdtWalletItem, coinToSell));
 
             // Act
             await walletService.SellAsync(userId, coinSymbol, coinsToSell);
