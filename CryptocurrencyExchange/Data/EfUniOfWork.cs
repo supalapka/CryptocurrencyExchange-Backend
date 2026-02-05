@@ -1,4 +1,6 @@
 ﻿using CryptocurrencyExchange.Services.Interfaces;
+using Microsoft.EntityFrameworkCore;
+using System.Data;
 
 namespace CryptocurrencyExchange.Data
 {
@@ -14,6 +16,24 @@ namespace CryptocurrencyExchange.Data
         public async Task CommitAsync()
         {
             await _context.SaveChangesAsync();
+        }
+
+        public async Task ExecuteInTransactionAsync(Func<Task> action)
+        {
+            await using var transaction = await _context.Database.BeginTransactionAsync(
+                    isolationLevel: IsolationLevel.Serializable);
+
+            try
+            {
+                await action();
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
         }
     }
 }
