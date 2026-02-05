@@ -27,10 +27,10 @@ namespace CryptocurrencyExchange.Controllers
 
 
         [HttpGet("list")]
-        public List<FutureDto> GetFutureList()
+        public async Task<List<FutureDto>> GetFutureList()
         {
             int userId = Convert.ToInt32(HttpContext.Items["UserId"]);
-            return _futuresService.GetFuturePositions(userId);
+            return await _futuresService.GetFuturePositions(userId);
         }
 
 
