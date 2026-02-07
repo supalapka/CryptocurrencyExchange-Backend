@@ -47,8 +47,8 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
             var expectedUsdtBalance = initialBalance - usdToBuy; // expect 400
             var expectedCoinAmount = usdToBuy / coinPrice; // expect 100 / 50 = 2 coins
 
-            var usdtWalletItem = new WalletItem { UserId = userId, Symbol = "usdt", Amount = initialBalance };
-            var coinToBuy = new WalletItem { UserId = userId, Symbol = coinSymbol, Amount = 0 };
+            var usdtWalletItem = WalletItemMother.CreateUsdt(userId, initialBalance);
+            var coinToBuy = WalletItemMother.CreateItem(userId, coinSymbol, initialBalance);
 
             walletItemRepoMock.Setup(x => x.GetAsync(userId, "usdt")).ReturnsAsync(usdtWalletItem);
             walletItemRepoMock.Setup(x => x.GetAsync(userId, coinSymbol)).ReturnsAsync(coinToBuy);
@@ -74,13 +74,13 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
             var coinSymbol = "btc";
             var usdToBuy = initialBalance + 100;
 
-            var usdt = new WalletItem { UserId = userId, Symbol = "usdt", Amount = initialBalance };
-            var btc = new WalletItem { UserId = userId, Symbol = "btc", Amount = 0 };
+            var usdt = WalletItemMother.CreateUsdt(userId, initialBalance);
+            var btc = WalletItemMother.CreateItem(userId, coinSymbol, 0);
 
             walletItemRepoMock.Setup(x => x.GetAsync(userId, "usdt")).ReturnsAsync(usdt);
             walletItemRepoMock.Setup(x => x.GetAsync(userId, coinSymbol)).ReturnsAsync(btc);
             marketServiceMock.Setup(x => x.GetPrice(coinSymbol)).ReturnsAsync(50000);
-            walletItemRepoMock.Setup(x=> x.GetCoinsDataForTradeAsync(userId, coinSymbol))
+            walletItemRepoMock.Setup(x => x.GetCoinsDataForTradeAsync(userId, coinSymbol))
                 .ReturnsAsync(new TradeWalletItems(usdt, btc));
 
             // Act + Assert
@@ -103,8 +103,8 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
             var expectedUsdtBalance = initialBalance + coinsToSell * coinPrice; // expect 550
             var expectedCoinAmount = 0;
 
-            var usdtWalletItem = new WalletItem { UserId = userId, Symbol = "usdt", Amount = initialBalance };
-            var coinToSell = new WalletItem { UserId = userId, Symbol = coinSymbol, Amount = coinsAmount };
+            var usdtWalletItem = WalletItemMother.CreateUsdt(userId, initialBalance);
+            var coinToSell = WalletItemMother.CreateItem(userId, coinSymbol, initialBalance);
 
             walletItemRepoMock.Setup(x => x.GetAsync(userId, "usdt")).ReturnsAsync(usdtWalletItem);
             walletItemRepoMock.Setup(x => x.GetAsync(userId, coinSymbol)).ReturnsAsync(coinToSell);

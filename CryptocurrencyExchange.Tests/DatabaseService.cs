@@ -46,16 +46,5 @@ namespace CryptocurrencyExchange.Tests
                 PasswordSalt = Encoding.UTF8.GetBytes("qwe"),
             };
         }
-
-        public static WalletItem CreateWalletItem(int userId, string symbol, decimal amount)
-        {
-            return new WalletItem
-            {
-                UserId = userId,
-                Symbol = symbol,
-                Amount = amount
-            };
-        }
-
     }
 }
