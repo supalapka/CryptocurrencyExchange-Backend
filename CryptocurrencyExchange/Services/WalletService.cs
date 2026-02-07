@@ -26,14 +26,15 @@ namespace CryptocurrencyExchange.Services
 
         public async Task BuyAsync(int userId, string coinSymbol, decimal usd)
         {
-            coinSymbol = coinSymbol.ToLower();
-            var tradeCoinPrice = await _marketService.GetPrice(coinSymbol);
+            await _unitOfWork.ExecuteInTransactionAsync(async () =>
+            {
+                coinSymbol = coinSymbol.ToLower();
+                var tradeCoinPrice = await _marketService.GetPrice(coinSymbol);
 
-            var tradeItems = await _walletItemRepository.GetCoinsDataForTradeAsync(userId, coinSymbol);
+                var tradeItems = await _walletItemRepository.GetCoinsDataForTradeAsync(userId, coinSymbol);
 
-            _walletDomainService.Buy(tradeItems.BaseCurrency, tradeItems.TradedCurrency, usd, tradeCoinPrice);
-
-            await _unitOfWork.CommitAsync();
+                _walletDomainService.Buy(tradeItems.BaseCurrency, tradeItems.TradedCurrency, usd, tradeCoinPrice);
+            });
         }
 
 
@@ -71,13 +72,15 @@ namespace CryptocurrencyExchange.Services
 
         public async Task SellAsync(int userId, string coinSymbol, decimal amount)
         {
-            coinSymbol = coinSymbol.ToLower();
-            var tradeCoinPrice = await _marketService.GetPrice(coinSymbol);
+            await _unitOfWork.ExecuteInTransactionAsync(async () =>
+            {
+                coinSymbol = coinSymbol.ToLower();
+                var tradeCoinPrice = await _marketService.GetPrice(coinSymbol);
 
-            var tradeItems = await _walletItemRepository.GetCoinsDataForTradeAsync(userId, coinSymbol);
+                var tradeItems = await _walletItemRepository.GetCoinsDataForTradeAsync(userId, coinSymbol);
 
-            _walletDomainService.Sell(tradeItems.BaseCurrency, tradeItems.TradedCurrency, amount, tradeCoinPrice);
-            await _unitOfWork.CommitAsync();
+                _walletDomainService.Sell(tradeItems.BaseCurrency, tradeItems.TradedCurrency, amount, tradeCoinPrice);
+            });
         }
     }
 }
