@@ -1,8 +1,8 @@
 ﻿using CryptocurrencyExchange.Exceptions;
 using CryptocurrencyExchange.Models;
 using CryptocurrencyExchange.Services;
-using Microsoft.Data.Sqlite;
-using Microsoft.EntityFrameworkCore;
+using CryptocurrencyExchange.Services.Interfaces;
+using Moq;
 using NUnit.Framework;
 
 namespace CryptocurrencyExchange.Tests.ServicesTests
@@ -13,31 +13,13 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
         const int userUsdtBalance = 1000;
         private int _testUserId;
 
-        private static SqliteConnection _connection;
+        private Mock<IUnitOfWork> unitOfWorkMock = null!;
+        private Mock<IWalletItemRepository> walletRepositoryMock = null!;
+        private Mock<IFutureRepository> futureRepositoryMock = null!;
+        private Mock<IFuturesDomainService> futuresDomainServiceMock = null!;
 
         [Test]
-        public void EnsureSufficientBalance_WhenBalanceIsLow_Throws()
-        {
-            int balance = 100;
-            Assert.Throws<InsufficientFundsException>(() =>
-                FuturesService.EnsureSufficientBalance(balance, balance+1)
-            );
-        }
-
-        [Test]
-        public void CalculateBalanceAfterClose_ReturnsCorrectValue()
-        {
-            var result = FuturesService.CalculateBalanceAfterClose(
-                currentBalance: 1000,
-                margin: 1000,
-                pnl: 200
-            );
-
-            Assert.AreEqual(2200, result);
-        }
-
-        [Test]
-        public async Task CreateFutureAsync_WithSufficientBalance()
+        public async Task CreateFutureAsync_WithSufficientBalance_ReturnsFutureId()
         {
             // Arrange
             var futureDto = new FutureDto
@@ -46,107 +28,146 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
                 EntryPrice = 50000,
                 Margin = 500,
                 Leverage = 10,
-                Position = PositionType.Long,
+                Position = PositionType.Long
             };
 
-            using var ctx = DatabaseService.CreateSqliteInMemoryContext(_connection);
-            var futuresService = new FuturesService(ctx);
+            var expectedFuture = new Future
+            {
+                Id = 1,
+                UserId = _testUserId,
+                Margin = 500,
+                Symbol = "BTC"
+            };
+
+            walletRepositoryMock
+                .Setup(x => x.GetAsync(_testUserId, "usdt"))
+                .ReturnsAsync(WalletItemMother.CreateUsdt(_testUserId, userUsdtBalance));
+
+            futuresDomainServiceMock
+                .Setup(x => x.OpenPosition(futureDto, It.IsAny<WalletItem>()))
+                .Returns(expectedFuture);
+
+            unitOfWorkMock
+                .Setup(x => x.ExecuteInTransactionAsync(It.IsAny<Func<Task>>()))
+                .Returns<Func<Task>>(action => action());
+
+            var service = new FuturesService(
+                futuresDomainServiceMock.Object,
+                unitOfWorkMock.Object,
+                walletRepositoryMock.Object,
+                futureRepositoryMock.Object);
 
             // Act
-            await futuresService.CreateFutureAsync(futureDto, _testUserId);
+            var resultId = await service.CreateFutureAsync(futureDto, _testUserId);
 
             // Assert
-            var future = await ctx.Futures
-                .SingleAsync(f => f.UserId == _testUserId && f.Symbol == futureDto.Symbol);
-            Assert.AreEqual(500, future.Margin);
+            Assert.AreEqual(1, resultId);
+
+            futureRepositoryMock.Verify(x => x.AddAsync(expectedFuture), Times.Once);
         }
 
 
         [Test]
-        public async Task CreateFutureAsync_WithInsufficientBalance()
+        public void CreateFutureAsync_WithInsufficientBalance_ThrowExceptionAndDoNotSave()
         {
             // Arrange
             var futureDto = new FutureDto
             {
                 Symbol = "BTC",
                 EntryPrice = 50000,
-                Margin = userUsdtBalance * 2,
+                Margin = 500,
                 Leverage = 10,
-                Position = PositionType.Long,
+                Position = PositionType.Long
             };
 
-            using var _ctx = DatabaseService.CreateSqliteInMemoryContext(_connection);
 
-            var userUsdt = DatabaseService.CreateWalletItem(_testUserId, "usdt", userUsdtBalance);
-            _ctx.WalletItems.Add(userUsdt);
-            await _ctx.SaveChangesAsync();
+            walletRepositoryMock
+                .Setup(x => x.GetAsync(_testUserId, "usdt"))
+                .ReturnsAsync(WalletItemMother.CreateUsdt(_testUserId, 1));
 
-            var futuresService = new FuturesService(_ctx);
+            futuresDomainServiceMock
+                .Setup(x => x.OpenPosition(It.IsAny<FutureDto>(), It.IsAny<WalletItem>()))
+                .Throws<InsufficientFundsException>();
+
+            unitOfWorkMock
+                .Setup(x => x.ExecuteInTransactionAsync(It.IsAny<Func<Task>>()))
+                .Returns<Func<Task>>(action => action());
+
+            var service = new FuturesService(
+                futuresDomainServiceMock.Object,
+                unitOfWorkMock.Object,
+                walletRepositoryMock.Object,
+                futureRepositoryMock.Object);
 
             // Act & Assert
-            Assert.ThrowsAsync<InsufficientFundsException>(async () => await futuresService.CreateFutureAsync(futureDto, _testUserId));
+            Assert.ThrowsAsync<InsufficientFundsException>(async () =>
+              await service.CreateFutureAsync(futureDto, _testUserId));
+
+            futureRepositoryMock.Verify(x => x.AddAsync(It.IsAny<Future>()), Times.Never);
         }
+
 
 
         [Test]
-        public async Task ClosePosition_Success_RightBalance()
+        public async Task ClosePosition_WhenCalled_Saved()
         {
-            using var _ctx = DatabaseService.CreateSqliteInMemoryContext(_connection);
-            var service = new FuturesService(_ctx);
-
             // Arrange
-            int margin = 1000;
-            int PnL = 200;
-            const int expectedBalance = 2200;
-            var future = new Future { UserId = _testUserId, Margin = margin, Position = PositionType.Long };
-            _ctx.Futures.Add(future);
-            await _ctx.SaveChangesAsync();
+            const int margin = 1000;
+            const decimal pnl = 200;
+
+            var position = new Future
+            {
+                Id = 1,
+                UserId = _testUserId,
+                Margin = margin,
+                Position = PositionType.Long,
+                IsCompleted = false
+            };
+
+            var usdtWallet = WalletItemMother.CreateUsdt(_testUserId, userUsdtBalance);
+
+
+            futureRepositoryMock.Setup(x => x.GetByIdAsync(position.Id))
+                .ReturnsAsync(position);
+
+            walletRepositoryMock.Setup(x => x.GetAsync(_testUserId, "usdt"))
+                .ReturnsAsync(usdtWallet);
+
+            unitOfWorkMock.Setup(x => x.ExecuteInTransactionAsync(It.IsAny<Func<Task>>()))
+                .Returns<Func<Task>>(action => action());
+
+            futuresDomainServiceMock.Setup(x => x.ClosePosition(position, usdtWallet, pnl))
+                .Callback<Future, WalletItem, decimal>((pos, wallet, profitAndLoss) =>
+                {
+                    pos.IsCompleted = true;
+                });
+
+            var service = new FuturesService(
+                futuresDomainServiceMock.Object,
+                unitOfWorkMock.Object,
+                walletRepositoryMock.Object,
+                futureRepositoryMock.Object);
 
             // Act
-            await service.ClosePosition(future.Id, PnL, 9000);
+            await service.ClosePosition(position.Id, pnl, 9000);
 
             // Assert
-            var wallet = _ctx.WalletItems.Single(x => x.UserId == _testUserId && x.Symbol == "usdt");
-            Assert.AreEqual(expectedBalance, wallet.Amount);
+            Assert.IsTrue(position.IsCompleted);
+
+            futureRepositoryMock.Verify(x => x.AddPositionToHistoryAsync(It.IsAny<Future>(), It.IsAny<double>()), Times.Once);
         }
 
 
-
-        [OneTimeSetUp]
-        public async Task OneTimeSetup()
-        {
-            _connection = new SqliteConnection("DataSource=:memory:");
-            _connection.Open();
-
-            using var ctx = DatabaseService.CreateSqliteInMemoryContext(_connection);
-            await ctx.Database.EnsureCreatedAsync();
-        }
 
         [SetUp]
-        public async Task Setup()
+        public void Setup()
         {
-            using var ctx = DatabaseService.CreateSqliteInMemoryContext(_connection);
-
-            ctx.Futures.RemoveRange(ctx.Futures);
-            ctx.WalletItems.RemoveRange(ctx.WalletItems);
-            ctx.Users.RemoveRange(ctx.Users);
-            await ctx.SaveChangesAsync();
-
-            var user = DatabaseService.CreateUser(0);
-            ctx.Users.Add(user);
-            await ctx.SaveChangesAsync();
-            _testUserId = user.Id;
-
-            var wallet = DatabaseService.CreateWalletItem(_testUserId, "usdt", userUsdtBalance);
-            ctx.WalletItems.Add(wallet);
-            await ctx.SaveChangesAsync();
+            unitOfWorkMock = new Mock<IUnitOfWork>();
+            walletRepositoryMock = new Mock<IWalletItemRepository>();
+            futureRepositoryMock = new Mock<IFutureRepository>();
+            futuresDomainServiceMock = new Mock<IFuturesDomainService>();
         }
 
-        [OneTimeTearDown]
-        public void OneTimeTearDown()
-        {
-            _connection.Close();
-        }
     }
 
 }
