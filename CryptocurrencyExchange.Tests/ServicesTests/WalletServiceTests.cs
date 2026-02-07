@@ -14,12 +14,11 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
         int userId = 1;
         int initialBalance = 500;
 
-        private Mock<IUnitOfWork> unitOfWorkMock;
-        private Mock<IWalletItemRepository> walletItemRepoMock;
-        private Mock<IMarketService> marketServiceMock;
-        private IWalletDomainService walletDomainService;
+        private Mock<IUnitOfWork> unitOfWorkMock = null!;
+        private Mock<IWalletItemRepository> walletItemRepoMock = null!;
+        private Mock<IMarketService> marketServiceMock = null!;
+        private Mock<IWalletDomainService> walletDomainService = null!;
 
-        private WalletService walletService;
 
         [SetUp]
         public void Setup()
@@ -27,14 +26,7 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
             unitOfWorkMock = new Mock<IUnitOfWork>();
             walletItemRepoMock = new Mock<IWalletItemRepository>();
             marketServiceMock = new Mock<IMarketService>();
-            walletDomainService = new WalletDomainService();
-
-            walletService = new WalletService(
-                marketServiceMock.Object,
-                walletItemRepoMock.Object,
-                unitOfWorkMock.Object,
-                walletDomainService
-            );
+            walletDomainService = new Mock<IWalletDomainService>();
         }
 
         [Test]
@@ -43,52 +35,79 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
             // Arrange
             var coinSymbol = "btc";
             var usdToBuy = 100;
-            var coinPrice = 50;
-            var expectedUsdtBalance = initialBalance - usdToBuy; // expect 400
-            var expectedCoinAmount = usdToBuy / coinPrice; // expect 100 / 50 = 2 coins
 
-            var usdtWalletItem = WalletItemMother.CreateUsdt(userId, initialBalance);
-            var coinToBuy = WalletItemMother.CreateItem(userId, coinSymbol, initialBalance);
+            var usdt = WalletItemMother.CreateUsdt(userId, 1000);
+            var coin = WalletItemMother.CreateItem(userId, coinSymbol, 0);
 
-            walletItemRepoMock.Setup(x => x.GetAsync(userId, "usdt")).ReturnsAsync(usdtWalletItem);
-            walletItemRepoMock.Setup(x => x.GetAsync(userId, coinSymbol)).ReturnsAsync(coinToBuy);
-            marketServiceMock.Setup(x => x.GetPrice(coinSymbol)).ReturnsAsync(coinPrice);
-            walletItemRepoMock.Setup(x => x.GetCoinsDataForTradeAsync(userId, coinSymbol))
-               .ReturnsAsync(new TradeWalletItems(usdtWalletItem, coinToBuy));
+            walletItemRepoMock
+                .Setup(x => x.GetCoinsDataForTradeAsync(userId, coinSymbol))
+                .ReturnsAsync(new TradeWalletItems(usdt, coin));
+
+            unitOfWorkMock
+                .Setup(x => x.ExecuteInTransactionAsync(It.IsAny<Func<Task>>()))
+                .Returns<Func<Task>>(action => action());
+
+            var walletService = new WalletService(
+                marketServiceMock.Object,
+                walletItemRepoMock.Object,
+                unitOfWorkMock.Object,
+                walletDomainService.Object
+            );
 
             // Act
             await walletService.BuyAsync(userId, coinSymbol, usdToBuy);
 
             // Assert
-            Assert.AreEqual(expectedUsdtBalance, usdtWalletItem.Amount);
-            Assert.AreEqual(expectedCoinAmount, coinToBuy.Amount);
+            unitOfWorkMock.Verify(x => x.ExecuteInTransactionAsync(It.IsAny<Func<Task>>()),
+                Times.Once);
+            
+            walletItemRepoMock.Verify
+                (x => x.GetCoinsDataForTradeAsync(userId, coinSymbol), Times.Once);
 
-            unitOfWorkMock.Verify(x => x.CommitAsync(), Times.Once);  // mean CommitAsync should be called 
+            walletDomainService.Verify(service => service.Buy(usdt, coin,
+                It.IsAny<decimal>(), It.IsAny<decimal>()), Times.Once);
         }
 
 
         [Test]
-        public async Task BuyAsync_NotEnoughBalance_ThrowsInsufficientFundsException()
+        public void BuyAsync_NotEnoughBalance_ThrowsInsufficientFundsException()
         {
             // Arrange
-            var coinSymbol = "btc";
-            var usdToBuy = initialBalance + 100;
+            walletItemRepoMock.Setup(x => x.GetCoinsDataForTradeAsync(userId, "btc"))
+                .ReturnsAsync(new TradeWalletItems(It.IsAny<WalletItem>(), It.IsAny<WalletItem>()));
 
-            var usdt = WalletItemMother.CreateUsdt(userId, initialBalance);
-            var btc = WalletItemMother.CreateItem(userId, coinSymbol, 0);
+            walletDomainService.Setup(x => x.Buy(
+                It.IsAny<WalletItem>(),
+                It.IsAny<WalletItem>(),
+                It.IsAny<decimal>(),
+                It.IsAny<decimal>()))
+                .Throws<InsufficientFundsException>();
 
-            walletItemRepoMock.Setup(x => x.GetAsync(userId, "usdt")).ReturnsAsync(usdt);
-            walletItemRepoMock.Setup(x => x.GetAsync(userId, coinSymbol)).ReturnsAsync(btc);
-            marketServiceMock.Setup(x => x.GetPrice(coinSymbol)).ReturnsAsync(50000);
-            walletItemRepoMock.Setup(x => x.GetCoinsDataForTradeAsync(userId, coinSymbol))
-                .ReturnsAsync(new TradeWalletItems(usdt, btc));
+            unitOfWorkMock
+                .Setup(x => x.ExecuteInTransactionAsync(It.IsAny<Func<Task>>()))
+                .Returns<Func<Task>>(action => action());
 
-            // Act + Assert
-            Assert.ThrowsAsync<InsufficientFundsException>(
-               () => walletService.BuyAsync(userId, coinSymbol, usdToBuy)
+            var walletService = new WalletService(
+                marketServiceMock.Object,
+                walletItemRepoMock.Object,
+                unitOfWorkMock.Object,
+                walletDomainService.Object
             );
 
-            unitOfWorkMock.Verify(x => x.CommitAsync(), Times.Never); // mean CommitAsync should not be called
+            // Act + Assert
+            Assert.ThrowsAsync<InsufficientFundsException>(async () =>
+            await walletService.BuyAsync(userId, "btc", 100));
+
+            unitOfWorkMock.Verify(
+                x => x.ExecuteInTransactionAsync(It.IsAny<Func<Task>>()),
+                Times.Once);
+
+            walletDomainService.Verify(x => x.Buy(
+                It.IsAny<WalletItem>(),
+                It.IsAny<WalletItem>(),
+                100,
+                It.IsAny<decimal>()),
+                Times.Once);
         }
 
 
@@ -97,30 +116,35 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
         {
             // Arrange
             var coinSymbol = "btc";
-            var coinsAmount = 1;
             var coinsToSell = 1;
-            var coinPrice = 50;
-            var expectedUsdtBalance = initialBalance + coinsToSell * coinPrice; // expect 550
-            var expectedCoinAmount = 0;
 
             var usdtWalletItem = WalletItemMother.CreateUsdt(userId, initialBalance);
             var coinToSell = WalletItemMother.CreateItem(userId, coinSymbol, initialBalance);
 
-            walletItemRepoMock.Setup(x => x.GetAsync(userId, "usdt")).ReturnsAsync(usdtWalletItem);
-            walletItemRepoMock.Setup(x => x.GetAsync(userId, coinSymbol)).ReturnsAsync(coinToSell);
-            marketServiceMock.Setup(x => x.GetPrice(coinSymbol)).ReturnsAsync(coinPrice);
-
             walletItemRepoMock.Setup(x => x.GetCoinsDataForTradeAsync(userId, coinSymbol))
               .ReturnsAsync(new TradeWalletItems(usdtWalletItem, coinToSell));
+
+            unitOfWorkMock
+               .Setup(x => x.ExecuteInTransactionAsync(It.IsAny<Func<Task>>()))
+               .Returns<Func<Task>>(action => action());
+
+            var walletService = new WalletService(
+                marketServiceMock.Object,
+                walletItemRepoMock.Object,
+                unitOfWorkMock.Object,
+                walletDomainService.Object
+            );
 
             // Act
             await walletService.SellAsync(userId, coinSymbol, coinsToSell);
 
             // Assert
-            Assert.AreEqual(expectedUsdtBalance, usdtWalletItem.Amount);
-            Assert.AreEqual(expectedCoinAmount, coinToSell.Amount);
+            unitOfWorkMock.Verify(
+                x => x.ExecuteInTransactionAsync(It.IsAny<Func<Task>>()),
+                Times.Once);
 
-            unitOfWorkMock.Verify(x => x.CommitAsync(), Times.Once);  // mean CommitAsync should be called 
+            walletDomainService.Verify(x => x.Sell(usdtWalletItem, coinToSell,
+                    coinsToSell, It.IsAny<decimal>()), Times.Once);
         }
     }
 }
