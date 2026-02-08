@@ -4,27 +4,38 @@ namespace CryptocurrencyExchange.Services
 {
     public class MarketService : IMarketService
     {
+        private const string USDT_SYMBOL = "USDT";
+
+        private readonly HttpClient httpClient;
+
+        public MarketService(HttpClient httpClient)
+        {
+            this.httpClient = httpClient;
+        }
+
         public async Task<decimal> GetPrice(string coinSymbol)
         {
-            var baseUrl = "https://api.binance.com";
-            var httpClient = new HttpClient { BaseAddress = new Uri(baseUrl) };
             coinSymbol = coinSymbol.ToUpper();
-            if (!coinSymbol.EndsWith("USDT"))
-                coinSymbol += "USDT";
-            var endpoint = $"/api/v3/ticker/price?symbol={coinSymbol}";
-            var response = await httpClient.GetAsync(endpoint);
+
+            if (!coinSymbol.EndsWith(USDT_SYMBOL))
+                coinSymbol += USDT_SYMBOL;
+
+            HttpResponseMessage response = await httpClient.GetAsync($"ticker/price?symbol={coinSymbol}");
+            response.EnsureSuccessStatusCode();
+
             var content = await response.Content.ReadAsStringAsync();
+
             var jObject = JObject.Parse(content);
 
             return (decimal)jObject["price"];
         }
 
-        public List<string> GetSymbolsByPage()
+        public async Task<List<string>> GetSymbolsByPage()
         {
-            HttpClient client = new HttpClient();
-            client.BaseAddress = new Uri("https://api.binance.com/api/v3/");
-            HttpResponseMessage response = client.GetAsync("ticker/24hr").Result;
-            string responseBody = response.Content.ReadAsStringAsync().Result;
+            HttpResponseMessage response = await httpClient.GetAsync("ticker/24hr");
+            response.EnsureSuccessStatusCode();
+
+            string responseBody = await response.Content.ReadAsStringAsync();
 
             List<string> symbols = new List<string>();
 
@@ -34,7 +45,7 @@ namespace CryptocurrencyExchange.Services
                 symbols.Add(market["symbol"].ToString());
             }
 
-            symbols = symbols.Where(x => x.Contains("USDT")).Take(100).ToList();
+            symbols = symbols.Where(x => x.Contains(USDT_SYMBOL)).Take(100).ToList();
             return symbols;
         }
 

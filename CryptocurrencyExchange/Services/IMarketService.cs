@@ -3,6 +3,6 @@
     public interface IMarketService
     {
         Task<decimal> GetPrice(string coinSymbol);
-        List<string> GetSymbolsByPage();
+        Task<List<string>> GetSymbolsByPage();
     }
 }

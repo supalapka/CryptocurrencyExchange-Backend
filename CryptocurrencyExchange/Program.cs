@@ -20,10 +20,15 @@ builder.Services.AddDbContext<DataContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
 
+
+builder.Services.AddHttpClient<IMarketService, MarketService>(cient =>
+{
+    cient.BaseAddress = new Uri("https://api.binance.com/api/v3/");
+});
+
 builder.Services.AddScoped<IWalletService, WalletService>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IFuturesService, FuturesService>();
-builder.Services.AddScoped<IMarketService, MarketService>();
 builder.Services.AddScoped<IStakingService, StakingService>();
 builder.Services.AddScoped<IWalletItemRepository, WalletItemRepository>();
 builder.Services.AddScoped<IWalletDomainService, WalletDomainService>();
