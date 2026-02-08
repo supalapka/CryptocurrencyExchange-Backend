@@ -11,7 +11,6 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
     [TestFixture]
     public class WalletServiceTests
     {
-        int userId = 1;
         int initialBalance = 500;
 
         private Mock<IUnitOfWork> unitOfWorkMock = null!;
@@ -36,12 +35,12 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
             var coinSymbol = "btc";
             var usdToBuy = 100;
 
-            var usdt = WalletItemMother.CreateUsdt(userId, 1000);
-            var coin = WalletItemMother.CreateItem(userId, coinSymbol, 0);
+            var usdt = WalletItemMother.CreateUsdt(amount: 1000);
+            var btc = WalletItemMother.CreateBtc(amount: 0);
 
             walletItemRepoMock
-                .Setup(x => x.GetCoinsDataForTradeAsync(userId, coinSymbol))
-                .ReturnsAsync(new TradeWalletItems(usdt, coin));
+                .Setup(x => x.GetCoinsDataForTradeAsync(TestUser.DefaultId, coinSymbol))
+                .ReturnsAsync(new TradeWalletItems(usdt, btc));
 
             unitOfWorkMock
                 .Setup(x => x.ExecuteInTransactionAsync(It.IsAny<Func<Task>>()))
@@ -55,16 +54,16 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
             );
 
             // Act
-            await walletService.BuyAsync(userId, coinSymbol, usdToBuy);
+            await walletService.BuyAsync(TestUser.DefaultId, coinSymbol, usdToBuy);
 
             // Assert
             unitOfWorkMock.Verify(x => x.ExecuteInTransactionAsync(It.IsAny<Func<Task>>()),
                 Times.Once);
-            
-            walletItemRepoMock.Verify
-                (x => x.GetCoinsDataForTradeAsync(userId, coinSymbol), Times.Once);
 
-            walletDomainService.Verify(service => service.Buy(usdt, coin,
+            walletItemRepoMock.Verify
+                (x => x.GetCoinsDataForTradeAsync(TestUser.DefaultId, coinSymbol), Times.Once);
+
+            walletDomainService.Verify(service => service.Buy(usdt, btc,
                 It.IsAny<decimal>(), It.IsAny<decimal>()), Times.Once);
         }
 
@@ -73,7 +72,7 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
         public void BuyAsync_NotEnoughBalance_ThrowsInsufficientFundsException()
         {
             // Arrange
-            walletItemRepoMock.Setup(x => x.GetCoinsDataForTradeAsync(userId, "btc"))
+            walletItemRepoMock.Setup(x => x.GetCoinsDataForTradeAsync(TestUser.DefaultId, "btc"))
                 .ReturnsAsync(new TradeWalletItems(It.IsAny<WalletItem>(), It.IsAny<WalletItem>()));
 
             walletDomainService.Setup(x => x.Buy(
@@ -96,7 +95,7 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
 
             // Act + Assert
             Assert.ThrowsAsync<InsufficientFundsException>(async () =>
-            await walletService.BuyAsync(userId, "btc", 100));
+            await walletService.BuyAsync(TestUser.DefaultId, "btc", 100));
 
             unitOfWorkMock.Verify(
                 x => x.ExecuteInTransactionAsync(It.IsAny<Func<Task>>()),
@@ -116,12 +115,12 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
         {
             // Arrange
             var coinSymbol = "btc";
-            var coinsToSell = 1;
+            decimal coinsToSell = 1;
 
-            var usdtWalletItem = WalletItemMother.CreateUsdt(userId, initialBalance);
-            var coinToSell = WalletItemMother.CreateItem(userId, coinSymbol, initialBalance);
+            var usdtWalletItem = WalletItemMother.CreateUsdt(amount: initialBalance);
+            var coinToSell = WalletItemMother.CreateBtc(amount: coinsToSell);
 
-            walletItemRepoMock.Setup(x => x.GetCoinsDataForTradeAsync(userId, coinSymbol))
+            walletItemRepoMock.Setup(x => x.GetCoinsDataForTradeAsync(TestUser.DefaultId, coinSymbol))
               .ReturnsAsync(new TradeWalletItems(usdtWalletItem, coinToSell));
 
             unitOfWorkMock
@@ -136,7 +135,7 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
             );
 
             // Act
-            await walletService.SellAsync(userId, coinSymbol, coinsToSell);
+            await walletService.SellAsync(TestUser.DefaultId, coinSymbol, coinsToSell);
 
             // Assert
             unitOfWorkMock.Verify(

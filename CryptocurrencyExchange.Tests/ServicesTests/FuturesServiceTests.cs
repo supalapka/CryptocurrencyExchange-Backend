@@ -11,7 +11,6 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
     public class FuturesServiceTests
     {
         const int userUsdtBalance = 1000;
-        private int _testUserId;
 
         private Mock<IUnitOfWork> unitOfWorkMock = null!;
         private Mock<IWalletItemRepository> walletRepositoryMock = null!;
@@ -34,14 +33,14 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
             var expectedFuture = new Future
             {
                 Id = 1,
-                UserId = _testUserId,
+                UserId = TestUser.DefaultId,
                 Margin = 500,
                 Symbol = "BTC"
             };
 
             walletRepositoryMock
-                .Setup(x => x.GetAsync(_testUserId, "usdt"))
-                .ReturnsAsync(WalletItemMother.CreateUsdt(_testUserId, userUsdtBalance));
+                .Setup(x => x.GetAsync(TestUser.DefaultId, "usdt"))
+                .ReturnsAsync(WalletItemMother.CreateUsdt(amount: userUsdtBalance));
 
             futuresDomainServiceMock
                 .Setup(x => x.OpenPosition(futureDto, It.IsAny<WalletItem>()))
@@ -58,7 +57,7 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
                 futureRepositoryMock.Object);
 
             // Act
-            var resultId = await service.CreateFutureAsync(futureDto, _testUserId);
+            var resultId = await service.CreateFutureAsync(futureDto, TestUser.DefaultId);
 
             // Assert
             Assert.AreEqual(1, resultId);
@@ -82,8 +81,8 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
 
 
             walletRepositoryMock
-                .Setup(x => x.GetAsync(_testUserId, "usdt"))
-                .ReturnsAsync(WalletItemMother.CreateUsdt(_testUserId, 1));
+                .Setup(x => x.GetAsync(TestUser.DefaultId, "usdt"))
+                .ReturnsAsync(WalletItemMother.CreateUsdt(amount: 1));
 
             futuresDomainServiceMock
                 .Setup(x => x.OpenPosition(It.IsAny<FutureDto>(), It.IsAny<WalletItem>()))
@@ -101,7 +100,7 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
 
             // Act & Assert
             Assert.ThrowsAsync<InsufficientFundsException>(async () =>
-              await service.CreateFutureAsync(futureDto, _testUserId));
+              await service.CreateFutureAsync(futureDto, TestUser.DefaultId));
 
             futureRepositoryMock.Verify(x => x.AddAsync(It.IsAny<Future>()), Times.Never);
         }
@@ -118,19 +117,19 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
             var position = new Future
             {
                 Id = 1,
-                UserId = _testUserId,
+                UserId = TestUser.DefaultId,
                 Margin = margin,
                 Position = PositionType.Long,
                 IsCompleted = false
             };
 
-            var usdtWallet = WalletItemMother.CreateUsdt(_testUserId, userUsdtBalance);
+            var usdtWallet = WalletItemMother.CreateUsdt(amount: userUsdtBalance);
 
 
             futureRepositoryMock.Setup(x => x.GetByIdAsync(position.Id))
                 .ReturnsAsync(position);
 
-            walletRepositoryMock.Setup(x => x.GetAsync(_testUserId, "usdt"))
+            walletRepositoryMock.Setup(x => x.GetAsync(TestUser.DefaultId, "usdt"))
                 .ReturnsAsync(usdtWallet);
 
             unitOfWorkMock.Setup(x => x.ExecuteInTransactionAsync(It.IsAny<Func<Task>>()))
