@@ -17,9 +17,9 @@ namespace CryptocurrencyExchange.Controllers
         }
 
         [HttpGet("available-coins")]
-        public IActionResult GetCoins()
+        public async Task<IActionResult> GetCoins()
         {
-            return Ok(_stakingService.GetCoins());
+            return Ok(await _stakingService.GetCoinsAsync());
         }
 
 

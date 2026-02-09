@@ -1,45 +1,54 @@
-﻿using CryptocurrencyExchange.Data;
+﻿using CryptocurrencyExchange.Exceptions;
 using CryptocurrencyExchange.Models;
+using CryptocurrencyExchange.Services.Interfaces;
 using CryptocurrencyExchange.Utilities;
-using Microsoft.EntityFrameworkCore;
 
 namespace CryptocurrencyExchange.Services
 {
     public class StakingService : IStakingService
     {
-        private readonly DataContext _dataContext;
+        private readonly IStakingRepository _stakingRepository;
+        private readonly IWalletItemRepository _walletItemRepository;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public StakingService(DataContext context)
+        public StakingService(
+            IStakingRepository stakingRepository,
+            IWalletItemRepository walletItemRepository,
+            IUnitOfWork unitOfWork
+            )
         {
-            _dataContext = context;
+            _stakingRepository = stakingRepository;
+            _walletItemRepository = walletItemRepository;
+            _unitOfWork = unitOfWork;
         }
 
 
-        public async Task CreateUserStaking(int userId, int stakingCoinId, decimal amount, int durationIdMonth)
+        public async Task CreateUserStaking(int userId, int stakingCoinId, decimal amount, int durationInMonth)
         {
-            var stakinCoin = _dataContext.StakingCoins.Find(stakingCoinId);
+            await _unitOfWork.ExecuteInTransactionAsync(async () =>
+             {
+                 StakingCoin stakingCoin = await _stakingRepository.GetCoinByIdAsync(stakingCoinId)
+                      ?? throw new StakingCoinNotFoundException(stakingCoinId.ToString());
 
-            var coinWalletItem = _dataContext.WalletItems.FirstOrDefault(x => x.UserId == userId
-            && x.Symbol == stakinCoin.Symbol);
-            if (coinWalletItem == null)
-                throw new Exception($"Buy {stakinCoin.Symbol} first");
+                 WalletItem coinWalletItem = await _walletItemRepository.GetAsync(userId, stakingCoin.Symbol)
+                      ?? throw new WalletItemNotFoundException($"staking coin not found: {stakingCoin.Symbol} in wallet");
 
-            if (coinWalletItem.Amount < amount)
-                throw new Exception($"Not anough balance in {stakinCoin.Symbol}");
+                 if (coinWalletItem.Amount < amount)
+                     throw new Exception($"Not anough balance in {stakingCoin.Symbol}");
 
-            coinWalletItem.Amount -= amount;
-            coinWalletItem.Amount = await MoneyPolicyUtils.RoundCoinAmountUpTo1USD(coinWalletItem.Amount, coinWalletItem.Symbol);
+                 coinWalletItem.Amount -= amount;
+                 coinWalletItem.Amount = await MoneyPolicyUtils.RoundCoinAmountUpTo1USD(coinWalletItem.Amount, coinWalletItem.Symbol);
 
-            var stakingmodel = new Staking();
-            stakingmodel.UserId = userId;
-            stakingmodel.StakingCoinId = stakingCoinId;
-            stakingmodel.Amount = amount;
-            stakingmodel.DurationInMonth = durationIdMonth;
-            stakingmodel.StartDate = DateTime.Today;
-            stakingmodel.IsCompleted = false;
+                 var stakingmodel = new Staking();
+                 stakingmodel.UserId = userId;
+                 stakingmodel.StakingCoinId = stakingCoinId;
+                 stakingmodel.Amount = amount;
+                 stakingmodel.DurationInMonth = durationInMonth;
+                 stakingmodel.StartDate = DateTime.Today;
+                 stakingmodel.IsCompleted = false;
 
-            await _dataContext.Staking.AddAsync(stakingmodel);
-            await _dataContext.SaveChangesAsync();
+                 await _stakingRepository.AddAsync(stakingmodel);
+             });
         }
 
 
@@ -47,7 +56,7 @@ namespace CryptocurrencyExchange.Services
         {
             DateTime currentDateTime = DateTime.Now;
 
-            var stakings = _dataContext.Staking.Where(x => x.IsCompleted == false).ToList();
+            List<Staking> stakings = await _stakingRepository.GetAllActiveStakingsAsync();
 
             foreach (var staking in stakings)
             {
@@ -56,7 +65,7 @@ namespace CryptocurrencyExchange.Services
                 if (currentDateTime >= stakingEndDate)
                 {
                     await PayStakingReward(staking.Id);
-                    _dataContext.SaveChanges();
+                    // _dataContext.SaveChanges();
                 }
                 else
                 {
@@ -66,42 +75,42 @@ namespace CryptocurrencyExchange.Services
         }
 
 
-
-        public List<Staking> GetStakingsByUser(int userId)
+        public async Task<List<Staking>> GetStakingsByUser(int userId)
         {
-            return _dataContext.Staking
-              .Include(s => s.StakingCoin)
-              .Where(x => x.UserId == userId)
-              .ToList();
-        }
-
-
-        public StakingCoin GetStakingCoinById(int id)
-        {
-            return _dataContext.StakingCoins.Find(id);
+            return await _stakingRepository.GetStakingsByUserAsync(userId);
         }
 
 
         public async Task PayStakingReward(int stakingId)
         {
-            var staking = _dataContext.Staking.Include(s => s.StakingCoin).First(x => x.Id == stakingId);
-            if (staking.IsCompleted == true) return;
-            var userWalletItem = _dataContext.WalletItems.First(x => x.UserId == staking.UserId && x.Symbol == staking.StakingCoin.Symbol);
+            await _unitOfWork.ExecuteInTransactionAsync(async () =>
+            {
+                Staking stakingData = await _stakingRepository.GetStakeDataByIdAsync(stakingId)
+                    ?? throw new Exception("Staking data not found, Id: " + stakingId.ToString());
 
-            staking.IsCompleted = true;
-            float persentageToAdd = staking.StakingCoin.RatePerMonth * staking.DurationInMonth;
-            var coinsToAdd = staking.Amount;
-            decimal rewards = (staking.Amount / 100) * (decimal)persentageToAdd;
-            coinsToAdd += rewards;
-            // coinsToAdd = UtilFunstions.RoundCoinAmountUpTo1USD(coinsToAdd, coinPrice);
-            userWalletItem.Amount += coinsToAdd;
-            await _dataContext.SaveChangesAsync();
+                WalletItem userWalletItem = await _walletItemRepository.GetAsync(stakingData.UserId, stakingData.StakingCoin.Symbol)
+                    ?? throw new WalletItemNotFoundException($"staking coin not found: {stakingData.StakingCoin.Symbol} in wallet");
+
+                {
+                    if (stakingData.IsCompleted == true)
+                        return;
+
+                    stakingData.IsCompleted = true;
+
+                    float persentageToAdd = stakingData.StakingCoin.RatePerMonth * stakingData.DurationInMonth;
+                    var coinsToAdd = stakingData.Amount;
+                    decimal rewards = (stakingData.Amount / 100) * (decimal)persentageToAdd;
+                    coinsToAdd += rewards;
+                    userWalletItem.Amount += coinsToAdd;
+                }
+            });
         }
 
 
-        public List<StakingCoin> GetCoins()
+        public async Task<List<StakingCoin>> GetCoinsAsync()
         {
-            return _dataContext.StakingCoins.ToList();
+            return await _stakingRepository.GetAllStakingCoinsAsync();
         }
+
     }
 }
