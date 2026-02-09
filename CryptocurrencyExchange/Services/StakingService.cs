@@ -1,7 +1,7 @@
 ﻿using CryptocurrencyExchange.Exceptions;
 using CryptocurrencyExchange.Models;
 using CryptocurrencyExchange.Services.Interfaces;
-using CryptocurrencyExchange.Utilities;
+using CryptocurrencyExchange.Services.StakingDomain;
 
 namespace CryptocurrencyExchange.Services
 {
@@ -10,16 +10,19 @@ namespace CryptocurrencyExchange.Services
         private readonly IStakingRepository _stakingRepository;
         private readonly IWalletItemRepository _walletItemRepository;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IStakingDomainService _stakingDomainService;
 
         public StakingService(
             IStakingRepository stakingRepository,
             IWalletItemRepository walletItemRepository,
-            IUnitOfWork unitOfWork
+            IUnitOfWork unitOfWork,
+            IStakingDomainService stakingDomainService
             )
         {
             _stakingRepository = stakingRepository;
             _walletItemRepository = walletItemRepository;
             _unitOfWork = unitOfWork;
+            _stakingDomainService = stakingDomainService;
         }
 
 
@@ -33,21 +36,9 @@ namespace CryptocurrencyExchange.Services
                  WalletItem coinWalletItem = await _walletItemRepository.GetAsync(userId, stakingCoin.Symbol)
                       ?? throw new WalletItemNotFoundException($"staking coin not found: {stakingCoin.Symbol} in wallet");
 
-                 if (coinWalletItem.Amount < amount)
-                     throw new Exception($"Not anough balance in {stakingCoin.Symbol}");
+                 Staking stakingData = _stakingDomainService.CreateStaking(coinWalletItem, stakingCoin, amount, durationInMonth);
 
-                 coinWalletItem.Amount -= amount;
-                 coinWalletItem.Amount = await MoneyPolicyUtils.RoundCoinAmountUpTo1USD(coinWalletItem.Amount, coinWalletItem.Symbol);
-
-                 var stakingmodel = new Staking();
-                 stakingmodel.UserId = userId;
-                 stakingmodel.StakingCoinId = stakingCoinId;
-                 stakingmodel.Amount = amount;
-                 stakingmodel.DurationInMonth = durationInMonth;
-                 stakingmodel.StartDate = DateTime.Today;
-                 stakingmodel.IsCompleted = false;
-
-                 await _stakingRepository.AddAsync(stakingmodel);
+                 await _stakingRepository.AddAsync(stakingData);
              });
         }
 
