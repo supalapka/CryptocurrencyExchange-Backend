@@ -4,6 +4,7 @@ using CryptocurrencyExchange.Services;
 using CryptocurrencyExchange.Services.Futures;
 using CryptocurrencyExchange.Services.Interfaces;
 using CryptocurrencyExchange.Services.Shcedulers;
+using CryptocurrencyExchange.Services.StakingDomain;
 using CryptocurrencyExchange.Services.Wallet;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -26,13 +27,19 @@ builder.Services.AddHttpClient<IMarketService, MarketService>(cient =>
     cient.BaseAddress = new Uri("https://api.binance.com/api/v3/");
 });
 
+builder.Services.AddScoped<IStakingRepository, EfStakingRepository>();
+builder.Services.AddScoped<IStakingDomainService, StakingDomainService>();
+builder.Services.AddScoped<IStakingService, StakingService>();
+
 builder.Services.AddScoped<IWalletService, WalletService>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IFuturesService, FuturesService>();
-builder.Services.AddScoped<IStakingService, StakingService>();
+
 builder.Services.AddScoped<IWalletItemRepository, WalletItemRepository>();
 builder.Services.AddScoped<IWalletDomainService, WalletDomainService>();
+
 builder.Services.AddScoped<IUnitOfWork, EfUniOfWork>();
+
 builder.Services.AddScoped<IFutureRepository, EfFutureRepository>();
 builder.Services.AddScoped<IFuturesDomainService, FuturesDomainService>();
 
