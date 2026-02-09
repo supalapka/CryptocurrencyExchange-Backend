@@ -8,7 +8,7 @@ namespace CryptocurrencyExchange.Services
         Task<List<Staking>> GetStakingsByUser(int userId);
         Task<List<StakingCoin>> GetCoinsAsync();
         Task CheckForExpiredStakings();
-        Task PayStakingReward(int stakingId);
+        Task PayStakingReward(Staking stakingData);
 
     }
 }

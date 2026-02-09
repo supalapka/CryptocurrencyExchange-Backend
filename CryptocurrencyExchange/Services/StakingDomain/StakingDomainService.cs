@@ -24,5 +24,26 @@ namespace CryptocurrencyExchange.Services.StakingDomain
 
             return stakingData;
         }
+
+        public void CompleteStaking(Staking stakingData, WalletItem coinWalletItem)
+        {
+            if (stakingData.IsCompleted == true)
+                return;
+
+            stakingData.IsCompleted = true;
+
+            float persentageToAdd = stakingData.StakingCoin.RatePerMonth * stakingData.DurationInMonth;
+            var coinsToAdd = stakingData.Amount;
+            decimal rewards = (stakingData.Amount / 100) * (decimal)persentageToAdd;
+            coinsToAdd += rewards;
+            coinWalletItem.Amount += coinsToAdd;
+        }
+
+        public bool IsExpired(Staking staking)
+        {
+            DateTime stakingEndDate = staking.StartDate.AddDays(staking.DurationInMonth * 30);
+            return DateTime.Now >= stakingEndDate;
+        }
+
     }
 }
