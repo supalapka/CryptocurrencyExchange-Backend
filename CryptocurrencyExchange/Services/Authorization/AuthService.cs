@@ -11,19 +11,35 @@ namespace CryptocurrencyExchange.Services.Authorization
         private readonly IWalletItemRepository _walletRepository;
         private readonly IAuthDomainService _authDomainService;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly ITokenService _tokenService;
 
         public AuthService(IUserRepository
             userRepository,
             IUnitOfWork unitOfWork,
             IWalletItemRepository walletRepository,
-            IAuthDomainService authDomainService)
+            IAuthDomainService authDomainService,
+            ITokenService tokenService)
         {
             _userRepository = userRepository;
             _unitOfWork = unitOfWork;
             _walletRepository = walletRepository;
             _authDomainService = authDomainService;
+            _tokenService = tokenService;
         }
 
+        public async Task<string> LoginAsync(string email, string password)
+        {
+            var user = await _userRepository.GetByEmailAsync(email);
+
+            if (user == null)
+                throw new UserNotFoundException();
+
+            if (!_authDomainService.VerifyPassword(password, user))
+                throw new Exception("Wrong Password");
+
+            return _tokenService.CreateToken(user);
+
+        }
 
         public async Task RegisterAsync(string email, string password)
         {

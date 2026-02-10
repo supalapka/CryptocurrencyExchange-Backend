@@ -2,24 +2,17 @@
 using CryptocurrencyExchange.Models;
 using CryptocurrencyExchange.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Security.Cryptography;
 
 namespace CryptocurrencyExchange.Controllers
 {
     [ApiController]
     public class AuthController : ControllerBase
     {
-        public readonly IConfiguration _configuration;
         public readonly IAuthService _authService;
         private readonly DataContext _dataContext;
 
-        public AuthController(IConfiguration configuration, DataContext dataContext, IAuthService authService)
+        public AuthController(DataContext dataContext, IAuthService authService)
         {
-            _configuration = configuration;
             _dataContext = dataContext;
             _authService = authService;
         }
@@ -35,18 +28,11 @@ namespace CryptocurrencyExchange.Controllers
 
 
         [HttpPost("login")]
-        public async Task<ActionResult<User>> Login(UserDto userDto)
+        public async Task<ActionResult<string>> Login(UserDto userDto)
         {
-            var user = await _dataContext.Users.FirstOrDefaultAsync(u => u.Email == userDto.Email);
+            var token = await _authService.LoginAsync(userDto.Email, userDto.Password);
 
-            if (user == null)
-                return BadRequest("User not found");
-
-            if (!VerifyPasswordHash(userDto.Password, user.PasswordHash, user.PasswordSalt))
-                return BadRequest("Wrond password");
-
-            string jwt = CreateToken(user);
-            return Ok(jwt);
+            return Ok(token);
         }
 
 
@@ -60,48 +46,6 @@ namespace CryptocurrencyExchange.Controllers
                 return BadRequest("Invalid or miss jwt");
 
             return Ok(user.Email);
-        }
-
-
-        private string CreateToken(User user)
-        {
-            List<Claim> claims = new List<Claim>()
-            {
-                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())
-            };
-
-            var key = new SymmetricSecurityKey(System.Text.Encoding.UTF8
-                .GetBytes(_configuration.GetSection("AppSettings:Token").Value));
-
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
-            var token = new JwtSecurityToken(
-                claims: claims,
-                expires: DateTime.Now.AddDays(5),
-                signingCredentials: creds);
-
-            var jwt = new JwtSecurityTokenHandler().WriteToken(token);
-            return jwt;
-
-        }
-
-
-        private void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
-        {
-            using (var hmac = new HMACSHA512())
-            {
-                passwordSalt = hmac.Key;
-                passwordHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
-            }
-        }
-
-
-        private bool VerifyPasswordHash(string password, byte[] passwordHash, byte[] passwordSalt)
-        {
-            using (var hmac = new HMACSHA512(passwordSalt))
-            {
-                var computeHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
-                return computeHash.SequenceEqual(passwordHash);
-            }
         }
     }
 }

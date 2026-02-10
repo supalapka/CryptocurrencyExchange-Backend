@@ -23,5 +23,10 @@ namespace CryptocurrencyExchange.Data
         {
             await dataContext.Users.AddAsync(user);
         }
+
+        public async Task<User> GetByEmailAsync(string email)
+        {
+            return await dataContext.Users.FirstOrDefaultAsync(u => u.Email == email);
+        }
     }
 }
