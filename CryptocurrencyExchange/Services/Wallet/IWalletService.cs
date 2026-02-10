@@ -1,4 +1,4 @@
-﻿using CryptocurrencyExchange.Models;
+﻿using CryptocurrencyExchange.Core.Models;
 
 namespace CryptocurrencyExchange.Services.Wallet
 {

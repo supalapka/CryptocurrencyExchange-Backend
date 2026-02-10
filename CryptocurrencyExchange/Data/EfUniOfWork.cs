@@ -1,4 +1,4 @@
-﻿using CryptocurrencyExchange.Services.Interfaces;
+﻿using CryptocurrencyExchange.Core.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System.Data;
 

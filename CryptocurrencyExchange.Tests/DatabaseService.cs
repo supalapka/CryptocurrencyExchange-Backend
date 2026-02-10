@@ -1,5 +1,5 @@
-﻿using CryptocurrencyExchange.Data;
-using CryptocurrencyExchange.Models;
+﻿using CryptocurrencyExchange.Core.Models;
+using CryptocurrencyExchange.Data;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;

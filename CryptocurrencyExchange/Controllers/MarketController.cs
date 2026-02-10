@@ -1,4 +1,4 @@
-﻿using CryptocurrencyExchange.Services;
+﻿using CryptocurrencyExchange.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CryptocurrencyExchange.Controllers

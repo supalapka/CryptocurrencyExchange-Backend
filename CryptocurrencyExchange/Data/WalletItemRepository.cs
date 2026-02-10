@@ -1,7 +1,7 @@
-﻿using CryptocurrencyExchange.Exceptions;
-using CryptocurrencyExchange.Models;
-using CryptocurrencyExchange.Services.Interfaces;
-using CryptocurrencyExchange.Services.Wallet;
+﻿using CryptocurrencyExchange.Core.Interfaces;
+using CryptocurrencyExchange.Core.Models;
+using CryptocurrencyExchange.Core.ValueObject;
+using CryptocurrencyExchange.Exceptions;
 using Microsoft.EntityFrameworkCore;
 
 namespace CryptocurrencyExchange.Data

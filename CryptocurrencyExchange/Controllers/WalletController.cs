@@ -1,5 +1,5 @@
-﻿using CryptocurrencyExchange.Data;
-using CryptocurrencyExchange.Models;
+﻿using CryptocurrencyExchange.Core.Models;
+using CryptocurrencyExchange.Data;
 using CryptocurrencyExchange.Services.Wallet;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

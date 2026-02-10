@@ -1,5 +1,5 @@
-﻿using CryptocurrencyExchange.Models;
-using CryptocurrencyExchange.Services.Interfaces;
+﻿using CryptocurrencyExchange.Core.Interfaces;
+using CryptocurrencyExchange.Core.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace CryptocurrencyExchange.Data

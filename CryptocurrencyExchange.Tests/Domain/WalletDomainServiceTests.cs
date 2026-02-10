@@ -1,4 +1,4 @@
-﻿using CryptocurrencyExchange.Services.Wallet;
+﻿using CryptocurrencyExchange.Core.Domain;
 using NUnit.Framework;
 
 namespace CryptocurrencyExchange.Tests.Domain
