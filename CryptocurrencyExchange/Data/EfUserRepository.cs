@@ -28,5 +28,10 @@ namespace CryptocurrencyExchange.Data
         {
             return await dataContext.Users.FirstOrDefaultAsync(u => u.Email == email);
         }
+
+        public async Task<string?> GetEmailByIdAsync(int userId)
+        {
+            return await dataContext.Users.Where(u => u.Id == userId).Select(u => u.Email).FirstOrDefaultAsync();
+        }
     }
 }

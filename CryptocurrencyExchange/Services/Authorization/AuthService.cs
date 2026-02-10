@@ -56,6 +56,13 @@ namespace CryptocurrencyExchange.Services.Authorization
             });
         }
 
+        public async Task<string> GetEmailByIdAsync(int userId)
+        {
+            string email = await _userRepository.GetEmailByIdAsync(userId)
+                ?? throw new UserNotFoundException();
+
+            return email;
+        }
 
         private Task CreateStarterWalletAsync(User user)
         {

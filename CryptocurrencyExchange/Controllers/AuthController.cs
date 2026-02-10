@@ -1,5 +1,4 @@
-﻿using CryptocurrencyExchange.Data;
-using CryptocurrencyExchange.Models;
+﻿using CryptocurrencyExchange.Models;
 using CryptocurrencyExchange.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,11 +8,9 @@ namespace CryptocurrencyExchange.Controllers
     public class AuthController : ControllerBase
     {
         public readonly IAuthService _authService;
-        private readonly DataContext _dataContext;
 
-        public AuthController(DataContext dataContext, IAuthService authService)
+        public AuthController(IAuthService authService)
         {
-            _dataContext = dataContext;
             _authService = authService;
         }
 
@@ -37,15 +34,12 @@ namespace CryptocurrencyExchange.Controllers
 
 
         [HttpGet("email")]
-        public async Task<ActionResult<User>> GetUserEmail()
+        public async Task<ActionResult<string>> GetUserEmail()
         {
             int userId = Convert.ToInt32(HttpContext.Items["UserId"]);
+            string email = await _authService.GetEmailByIdAsync(userId);
 
-            var user = _dataContext.Users.Where(x => x.Id == userId).FirstOrDefault();
-            if (user == null)
-                return BadRequest("Invalid or miss jwt");
-
-            return Ok(user.Email);
+            return Ok(email);
         }
     }
 }
