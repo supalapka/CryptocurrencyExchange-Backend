@@ -1,0 +1,58 @@
+﻿using CryptocurrencyExchange.Data.Intefraces;
+using CryptocurrencyExchange.Exceptions;
+using CryptocurrencyExchange.Models;
+using CryptocurrencyExchange.Services.Interfaces;
+
+namespace CryptocurrencyExchange.Services.Authorization
+{
+    public class AuthService : IAuthService
+    {
+        private readonly IUserRepository _userRepository;
+        private readonly IWalletItemRepository _walletRepository;
+        private readonly IAuthDomainService _authDomainService;
+        private readonly IUnitOfWork _unitOfWork;
+
+        public AuthService(IUserRepository
+            userRepository,
+            IUnitOfWork unitOfWork,
+            IWalletItemRepository walletRepository,
+            IAuthDomainService authDomainService)
+        {
+            _userRepository = userRepository;
+            _unitOfWork = unitOfWork;
+            _walletRepository = walletRepository;
+            _authDomainService = authDomainService;
+        }
+
+
+        public async Task RegisterAsync(string email, string password)
+        {
+            if (await _userRepository.UserExists(email))
+                throw new UserAlreadyExistsException();
+
+            await _unitOfWork.ExecuteInTransactionAsync(async () =>
+            {
+                User user = _authDomainService.CreateUser(email, password);
+
+                await _userRepository.AddUserAsync(user);
+
+                await CreateStarterWalletAsync(user);
+            });
+        }
+
+
+        private Task CreateStarterWalletAsync(User user)
+        {
+            var walletItem = new WalletItem
+            {
+                Symbol = "usdt",
+                Amount = 5000,
+                User = user
+            };
+
+            return _walletRepository.AddAsync(walletItem);
+        }
+
+
+    }
+}

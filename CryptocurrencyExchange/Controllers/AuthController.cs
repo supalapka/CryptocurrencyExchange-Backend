@@ -1,6 +1,6 @@
 ﻿using CryptocurrencyExchange.Data;
 using CryptocurrencyExchange.Models;
-using Microsoft.AspNetCore.Authorization;
+using CryptocurrencyExchange.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -14,42 +14,23 @@ namespace CryptocurrencyExchange.Controllers
     public class AuthController : ControllerBase
     {
         public readonly IConfiguration _configuration;
+        public readonly IAuthService _authService;
         private readonly DataContext _dataContext;
 
-        public AuthController(IConfiguration configuration, DataContext dataContext)
+        public AuthController(IConfiguration configuration, DataContext dataContext, IAuthService authService)
         {
             _configuration = configuration;
             _dataContext = dataContext;
+            _authService = authService;
         }
 
 
         [HttpPost("register")]
         public async Task<ActionResult> Register(UserDto userDto)
         {
-            var user = await _dataContext.Users.FirstOrDefaultAsync(u => u.Email == userDto.Email);
-            if (user != null)
-                return BadRequest("User with this email already exits");
+            await _authService.RegisterAsync(userDto.Email, userDto.Password);
 
-            user = new User();
-            user.Email = userDto.Email;
-            CreatePasswordHash(userDto.Password, out byte[] PasswordHash, out byte[] PasswordSalt);
-            user.PasswordHash = PasswordHash;
-            user.PasswordSalt = PasswordSalt;
-
-            await _dataContext.Users.AddAsync(user);
-            await _dataContext.SaveChangesAsync(); //save changes for generate user.id
-
-            WalletItem usdt = new WalletItem() // starter pack 5000 usdt
-            {
-                Symbol = "usdt",
-                Amount = 5000,
-                UserId = user.Id,
-            };
-
-            await _dataContext.WalletItems.AddAsync(usdt);
-            await _dataContext.SaveChangesAsync();
-
-            return Ok($"{user.Email} successfully registered");
+            return Ok($"{userDto.Email} successfully registered");
         }
 
 

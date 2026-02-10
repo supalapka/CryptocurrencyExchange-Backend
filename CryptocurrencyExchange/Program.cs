@@ -1,6 +1,8 @@
 using CryptocurrencyExchange.Data;
+using CryptocurrencyExchange.Data.Intefraces;
 using CryptocurrencyExchange.Middleware;
 using CryptocurrencyExchange.Services;
+using CryptocurrencyExchange.Services.Authorization;
 using CryptocurrencyExchange.Services.Futures;
 using CryptocurrencyExchange.Services.Interfaces;
 using CryptocurrencyExchange.Services.Shcedulers;
@@ -35,6 +37,10 @@ builder.Services.AddScoped<IWalletDomainService, WalletDomainService>();
 builder.Services.AddScoped<IUnitOfWork, EfUniOfWork>();
 builder.Services.AddScoped<IFutureRepository, EfFutureRepository>();
 builder.Services.AddScoped<IFuturesDomainService, FuturesDomainService>();
+
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IAuthDomainService, AuthDomainService>();
+builder.Services.AddScoped<IUserRepository, EfUserRepository>();
 
 builder.Services.AddHostedService<StakingScheduler>();
 
