@@ -16,12 +16,9 @@ namespace CryptocurrencyExchange.Services.Market
 
         public async Task<decimal> GetPrice(string coinSymbol)
         {
-            coinSymbol = coinSymbol.ToUpper();
+            var normalizedSymbol = NormalizeSymbol(coinSymbol);
 
-            if (!coinSymbol.EndsWith(USDT_SYMBOL))
-                coinSymbol += USDT_SYMBOL;
-
-            HttpResponseMessage response = await httpClient.GetAsync($"ticker/price?symbol={coinSymbol}");
+            HttpResponseMessage response = await httpClient.GetAsync($"ticker/price?symbol={normalizedSymbol}");
             response.EnsureSuccessStatusCode();
 
             var content = await response.Content.ReadAsStringAsync();
@@ -29,6 +26,14 @@ namespace CryptocurrencyExchange.Services.Market
             var jObject = JObject.Parse(content);
 
             return (decimal)jObject["price"];
+        }
+
+        private string NormalizeSymbol(string coinSymbol)
+        {
+            var normalizedSymbol = coinSymbol.ToUpper();
+            if (!normalizedSymbol.EndsWith(USDT_SYMBOL))
+                normalizedSymbol += USDT_SYMBOL;
+            return normalizedSymbol;
         }
 
     }
