@@ -2,6 +2,6 @@
 {
     public interface IMarketApiClient
     {
-        Task<string> GetPriceRawAsync(string symbol);
+        Task<decimal> GetUsdtPriceAsync(string symbol);
     }
 }
