@@ -31,24 +31,5 @@ namespace CryptocurrencyExchange.Services.Market
             return (decimal)jObject["price"];
         }
 
-        public async Task<List<string>> GetSymbolsByPage()
-        {
-            HttpResponseMessage response = await httpClient.GetAsync("ticker/24hr");
-            response.EnsureSuccessStatusCode();
-
-            string responseBody = await response.Content.ReadAsStringAsync();
-
-            List<string> symbols = new List<string>();
-
-            JArray marketData = JArray.Parse(responseBody);
-            foreach (JObject market in marketData)
-            {
-                symbols.Add(market["symbol"].ToString());
-            }
-
-            symbols = symbols.Where(x => x.Contains(USDT_SYMBOL)).Take(100).ToList();
-            return symbols;
-        }
-
     }
 }
