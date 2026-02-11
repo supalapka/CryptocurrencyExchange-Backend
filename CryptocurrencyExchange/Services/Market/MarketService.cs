@@ -1,5 +1,5 @@
 ﻿using CryptocurrencyExchange.Services.Interfaces;
-using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
 
 namespace CryptocurrencyExchange.Services.Market
 {
@@ -23,9 +23,7 @@ namespace CryptocurrencyExchange.Services.Market
 
             var content = await response.Content.ReadAsStringAsync();
 
-            var jObject = JObject.Parse(content);
-
-            return (decimal)jObject["price"];
+            return ParsePrice(content);
         }
 
         private string NormalizeSymbol(string coinSymbol)
@@ -34,6 +32,17 @@ namespace CryptocurrencyExchange.Services.Market
             if (!normalizedSymbol.EndsWith(USDT_SYMBOL))
                 normalizedSymbol += USDT_SYMBOL;
             return normalizedSymbol;
+        }
+
+        private decimal ParsePrice(string content)
+        {
+            var dto = JsonConvert.DeserializeObject<PriceResponseDto>(content)
+              ?? throw new InvalidOperationException("Empty price response");
+
+            if (dto.Price is null)
+                throw new InvalidOperationException("Price not found in response");
+
+            return (decimal)dto.Price;
         }
 
     }
