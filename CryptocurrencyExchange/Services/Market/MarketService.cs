@@ -1,4 +1,5 @@
-﻿using CryptocurrencyExchange.Services.Interfaces;
+﻿using CryptocurrencyExchange.InfrastructureProject.Market;
+using CryptocurrencyExchange.Services.Interfaces;
 using Newtonsoft.Json;
 
 namespace CryptocurrencyExchange.Services.Market
@@ -7,21 +8,18 @@ namespace CryptocurrencyExchange.Services.Market
     {
         private const string USDT_SYMBOL = "USDT";
 
-        private readonly HttpClient httpClient;
+        private readonly IMarketApiClient _marketApiClient;
 
-        public MarketService(HttpClient httpClient)
+        public MarketService(IMarketApiClient marketApiClient)
         {
-            this.httpClient = httpClient;
+            _marketApiClient = marketApiClient;
         }
 
         public async Task<decimal> GetPrice(string coinSymbol)
         {
             var normalizedSymbol = NormalizeSymbol(coinSymbol);
 
-            HttpResponseMessage response = await httpClient.GetAsync($"ticker/price?symbol={normalizedSymbol}");
-            response.EnsureSuccessStatusCode();
-
-            var content = await response.Content.ReadAsStringAsync();
+            var content = await _marketApiClient.GetPriceRawAsync(normalizedSymbol);
 
             return ParsePrice(content);
         }
