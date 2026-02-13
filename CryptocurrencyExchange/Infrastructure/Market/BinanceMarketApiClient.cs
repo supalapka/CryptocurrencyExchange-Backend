@@ -23,6 +23,7 @@ namespace CryptocurrencyExchange.Infrastructure.Market
         {
             var normalizedSymbol = NormalizeSymbol(symbol);
             var coinData = await GetCoinDataResponse(normalizedSymbol);
+
             return ParsePrice(coinData);
         }
 
@@ -31,6 +32,7 @@ namespace CryptocurrencyExchange.Infrastructure.Market
             var normalizedSymbol = coinSymbol.ToUpper();
             if (!normalizedSymbol.EndsWith(UsdtSymbol))
                 normalizedSymbol += UsdtSymbol;
+
             return normalizedSymbol;
         }
 
