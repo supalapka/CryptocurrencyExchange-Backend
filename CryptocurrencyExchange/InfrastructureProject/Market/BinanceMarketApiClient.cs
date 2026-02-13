@@ -4,21 +4,20 @@ namespace CryptocurrencyExchange.InfrastructureProject.Market
 {
     public sealed class BinanceMarketApiClient : IMarketApiClient
     {
-        private const string USDT_SYMBOL = "USDT";
+        private const string UsdtSymbol = "USDT";
 
-        private readonly HttpClient httpClient;
+        private readonly HttpClient _httpClient;
 
         public BinanceMarketApiClient(HttpClient httpClient)
         {
-            this.httpClient = httpClient;
+            _httpClient = httpClient;
         }
 
         public async Task<decimal> GetUsdtPriceAsync(string symbol)
         {
             var normalizedSymbol = NormalizeSymbol(symbol);
 
-
-            using var response = await httpClient.GetAsync($"ticker/price?symbol={normalizedSymbol}");
+            using var response = await _httpClient.GetAsync($"ticker/price?symbol={normalizedSymbol}");
             response.EnsureSuccessStatusCode();
 
             return ParsePrice(await response.Content.ReadAsStringAsync());
@@ -27,8 +26,8 @@ namespace CryptocurrencyExchange.InfrastructureProject.Market
         private string NormalizeSymbol(string coinSymbol)
         {
             var normalizedSymbol = coinSymbol.ToUpper();
-            if (!normalizedSymbol.EndsWith(USDT_SYMBOL))
-                normalizedSymbol += USDT_SYMBOL;
+            if (!normalizedSymbol.EndsWith(UsdtSymbol))
+                normalizedSymbol += UsdtSymbol;
             return normalizedSymbol;
         }
 
