@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using CryptocurrencyExchange.Core.Interfaces;
+using Newtonsoft.Json;
 
 namespace CryptocurrencyExchange.Infrastructure.Market
 {
