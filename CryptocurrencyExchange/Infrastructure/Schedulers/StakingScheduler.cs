@@ -1,7 +1,7 @@
 ﻿using CryptocurrencyExchange.Data;
 using CryptocurrencyExchange.Services.StakingServices;
 
-namespace CryptocurrencyExchange.Schedulers
+namespace CryptocurrencyExchange.Infrastructure.Schedulers
 {
     public class StakingScheduler : BackgroundService
     {

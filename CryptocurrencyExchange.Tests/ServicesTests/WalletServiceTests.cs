@@ -1,7 +1,7 @@
 ﻿using CryptocurrencyExchange.Core.Interfaces;
 using CryptocurrencyExchange.Core.Models;
+using CryptocurrencyExchange.Core.ValueObject;
 using CryptocurrencyExchange.Exceptions;
-using CryptocurrencyExchange.Services;
 using CryptocurrencyExchange.Services.Interfaces;
 using CryptocurrencyExchange.Services.Wallet;
 using Moq;
