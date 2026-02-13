@@ -1,6 +1,7 @@
 using CryptocurrencyExchange.Core.Domain;
 using CryptocurrencyExchange.Core.Interfaces;
 using CryptocurrencyExchange.Data;
+using CryptocurrencyExchange.Infrastructure.Market;
 using CryptocurrencyExchange.Infrastructure.Security;
 using CryptocurrencyExchange.Middleware;
 using CryptocurrencyExchange.Options;
@@ -27,18 +28,18 @@ builder.Services
     .Validate(o => o.SecretKey.Length >= 32, "JWT key is too short")
     .ValidateOnStart();
 
-
 builder.Services.AddControllers();
 builder.Services.AddDbContext<DataContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
 
-
-builder.Services.AddHttpClient<IMarketService, MarketService>(cient =>
+builder.Services.AddHttpClient<IMarketApiClient, BinanceMarketApiClient>(client =>
 {
-    cient.BaseAddress = new Uri("https://api.binance.com/api/v3/");
+    client.BaseAddress = new Uri("https://api.binance.com/api/v3/");
 });
+
+builder.Services.AddScoped<IMarketService, MarketService>();
 
 builder.Services.AddScoped<IStakingRepository, EfStakingRepository>();
 builder.Services.AddScoped<IStakingDomainService, StakingDomainService>();
@@ -62,7 +63,6 @@ builder.Services.AddScoped<IAuthDomainService, AuthDomainService>();
 builder.Services.AddScoped<IUserRepository, EfUserRepository>();
 
 builder.Services.AddHostedService<StakingScheduler>();
-
 
 builder.Services.AddCors(options =>
 {
