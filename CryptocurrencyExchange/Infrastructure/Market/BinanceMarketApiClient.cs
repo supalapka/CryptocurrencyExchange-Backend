@@ -51,7 +51,5 @@ namespace CryptocurrencyExchange.Infrastructure.Market
 
             return decimal.Parse(dto.Price, CultureInfo.InvariantCulture);
         }
-
     }
-
 }

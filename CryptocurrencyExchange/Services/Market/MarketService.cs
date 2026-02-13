@@ -5,7 +5,6 @@ namespace CryptocurrencyExchange.Services.Market
 {
     public class MarketService : IMarketService
     {
-
         private readonly IMarketApiClient _marketApiClient;
 
         public MarketService(IMarketApiClient marketApiClient)
@@ -17,6 +16,5 @@ namespace CryptocurrencyExchange.Services.Market
         {
             return await _marketApiClient.GetUsdtPriceAsync(coinSymbol);
         }
-
     }
 }
