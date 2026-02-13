@@ -1,4 +1,4 @@
-﻿using CryptocurrencyExchange.InfrastructureProject.Market;
+﻿using CryptocurrencyExchange.Infrastructure.Market;
 using CryptocurrencyExchange.Services.Interfaces;
 
 namespace CryptocurrencyExchange.Services.Market

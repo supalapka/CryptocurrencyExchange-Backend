@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace CryptocurrencyExchange.InfrastructureProject.Market
+namespace CryptocurrencyExchange.Infrastructure.Market
 {
     public class PriceResponseDto
     {

@@ -1,8 +1,8 @@
 using CryptocurrencyExchange.Core.Domain;
 using CryptocurrencyExchange.Core.Interfaces;
 using CryptocurrencyExchange.Data;
+using CryptocurrencyExchange.Infrastructure.Market;
 using CryptocurrencyExchange.Infrastructure.Security;
-using CryptocurrencyExchange.InfrastructureProject.Market;
 using CryptocurrencyExchange.Middleware;
 using CryptocurrencyExchange.Options;
 using CryptocurrencyExchange.Schedulers;

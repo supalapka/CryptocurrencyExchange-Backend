@@ -1,4 +1,4 @@
-﻿namespace CryptocurrencyExchange.InfrastructureProject.Market
+﻿namespace CryptocurrencyExchange.Core.Interfaces
 {
     public interface IMarketApiClient
     {
