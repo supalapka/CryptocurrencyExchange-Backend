@@ -1,5 +1,5 @@
 ﻿using CryptocurrencyExchange.Core.Interfaces;
-using CryptocurrencyExchange.Services.Interfaces;
+using CryptocurrencyExchange.Core.Interfaces.Services;
 
 namespace CryptocurrencyExchange.Services.Market
 {

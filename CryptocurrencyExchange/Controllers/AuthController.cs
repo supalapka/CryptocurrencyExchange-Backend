@@ -1,4 +1,5 @@
-﻿using CryptocurrencyExchange.Services.Auth;
+﻿using CryptocurrencyExchange.Core.Interfaces.Services;
+using CryptocurrencyExchange.Services.Auth;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CryptocurrencyExchange.Controllers

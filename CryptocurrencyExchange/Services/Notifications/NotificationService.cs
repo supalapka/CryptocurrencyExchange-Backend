@@ -1,4 +1,5 @@
-﻿using CryptocurrencyExchange.Core.Models;
+﻿using CryptocurrencyExchange.Core.Interfaces.Services;
+using CryptocurrencyExchange.Core.Models;
 using CryptocurrencyExchange.Data;
 
 namespace CryptocurrencyExchange.Services.Notifications

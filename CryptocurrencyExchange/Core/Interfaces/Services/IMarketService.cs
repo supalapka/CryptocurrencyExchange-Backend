@@ -1,4 +1,4 @@
-﻿namespace CryptocurrencyExchange.Services.Interfaces
+﻿namespace CryptocurrencyExchange.Core.Interfaces.Services
 {
     public interface IMarketService
     {

@@ -1,4 +1,5 @@
 ﻿using CryptocurrencyExchange.Core.Interfaces;
+using CryptocurrencyExchange.Core.Interfaces.Services;
 using CryptocurrencyExchange.Core.Models;
 using CryptocurrencyExchange.Exceptions;
 using CryptocurrencyExchange.Infrastructure.Security;

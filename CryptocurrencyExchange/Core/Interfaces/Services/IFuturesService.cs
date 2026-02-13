@@ -1,4 +1,6 @@
-﻿namespace CryptocurrencyExchange.Services.Futures
+﻿using CryptocurrencyExchange.Services.Futures;
+
+namespace CryptocurrencyExchange.Core.Interfaces.Services
 {
     public interface IFuturesService
     {

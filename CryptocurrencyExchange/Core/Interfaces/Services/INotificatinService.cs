@@ -1,6 +1,6 @@
 ﻿using CryptocurrencyExchange.Core.Models;
 
-namespace CryptocurrencyExchange.Services.Notifications
+namespace CryptocurrencyExchange.Core.Interfaces.Services
 {
     public interface INotificationService
     {

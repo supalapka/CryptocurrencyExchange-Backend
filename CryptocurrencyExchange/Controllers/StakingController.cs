@@ -1,4 +1,4 @@
-﻿using CryptocurrencyExchange.Services.StakingServices;
+﻿using CryptocurrencyExchange.Core.Interfaces.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

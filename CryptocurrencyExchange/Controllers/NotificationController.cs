@@ -1,5 +1,5 @@
-﻿using CryptocurrencyExchange.Core.Models;
-using CryptocurrencyExchange.Services.Notifications;
+﻿using CryptocurrencyExchange.Core.Interfaces.Services;
+using CryptocurrencyExchange.Core.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

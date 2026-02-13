@@ -1,5 +1,5 @@
-﻿using CryptocurrencyExchange.Data;
-using CryptocurrencyExchange.Services.StakingServices;
+﻿using CryptocurrencyExchange.Core.Interfaces.Services;
+using CryptocurrencyExchange.Data;
 
 namespace CryptocurrencyExchange.Infrastructure.Schedulers
 {

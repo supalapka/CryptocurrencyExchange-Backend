@@ -1,6 +1,6 @@
 ﻿using CryptocurrencyExchange.Core.Models;
 
-namespace CryptocurrencyExchange.Services.Wallet
+namespace CryptocurrencyExchange.Core.Interfaces.Services
 {
     public interface IWalletService
     {

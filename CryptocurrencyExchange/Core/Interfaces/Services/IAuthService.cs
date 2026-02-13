@@ -1,4 +1,4 @@
-﻿namespace CryptocurrencyExchange.Services.Auth
+﻿namespace CryptocurrencyExchange.Core.Interfaces.Services
 {
     public interface IAuthService
     {

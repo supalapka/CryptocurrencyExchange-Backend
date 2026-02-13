@@ -1,4 +1,5 @@
-﻿using CryptocurrencyExchange.Services.Futures;
+﻿using CryptocurrencyExchange.Core.Interfaces.Services;
+using CryptocurrencyExchange.Services.Futures;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

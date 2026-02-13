@@ -1,8 +1,8 @@
 ﻿using CryptocurrencyExchange.Core.Interfaces;
+using CryptocurrencyExchange.Core.Interfaces.Services;
 using CryptocurrencyExchange.Core.Models;
 using CryptocurrencyExchange.Core.ValueObject;
 using CryptocurrencyExchange.Exceptions;
-using CryptocurrencyExchange.Services.Interfaces;
 using CryptocurrencyExchange.Services.Wallet;
 using Moq;
 using NUnit.Framework;
