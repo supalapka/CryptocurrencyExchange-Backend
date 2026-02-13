@@ -1,12 +1,17 @@
 ﻿using CryptocurrencyExchange.Core.Interfaces;
 using Newtonsoft.Json;
+using System.Globalization;
 
 namespace CryptocurrencyExchange.Infrastructure.Market
 {
     public sealed class BinanceMarketApiClient : IMarketApiClient
     {
-        private const string UsdtSymbol = "USDT";
+        private record PriceResponseDto
+        {
+            public string? Price { get; init; }
+        }
 
+        private const string UsdtSymbol = "USDT";
         private readonly HttpClient _httpClient;
 
         public BinanceMarketApiClient(HttpClient httpClient)
@@ -44,7 +49,7 @@ namespace CryptocurrencyExchange.Infrastructure.Market
             if (dto.Price is null)
                 throw new InvalidOperationException("Price not found in response");
 
-            return (decimal)dto.Price;
+            return decimal.Parse(dto.Price, CultureInfo.InvariantCulture);
         }
 
     }
