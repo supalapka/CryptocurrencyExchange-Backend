@@ -1,4 +1,4 @@
-﻿using CryptocurrencyExchange.Core.Interfaces;
+﻿using CryptocurrencyExchange.Core.Interfaces.Repositories;
 using CryptocurrencyExchange.Core.Models;
 using Microsoft.EntityFrameworkCore;
 

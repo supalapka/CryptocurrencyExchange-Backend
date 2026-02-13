@@ -1,6 +1,6 @@
 ﻿using CryptocurrencyExchange.Core.Models;
 
-namespace CryptocurrencyExchange.Core.Interfaces
+namespace CryptocurrencyExchange.Core.Interfaces.Repositories
 {
     public interface IUserRepository
     {

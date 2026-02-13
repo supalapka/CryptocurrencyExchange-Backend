@@ -1,5 +1,6 @@
 using CryptocurrencyExchange.Core.Domain;
 using CryptocurrencyExchange.Core.Interfaces;
+using CryptocurrencyExchange.Core.Interfaces.Repositories;
 using CryptocurrencyExchange.Core.Interfaces.Services;
 using CryptocurrencyExchange.Data;
 using CryptocurrencyExchange.Infrastructure.Market;

@@ -1,7 +1,7 @@
 ﻿using CryptocurrencyExchange.Core.Models;
 using CryptocurrencyExchange.Services.Futures;
 
-namespace CryptocurrencyExchange.Core.Interfaces
+namespace CryptocurrencyExchange.Core.Interfaces.Repositories
 {
     public interface IFutureRepository
     {
