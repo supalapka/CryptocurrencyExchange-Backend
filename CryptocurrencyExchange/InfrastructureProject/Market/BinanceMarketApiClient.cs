@@ -16,11 +16,8 @@ namespace CryptocurrencyExchange.InfrastructureProject.Market
         public async Task<decimal> GetUsdtPriceAsync(string symbol)
         {
             var normalizedSymbol = NormalizeSymbol(symbol);
-
-            using var response = await _httpClient.GetAsync($"ticker/price?symbol={normalizedSymbol}");
-            response.EnsureSuccessStatusCode();
-
-            return ParsePrice(await response.Content.ReadAsStringAsync());
+            var coinData = await GetCoinDataResponse(normalizedSymbol);
+            return ParsePrice(coinData);
         }
 
         private string NormalizeSymbol(string coinSymbol)
@@ -29,6 +26,13 @@ namespace CryptocurrencyExchange.InfrastructureProject.Market
             if (!normalizedSymbol.EndsWith(UsdtSymbol))
                 normalizedSymbol += UsdtSymbol;
             return normalizedSymbol;
+        }
+
+        private async Task<string> GetCoinDataResponse(string symbol)
+        {
+            using var response = await _httpClient.GetAsync($"ticker/price?symbol={symbol}");
+            response.EnsureSuccessStatusCode();
+            return await response.Content.ReadAsStringAsync();
         }
 
         private decimal ParsePrice(string content)
