@@ -28,13 +28,11 @@ builder.Services
     .Validate(o => o.SecretKey.Length >= 32, "JWT key is too short")
     .ValidateOnStart();
 
-
 builder.Services.AddControllers();
 builder.Services.AddDbContext<DataContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
-
 
 builder.Services.AddHttpClient<IMarketApiClient, BinanceMarketApiClient>(client =>
 {
@@ -65,8 +63,6 @@ builder.Services.AddScoped<IAuthDomainService, AuthDomainService>();
 builder.Services.AddScoped<IUserRepository, EfUserRepository>();
 
 builder.Services.AddHostedService<StakingScheduler>();
-
-
 
 builder.Services.AddCors(options =>
 {
