@@ -42,6 +42,7 @@ builder.Services.AddHttpClient<IMarketApiClient, BinanceMarketApiClient>(client 
 });
 
 builder.Services.AddScoped<IMarketService, MarketService>();
+builder.Services.AddScoped<IMarketPriceProvider, ApiMarketPriceProvider>();
 
 builder.Services.AddScoped<IStakingRepository, EfStakingRepository>();
 builder.Services.AddScoped<IStakingDomainService, StakingDomainService>();

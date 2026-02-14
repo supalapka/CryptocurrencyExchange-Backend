@@ -5,16 +5,16 @@ namespace CryptocurrencyExchange.Services.Market
 {
     public class MarketService : IMarketService
     {
-        private readonly IMarketApiClient _marketApiClient;
+        private readonly IMarketPriceProvider _marketPriceProvider;
 
-        public MarketService(IMarketApiClient marketApiClient)
+        public MarketService(IMarketPriceProvider marketPriceProvider)
         {
-            _marketApiClient = marketApiClient;
+            _marketPriceProvider = marketPriceProvider;
         }
 
         public async Task<decimal> GetPrice(string coinSymbol)
         {
-            return await _marketApiClient.GetUsdtPriceAsync(coinSymbol);
+            return await _marketPriceProvider.GetPriceInUsdt(coinSymbol);
         }
     }
 }
