@@ -36,7 +36,7 @@ builder.Services.AddDbContext<DataContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
 
-builder.Services.AddHttpClient<IMarketApiClient, BinanceMarketApiClient>();
+builder.Services.AddHttpClient<IMarketApiClient, BybitMarketApiClient>();
 
 builder.Services.AddScoped<IMarketService, MarketService>();
 builder.Services.AddScoped<IMarketPriceProvider, ApiMarketPriceProvider>();
