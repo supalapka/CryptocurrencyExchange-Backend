@@ -1,23 +1,18 @@
 ﻿using CryptocurrencyExchange.Core.Interfaces;
-using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System.Globalization;
 
 namespace CryptocurrencyExchange.Infrastructure.Market
 {
-    public sealed class BinanceMarketApiClient : IMarketApiClient
+    public class BybitMarketApiClient : IMarketApiClient
     {
-        private record PriceResponseDto
-        {
-            public string? Price { get; init; }
-        }
-
         private const string UsdtSymbol = "USDT";
         private readonly HttpClient _httpClient;
 
-        public BinanceMarketApiClient(HttpClient httpClient)
+        public BybitMarketApiClient(HttpClient httpClient)
         {
             _httpClient = httpClient;
-            _httpClient.BaseAddress = new Uri("https://api.binance.com/api/v3/");
+            _httpClient.BaseAddress = new Uri("https://api.bybit.com/");
         }
 
         public async Task<decimal> GetUsdtPriceAsync(string symbol)
@@ -39,20 +34,19 @@ namespace CryptocurrencyExchange.Infrastructure.Market
 
         private async Task<string> GetCoinDataResponse(string symbol)
         {
-            using var response = await _httpClient.GetAsync($"ticker/price?symbol={symbol}");
+            using var response = await _httpClient.GetAsync($"/v5/market/tickers?category=spot&symbol={symbol}");
             response.EnsureSuccessStatusCode();
+
             return await response.Content.ReadAsStringAsync();
         }
 
         private decimal ParsePrice(string content)
         {
-            var dto = JsonConvert.DeserializeObject<PriceResponseDto>(content)
-              ?? throw new InvalidOperationException("Empty price response");
+            var json = JObject.Parse(content);
+            var lastPrice = json["result"]?["list"]?.First?["lastPrice"]?.Value<string>()
+                ?? throw new InvalidOperationException("LastPrice not found in Bybit response");
 
-            if (dto.Price is null)
-                throw new InvalidOperationException("Price not found in response");
-
-            return decimal.Parse(dto.Price, CultureInfo.InvariantCulture);
+            return decimal.Parse(lastPrice, CultureInfo.InvariantCulture);
         }
     }
 }

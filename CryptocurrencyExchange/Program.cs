@@ -36,13 +36,12 @@ builder.Services.AddDbContext<DataContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
 
-builder.Services.AddHttpClient<IMarketApiClient, BinanceMarketApiClient>(client =>
-{
-    client.BaseAddress = new Uri("https://api.binance.com/api/v3/");
-});
+builder.Services.AddHttpClient<IMarketApiClient, BybitMarketApiClient>();
+builder.Services.AddHttpClient<IMarketApiClient, BinanceMarketApiClient>();
+
 
 builder.Services.AddScoped<IMarketService, MarketService>();
-builder.Services.AddScoped<IMarketPriceProvider, ApiMarketPriceProvider>();
+builder.Services.AddSingleton<IMarketPriceProvider, RoutingApiMarketPriceProvider>(); // carefull, do not inject Scoped services inside singleton
 
 builder.Services.AddScoped<IStakingRepository, EfStakingRepository>();
 builder.Services.AddScoped<IStakingDomainService, StakingDomainService>();
