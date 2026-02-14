@@ -43,7 +43,6 @@ namespace CryptocurrencyExchange.Infrastructure.Market
         private decimal ParsePrice(string content)
         {
             var json = JObject.Parse(content);
-
             var lastPrice = json["result"]?["list"]?.First?["lastPrice"]?.Value<string>()
                 ?? throw new InvalidOperationException("LastPrice not found in Bybit response");
 
