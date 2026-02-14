@@ -37,9 +37,11 @@ builder.Services.AddDbContext<DataContext>(options =>
 });
 
 builder.Services.AddHttpClient<IMarketApiClient, BybitMarketApiClient>();
+builder.Services.AddHttpClient<IMarketApiClient, BinanceMarketApiClient>();
+
 
 builder.Services.AddScoped<IMarketService, MarketService>();
-builder.Services.AddScoped<IMarketPriceProvider, ApiMarketPriceProvider>();
+builder.Services.AddSingleton<IMarketPriceProvider, RoutingApiMarketPriceProvider>(); // carefull, do not inject Scoped services inside singleton
 
 builder.Services.AddScoped<IStakingRepository, EfStakingRepository>();
 builder.Services.AddScoped<IStakingDomainService, StakingDomainService>();
