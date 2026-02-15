@@ -1,6 +1,6 @@
 ﻿using CryptocurrencyExchange.Core.Interfaces.Services;
 using CryptocurrencyExchange.Core.Models;
-using CryptocurrencyExchange.Data;
+using CryptocurrencyExchange.Infrastructure.Persistence;
 
 namespace CryptocurrencyExchange.Services.Notifications
 {

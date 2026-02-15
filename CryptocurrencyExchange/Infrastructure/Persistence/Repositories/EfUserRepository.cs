@@ -2,7 +2,7 @@
 using CryptocurrencyExchange.Core.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace CryptocurrencyExchange.Data
+namespace CryptocurrencyExchange.Infrastructure.Persistence.Repositories
 {
     public class EfUserRepository : IUserRepository
     {

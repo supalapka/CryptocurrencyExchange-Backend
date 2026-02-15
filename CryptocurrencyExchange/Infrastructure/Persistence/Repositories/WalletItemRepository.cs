@@ -4,7 +4,7 @@ using CryptocurrencyExchange.Core.ValueObject;
 using CryptocurrencyExchange.Exceptions;
 using Microsoft.EntityFrameworkCore;
 
-namespace CryptocurrencyExchange.Data
+namespace CryptocurrencyExchange.Infrastructure.Persistence.Repositories
 {
     public class WalletItemRepository : IWalletItemRepository
     {

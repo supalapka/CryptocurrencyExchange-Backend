@@ -3,7 +3,7 @@ using CryptocurrencyExchange.Core.Models;
 using CryptocurrencyExchange.Services.Futures;
 using Microsoft.EntityFrameworkCore;
 
-namespace CryptocurrencyExchange.Data
+namespace CryptocurrencyExchange.Infrastructure.Persistence.Repositories
 {
     public class EfFutureRepository : IFutureRepository
     {

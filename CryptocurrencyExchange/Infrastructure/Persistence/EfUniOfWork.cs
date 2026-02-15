@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using System.Data;
 
-namespace CryptocurrencyExchange.Data
+namespace CryptocurrencyExchange.Infrastructure.Persistence
 {
     public class EfUniOfWork : IUnitOfWork
     {
