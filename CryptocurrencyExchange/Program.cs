@@ -15,7 +15,7 @@ using CryptocurrencyExchange.Services.Interfaces;
 using CryptocurrencyExchange.Services.Market;
 using CryptocurrencyExchange.Services.Notifications;
 using CryptocurrencyExchange.Services.StakingServices;
-using CryptocurrencyExchange.Services.Wallet;
+using CryptocurrencyExchange.Services.Wallets;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -54,7 +54,6 @@ builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IFuturesService, FuturesService>();
 
 builder.Services.AddScoped<IWalletItemRepository, WalletItemRepository>();
-builder.Services.AddScoped<IWalletDomainService, WalletDomainService>();
 
 builder.Services.AddScoped<IUnitOfWork, EfUniOfWork>();
 

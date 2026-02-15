@@ -10,10 +10,8 @@ namespace CryptocurrencyExchange.Core.Domain
         public Future OpenPosition(FutureDto futureDto, WalletItem usdtItem)
         {
             EnsureSufficientBalance(usdtItem.Amount, futureDto.Margin);
-
             var future = CreateFuture(futureDto, usdtItem.UserId);
-
-            DebitMargin(future.Margin, usdtItem);
+            usdtItem.RemoveAmount((future.Margin));
 
             return future;
         }
@@ -21,21 +19,12 @@ namespace CryptocurrencyExchange.Core.Domain
         public void ClosePosition(Future position, WalletItem usdtItem, decimal pnl)
         {
             MarkPositionAsCompleted(position);
-
-            usdtItem.Amount = CalculateBalanceAfterClose(usdtItem.Amount, position.Margin, pnl);
+            usdtItem.AddAmount(CalculatePayoutAmount(position.Margin, pnl));
         }
 
         public void LiquidatePosition(Future position)
         {
             MarkPositionAsCompleted(position);
-        }
-
-
-
-
-        private void DebitMargin(decimal futureMargin, WalletItem usdt)
-        {
-            usdt.Amount = Math.Round(usdt.Amount - futureMargin, 2);
         }
 
         private void MarkPositionAsCompleted(Future position)
@@ -63,10 +52,9 @@ namespace CryptocurrencyExchange.Core.Domain
               Position = dto.Position
           };
 
-        private decimal CalculateBalanceAfterClose(decimal currentBalance, decimal margin, decimal pnl)
+        private decimal CalculatePayoutAmount(decimal margin, decimal pnl)
         {
-            return Math.Round(currentBalance + margin + pnl, 2);
+            return Math.Round(margin + pnl, 2);
         }
-
     }
 }

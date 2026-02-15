@@ -1,29 +1,27 @@
-﻿using CryptocurrencyExchange.Core.Interfaces;
+﻿using CryptocurrencyExchange.Core.Domain.Wallets;
+using CryptocurrencyExchange.Core.Interfaces;
 using CryptocurrencyExchange.Core.Interfaces.Repositories;
 using CryptocurrencyExchange.Core.Interfaces.Services;
 using CryptocurrencyExchange.Core.Models;
 
-namespace CryptocurrencyExchange.Services.Wallet
+namespace CryptocurrencyExchange.Services.Wallets
 {
     public class WalletService : IWalletService
     {
         private readonly IMarketService _marketService;
         private readonly IWalletItemRepository _walletItemRepository;
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IWalletDomainService _walletDomainService;
 
         public WalletService(
             IMarketService marketService,
             IWalletItemRepository walletItemRepository,
-            IUnitOfWork unitOfWork,
-            IWalletDomainService walletDomainService)
+            IUnitOfWork unitOfWork
+            )
         {
             _marketService = marketService;
             _walletItemRepository = walletItemRepository;
             _unitOfWork = unitOfWork;
-            _walletDomainService = walletDomainService;
         }
-
 
         public async Task BuyAsync(int userId, string coinSymbol, decimal usd)
         {
@@ -33,24 +31,24 @@ namespace CryptocurrencyExchange.Services.Wallet
                 var tradeCoinPrice = await _marketService.GetPrice(coinSymbol);
 
                 var tradeItems = await _walletItemRepository.GetCoinsDataForTradeAsync(userId, coinSymbol);
+                IEnumerable<WalletItem> walletItemsToTrade = new[] { tradeItems.BaseCurrency, tradeItems.TradedCurrency };
 
-                _walletDomainService.Buy(tradeItems.BaseCurrency, tradeItems.TradedCurrency, usd, tradeCoinPrice);
+                Wallet wallet = new Wallet(userId, walletItemsToTrade);
+                wallet.Buy(coinSymbol, usd, tradeCoinPrice);
             });
         }
-
 
         public async Task<decimal> GetCoinAmountAsync(int userId, string symbol)
         {
             var walletItem = await _walletItemRepository.GetAsync(userId, symbol);
+
             return walletItem?.Amount ?? 0;
         }
-
 
         public async Task<List<WalletItem>> GetFullWalletAsync(int userId)
         {
             return await _walletItemRepository.GetNonEmptyByUserAsync(userId);
         }
-
 
         public async Task<WalletItem> GetOrCreateWalletItem(int userId, string symbol)
         {
@@ -58,18 +56,12 @@ namespace CryptocurrencyExchange.Services.Wallet
 
             if (item == null)
             {
-                item = new WalletItem()
-                {
-                    Symbol = symbol,
-                    Amount = 0,
-                    UserId = userId
-                };
+                item = new WalletItem(userId, symbol);
                 await _walletItemRepository.AddAsync(item);
             }
 
             return item;
         }
-
 
         public async Task SellAsync(int userId, string coinSymbol, decimal amount)
         {
@@ -79,8 +71,10 @@ namespace CryptocurrencyExchange.Services.Wallet
                 var tradeCoinPrice = await _marketService.GetPrice(coinSymbol);
 
                 var tradeItems = await _walletItemRepository.GetCoinsDataForTradeAsync(userId, coinSymbol);
+                IEnumerable<WalletItem> walletItemsToTrade = new[] { tradeItems.BaseCurrency, tradeItems.TradedCurrency };
 
-                _walletDomainService.Sell(tradeItems.BaseCurrency, tradeItems.TradedCurrency, amount, tradeCoinPrice);
+                Wallet wallet = new Wallet(userId, walletItemsToTrade);
+                wallet.Sell(coinSymbol, amount, tradeCoinPrice);
             });
         }
     }

@@ -11,7 +11,7 @@ namespace CryptocurrencyExchange.Core.Domain
             if (stakingCoinWalletItem.Amount < amountToStake)
                 throw new InsufficientFundsException($"Not anough balance in {stakingCoinWalletItem.Symbol} to stake");
 
-            stakingCoinWalletItem.Amount -= amountToStake;
+            stakingCoinWalletItem.RemoveAmount(amountToStake);
 
             var stakingData = new Staking()
             {
@@ -37,7 +37,7 @@ namespace CryptocurrencyExchange.Core.Domain
             var coinsToAdd = stakingData.Amount;
             decimal rewards = stakingData.Amount / 100 * (decimal)persentageToAdd;
             coinsToAdd += rewards;
-            coinWalletItem.Amount += coinsToAdd;
+            coinWalletItem.AddAmount(coinsToAdd);
         }
 
         public bool IsExpired(Staking staking)
