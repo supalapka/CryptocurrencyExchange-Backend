@@ -1,6 +1,5 @@
 ﻿using CryptocurrencyExchange.Core.Interfaces.Services;
 using CryptocurrencyExchange.Core.Models;
-using CryptocurrencyExchange.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,12 +8,10 @@ namespace CryptocurrencyExchange.Controllers
     [Authorize]
     public class WalletController : Controller
     {
-        private readonly DataContext _dataContext;
         private readonly IWalletService _walletService;
 
-        public WalletController(DataContext dataContext, IWalletService walletService)
+        public WalletController(IWalletService walletService)
         {
-            _dataContext = dataContext;
             _walletService = walletService;
         }
 
