@@ -37,5 +37,10 @@ namespace CryptocurrencyExchange.Utilities
 
             return RoundCoinAmountUpTo1USD(amount, coinPrice);
         }
+
+        public static decimal RoundFiat(decimal amount)
+        {
+            return Math.Round(amount, 2);
+        }
     }
 }
