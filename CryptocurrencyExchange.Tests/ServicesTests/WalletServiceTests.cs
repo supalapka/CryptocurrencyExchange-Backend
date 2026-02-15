@@ -1,7 +1,6 @@
 ﻿using CryptocurrencyExchange.Core.Interfaces;
 using CryptocurrencyExchange.Core.Interfaces.Repositories;
 using CryptocurrencyExchange.Core.Interfaces.Services;
-using CryptocurrencyExchange.Core.Models;
 using CryptocurrencyExchange.Core.ValueObject;
 using CryptocurrencyExchange.Exceptions;
 using CryptocurrencyExchange.Services.Wallet;
@@ -18,7 +17,6 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
         private Mock<IUnitOfWork> unitOfWorkMock = null!;
         private Mock<IWalletItemRepository> walletItemRepoMock = null!;
         private Mock<IMarketService> marketServiceMock = null!;
-        private Mock<IWalletDomainService> walletDomainService = null!;
 
 
         [SetUp]
@@ -27,7 +25,6 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
             unitOfWorkMock = new Mock<IUnitOfWork>();
             walletItemRepoMock = new Mock<IWalletItemRepository>();
             marketServiceMock = new Mock<IMarketService>();
-            walletDomainService = new Mock<IWalletDomainService>();
         }
 
         [Test]
@@ -48,12 +45,16 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
                 .Setup(x => x.ExecuteInTransactionAsync(It.IsAny<Func<Task>>()))
                 .Returns<Func<Task>>(action => action());
 
+            marketServiceMock
+                .Setup(x => x.GetPrice(coinSymbol))
+                .ReturnsAsync(50000m);
+
             var walletService = new WalletService(
                 marketServiceMock.Object,
                 walletItemRepoMock.Object,
-                unitOfWorkMock.Object,
-                walletDomainService.Object
+                unitOfWorkMock.Object
             );
+
 
             // Act
             await walletService.BuyAsync(TestUser.DefaultId, coinSymbol, usdToBuy);
@@ -64,9 +65,6 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
 
             walletItemRepoMock.Verify
                 (x => x.GetCoinsDataForTradeAsync(TestUser.DefaultId, coinSymbol), Times.Once);
-
-            walletDomainService.Verify(service => service.Buy(usdt, btc,
-                It.IsAny<decimal>(), It.IsAny<decimal>()), Times.Once);
         }
 
 
@@ -74,15 +72,11 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
         public void BuyAsync_NotEnoughBalance_ThrowsInsufficientFundsException()
         {
             // Arrange
-            walletItemRepoMock.Setup(x => x.GetCoinsDataForTradeAsync(TestUser.DefaultId, "btc"))
-                .ReturnsAsync(new TradeWalletItems(It.IsAny<WalletItem>(), It.IsAny<WalletItem>()));
+            var usdt = WalletItemMother.CreateUsdt(amount: 50);
+            var btc = WalletItemMother.CreateBtc(amount: 0);
 
-            walletDomainService.Setup(x => x.Buy(
-                It.IsAny<WalletItem>(),
-                It.IsAny<WalletItem>(),
-                It.IsAny<decimal>(),
-                It.IsAny<decimal>()))
-                .Throws<InsufficientFundsException>();
+            walletItemRepoMock.Setup(x => x.GetCoinsDataForTradeAsync(TestUser.DefaultId, "btc"))
+                .ReturnsAsync(new TradeWalletItems(usdt, btc));
 
             unitOfWorkMock
                 .Setup(x => x.ExecuteInTransactionAsync(It.IsAny<Func<Task>>()))
@@ -91,8 +85,7 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
             var walletService = new WalletService(
                 marketServiceMock.Object,
                 walletItemRepoMock.Object,
-                unitOfWorkMock.Object,
-                walletDomainService.Object
+                unitOfWorkMock.Object
             );
 
             // Act + Assert
@@ -101,13 +94,6 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
 
             unitOfWorkMock.Verify(
                 x => x.ExecuteInTransactionAsync(It.IsAny<Func<Task>>()),
-                Times.Once);
-
-            walletDomainService.Verify(x => x.Buy(
-                It.IsAny<WalletItem>(),
-                It.IsAny<WalletItem>(),
-                100,
-                It.IsAny<decimal>()),
                 Times.Once);
         }
 
@@ -124,6 +110,10 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
 
             walletItemRepoMock.Setup(x => x.GetCoinsDataForTradeAsync(TestUser.DefaultId, coinSymbol))
               .ReturnsAsync(new TradeWalletItems(usdtWalletItem, coinToSell));
+         
+            marketServiceMock
+               .Setup(x => x.GetPrice(coinSymbol))
+               .ReturnsAsync(50000m);
 
             unitOfWorkMock
                .Setup(x => x.ExecuteInTransactionAsync(It.IsAny<Func<Task>>()))
@@ -132,8 +122,7 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
             var walletService = new WalletService(
                 marketServiceMock.Object,
                 walletItemRepoMock.Object,
-                unitOfWorkMock.Object,
-                walletDomainService.Object
+                unitOfWorkMock.Object
             );
 
             // Act
@@ -143,9 +132,6 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
             unitOfWorkMock.Verify(
                 x => x.ExecuteInTransactionAsync(It.IsAny<Func<Task>>()),
                 Times.Once);
-
-            walletDomainService.Verify(x => x.Sell(usdtWalletItem, coinToSell,
-                    coinsToSell, It.IsAny<decimal>()), Times.Once);
         }
     }
 }

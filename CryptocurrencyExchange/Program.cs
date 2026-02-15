@@ -54,7 +54,6 @@ builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IFuturesService, FuturesService>();
 
 builder.Services.AddScoped<IWalletItemRepository, WalletItemRepository>();
-builder.Services.AddScoped<IWalletDomainService, WalletDomainService>();
 
 builder.Services.AddScoped<IUnitOfWork, EfUniOfWork>();
 
