@@ -2,7 +2,7 @@
 using CryptocurrencyExchange.Exceptions;
 using CryptocurrencyExchange.Utilities;
 
-namespace CryptocurrencyExchange.Core.Domain.Wallet
+namespace CryptocurrencyExchange.Core.Domain.Wallets
 {
     public class Wallet
     {
@@ -27,11 +27,8 @@ namespace CryptocurrencyExchange.Core.Domain.Wallet
             var coinAmount = usd / coinPrice;
             coinAmount = MoneyPolicyUtils.RoundCoinAmountUpTo1USD(coinAmount, coinPrice);
 
-            usdt.Amount = MoneyPolicyUtils.RoundFiat(usdt.Amount - usd);
-            coin.Amount = MoneyPolicyUtils.RoundCoinAmountUpTo1USD(
-                coin.Amount + coinAmount,
-                coinPrice
-            );
+            usdt.RemoveAmount(usd);
+            coin.AddAmount(coinAmount);
         }
 
         public void Sell(string coinSymbol, decimal amount, decimal coinPrice)
@@ -44,12 +41,8 @@ namespace CryptocurrencyExchange.Core.Domain.Wallet
 
             var usdtAmount = coinPrice * amount;
 
-            coin.Amount = MoneyPolicyUtils.RoundCoinAmountUpTo1USD(
-                coin.Amount - amount,
-                coinPrice
-            );
-
-            usdt.Amount = MoneyPolicyUtils.RoundFiat(usdt.Amount + usdtAmount);
+            usdt.AddAmount(usdtAmount);
+            coin.RemoveAmount(amount);
         }
 
         public decimal GetBalance(string symbol) =>
@@ -67,12 +60,7 @@ namespace CryptocurrencyExchange.Core.Domain.Wallet
             if (_items.TryGetValue(symbol, out var item))
                 return item;
 
-            item = new WalletItem
-            {
-                Symbol = symbol,
-                UserId = UserId,
-                Amount = 0
-            };
+            item = new WalletItem(UserId, symbol);
 
             _items[symbol] = item;
             return item;

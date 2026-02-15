@@ -1,4 +1,4 @@
-﻿using CryptocurrencyExchange.Core.Domain.Wallet;
+﻿using CryptocurrencyExchange.Core.Domain.Wallets;
 using CryptocurrencyExchange.Core.Interfaces;
 using CryptocurrencyExchange.Core.Interfaces.Repositories;
 using CryptocurrencyExchange.Core.Interfaces.Services;
@@ -56,12 +56,7 @@ namespace CryptocurrencyExchange.Services.Wallets
 
             if (item == null)
             {
-                item = new WalletItem()
-                {
-                    Symbol = symbol,
-                    Amount = 0,
-                    UserId = userId
-                };
+                item = new WalletItem(userId, symbol);
                 await _walletItemRepository.AddAsync(item);
             }
 

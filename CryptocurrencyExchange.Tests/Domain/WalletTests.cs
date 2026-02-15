@@ -1,4 +1,4 @@
-﻿using CryptocurrencyExchange.Core.Domain.Wallet;
+﻿using CryptocurrencyExchange.Core.Domain.Wallets;
 using CryptocurrencyExchange.Exceptions;
 using NUnit.Framework;
 
