@@ -1,4 +1,5 @@
-﻿using CryptocurrencyExchange.Core.Domain.Wallets;
+﻿using CryptocurrencyExchange.Core.Domain.Wallet.Commands;
+using CryptocurrencyExchange.Core.Domain.Wallets;
 using CryptocurrencyExchange.Exceptions;
 using NUnit.Framework;
 
@@ -28,9 +29,15 @@ namespace CryptocurrencyExchange.Tests.Domain
             var btc = WalletItemMother.CreateBtc(amount: 0);
 
             Wallet wallet = new Wallet(TestUser.DefaultId, new[] { usdt, btc });
+            WalletTradeCommand walletTradeCommand = new WalletTradeCommand
+            (
+                coinSymbol: "btc",
+                coinAmount: 1,
+                coinPrice: 500
+            );
 
             // Act
-            wallet.Buy("btc", usd: 500, coinPrice: 500);
+            wallet.Buy(walletTradeCommand);
 
             // Assert
             Assert.That(usdt.Amount, Is.EqualTo(500));
@@ -45,10 +52,15 @@ namespace CryptocurrencyExchange.Tests.Domain
             var btc = WalletItemMother.CreateBtc(amount: 0);
 
             Wallet wallet = new Wallet(TestUser.DefaultId, new[] { usdt, btc });
-
+            WalletTradeCommand walletTradeCommand = new WalletTradeCommand
+            (
+                coinSymbol: "btc",
+                coinAmount: 1,
+                coinPrice: 500
+            );
             // Act & Assert
             Assert.Throws<InsufficientFundsException>(() =>
-                wallet.Buy("btc", usd: 500, coinPrice: 500));
+                wallet.Buy(walletTradeCommand));
         }
 
         [Test]
@@ -59,9 +71,15 @@ namespace CryptocurrencyExchange.Tests.Domain
             var btc = WalletItemMother.CreateBtc(amount: 1);
 
             Wallet wallet = new Wallet(TestUser.DefaultId, new[] { usdt, btc });
+            WalletTradeCommand walletTradeCommand = new WalletTradeCommand
+            (
+                coinSymbol: "btc",
+                coinAmount: 1,
+                coinPrice: 500
+            );
 
             // Act
-            wallet.Sell("btc", amount: 1, coinPrice: 500);
+            wallet.Sell(walletTradeCommand);
 
             // Assert
             Assert.That(wallet.GetBalance("usdt"), Is.EqualTo(500));
@@ -76,10 +94,16 @@ namespace CryptocurrencyExchange.Tests.Domain
             var btc = WalletItemMother.CreateBtc(amount: 0);
 
             Wallet wallet = new Wallet(TestUser.DefaultId, new[] { usdt, btc });
+            WalletTradeCommand walletTradeCommand = new WalletTradeCommand
+           (
+               coinSymbol: "btc",
+               coinAmount: 1,
+               coinPrice: 500
+           );
 
             // Act & Assert
             Assert.Throws<InsufficientFundsException>(() =>
-                wallet.Sell("btc", amount: 1, coinPrice: 500));
+                wallet.Sell(walletTradeCommand));
         }
     }
 }

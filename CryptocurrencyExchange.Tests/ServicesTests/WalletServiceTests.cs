@@ -54,7 +54,7 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
                 .ReturnsAsync(new TradeWalletItems(usdt, btc));
 
             // Act
-            await _service.BuyAsync(TestUser.DefaultId, "BTC", 500);
+            await _service.BuyAsync(TestUser.DefaultId, "BTC", 1);
 
             // Assert
             _uow.Verify(x => x.ExecuteInTransactionAsync(It.IsAny<Func<Task>>()), Times.Once);
@@ -109,7 +109,7 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
 
             // Act & Assert
             Assert.ThrowsAsync<InsufficientFundsException>(async () =>
-                await _service.BuyAsync(TestUser.DefaultId, "btc", 100));
+                await _service.BuyAsync(TestUser.DefaultId, "btc", coinAmount: 100));
         }
 
         [Test]

@@ -1,4 +1,5 @@
-﻿using CryptocurrencyExchange.Core.Models;
+﻿using CryptocurrencyExchange.Core.Domain.Wallet.Commands;
+using CryptocurrencyExchange.Core.Models;
 using CryptocurrencyExchange.Exceptions;
 using CryptocurrencyExchange.Core.Domain.Wallet;
 
@@ -16,34 +17,36 @@ namespace CryptocurrencyExchange.Core.Domain.Wallets
             _items = items.ToDictionary(x => x.Symbol.ToLower());
         }
 
-        public void Buy(string coinSymbol, decimal usd, decimal coinPrice)
+        public void Buy(WalletTradeCommand walletTradeCommand)
         {
             var usdt = GetRequired("usdt");
-            var coin = GetOrCreate(coinSymbol);
+            var coin = GetOrCreate(walletTradeCommand.CoinSymbol);
 
-            if (usdt.Amount < usd)
+            var roundedCoinAmount = MoneyPolicy
+                .RoundDownWithMax1UsdLoss(walletTradeCommand.CoinAmount, walletTradeCommand.CoinPrice);
+            var usdToSpend = MoneyPolicy.RoundFiat(roundedCoinAmount * walletTradeCommand.CoinPrice);
+
+            if (usdt.Amount < usdToSpend)
                 throw new InsufficientFundsException("USDT");
 
-            var coinAmount = usd / coinPrice;
-            coinAmount = MoneyPolicy.RoundDownWithMax1UsdLoss(coinAmount, coinPrice);
-
-            usdt.RemoveAmount(usd);
-            coin.AddAmount(coinAmount);
+            usdt.RemoveAmount(usdToSpend);
+            coin.AddAmount(roundedCoinAmount);
         }
 
-        public void Sell(string coinSymbol, decimal amount, decimal coinPrice)
+
+        public void Sell(WalletTradeCommand walletTradeCommand)
         {
             var usdt = GetRequired("usdt");
-            var coin = GetRequired(coinSymbol);
+            var coin = GetRequired(walletTradeCommand.CoinSymbol);
 
-            if (coin.Amount < amount)
-                throw new InsufficientFundsException(coinSymbol.ToUpper());
+            if (coin.Amount < walletTradeCommand.CoinAmount)
+                throw new InsufficientFundsException(walletTradeCommand.CoinSymbol.ToUpper());
 
-            var usdtAmount = coinPrice * amount;
+            var usdtAmount = walletTradeCommand.CoinAmount * walletTradeCommand.CoinPrice;
             usdtAmount = MoneyPolicy.RoundFiat(usdtAmount);
 
             usdt.AddAmount(usdtAmount);
-            coin.RemoveAmount(amount);
+            coin.RemoveAmount(walletTradeCommand.CoinAmount);
         }
 
         public decimal GetBalance(string symbol) =>
