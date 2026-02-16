@@ -1,5 +1,4 @@
-﻿using CryptocurrencyExchange.Core.Domain.Wallet;
-using CryptocurrencyExchange.Core.Domain.Wallet.Commands;
+﻿using CryptocurrencyExchange.Core.Domain.Wallet.Commands;
 using CryptocurrencyExchange.Core.Models;
 using CryptocurrencyExchange.Core.ValueObject;
 using CryptocurrencyExchange.Exceptions;
@@ -23,15 +22,13 @@ namespace CryptocurrencyExchange.Core.Domain.Wallets
             var usdt = GetRequired(CoinSymbol.Usdt);
             var coin = GetOrCreate(walletTradeCommand.CoinSymbol);
 
-            var roundedCoinAmount = MoneyPolicy
-                .RoundDownWithMax1UsdLoss(walletTradeCommand.CoinAmount, walletTradeCommand.CoinPrice);
-            var usdToSpend = MoneyPolicy.RoundFiat(roundedCoinAmount * walletTradeCommand.CoinPrice);
+            var usdToSpend = walletTradeCommand.CoinAmount * walletTradeCommand.CoinPrice;
 
             if (usdt.Amount < usdToSpend)
                 throw new InsufficientFundsException(CoinSymbol.Usdt.Value);
 
             usdt.RemoveAmount(usdToSpend);
-            coin.AddAmount(roundedCoinAmount);
+            coin.AddAmount(walletTradeCommand.CoinAmount);
         }
 
         public void Sell(WalletTradeCommand walletTradeCommand)
@@ -43,8 +40,6 @@ namespace CryptocurrencyExchange.Core.Domain.Wallets
                 throw new InsufficientFundsException(walletTradeCommand.CoinSymbol.Value);
 
             var usdtAmount = walletTradeCommand.CoinAmount * walletTradeCommand.CoinPrice;
-            usdtAmount = MoneyPolicy.RoundFiat(usdtAmount);
-
             usdt.AddAmount(usdtAmount);
             coin.RemoveAmount(walletTradeCommand.CoinAmount);
         }
