@@ -64,7 +64,7 @@ namespace CryptocurrencyExchange.Tests.Domain
         }
 
         [Test]
-        public void Sell_WhenEnoughBalance_ShouldEcreaseUsdtAndDecreaseBtc()
+        public void Sell_WhenEnoughBalance_ShouldEncreaseUsdtAndDecreaseBtc()
         {
             // Arrange
             var usdt = WalletItemMother.CreateUsdt(amount: 0);
