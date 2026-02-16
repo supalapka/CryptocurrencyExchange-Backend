@@ -34,7 +34,6 @@ namespace CryptocurrencyExchange.Core.Domain.Wallets
             coin.AddAmount(roundedCoinAmount);
         }
 
-
         public void Sell(WalletTradeCommand walletTradeCommand)
         {
             var usdt = GetRequired(new CoinSymbol("usdt"));
