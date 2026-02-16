@@ -5,8 +5,8 @@ namespace CryptocurrencyExchange.Core.Interfaces.Services
 {
     public interface IWalletService
     {
-        Task BuyAsync(CoinTradeDto coinTradeDto);
-        Task SellAsync(CoinTradeDto coinTradeDto);
+        Task BuyAsync(int userId, CoinTradeDto coinTradeDto);
+        Task SellAsync(int userId, CoinTradeDto coinTradeDto);
         Task<decimal> GetCoinAmountAsync(int userId, string symbol);
         Task<List<WalletItem>> GetFullWalletAsync(int userId);
         Task<WalletItem> GetOrCreateWalletItem(int userId, string symbol);

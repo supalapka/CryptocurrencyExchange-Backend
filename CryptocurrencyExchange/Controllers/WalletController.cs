@@ -42,9 +42,7 @@ namespace CryptocurrencyExchange.Controllers
         public async Task<ActionResult> Buy([FromBody] CoinTradeDto coinTradeDto)
         {
             int userId = Convert.ToInt32(HttpContext.Items["UserId"]);
-            coinTradeDto.UserId = userId;
-
-            await _walletService.BuyAsync(coinTradeDto);
+            await _walletService.BuyAsync(userId, coinTradeDto);
 
             return Ok();
         }
@@ -54,9 +52,7 @@ namespace CryptocurrencyExchange.Controllers
         public async Task<ActionResult> Sell([FromBody] CoinTradeDto coinTradeDto)
         {
             int userId = Convert.ToInt32(HttpContext.Items["UserId"]);
-            coinTradeDto.UserId = userId;
-
-            await _walletService.SellAsync(coinTradeDto);
+            await _walletService.SellAsync(userId, coinTradeDto);
 
             return Ok();
         }

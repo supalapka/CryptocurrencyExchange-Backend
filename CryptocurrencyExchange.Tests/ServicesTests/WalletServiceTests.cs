@@ -56,13 +56,12 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
 
             CoinTradeDto coinTradeDto = new CoinTradeDto
             {
-                UserId = TestUser.DefaultId,
                 CoinSymbol = "BTC",
                 CoinAmount = 1
             };
 
             // Act
-            await _service.BuyAsync(coinTradeDto);
+            await _service.BuyAsync(TestUser.DefaultId, coinTradeDto);
 
             // Assert
             _uow.Verify(x => x.ExecuteInTransactionAsync(It.IsAny<Func<Task>>()), Times.Once);
@@ -90,13 +89,12 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
 
             CoinTradeDto coinTradeDto = new CoinTradeDto
             {
-                UserId = TestUser.DefaultId,
                 CoinSymbol = "BTC",
                 CoinAmount = 1
             };
 
             // Act
-            await _service.SellAsync(coinTradeDto);
+            await _service.SellAsync(TestUser.DefaultId, coinTradeDto);
 
             // Assert
             _uow.Verify(x => x.ExecuteInTransactionAsync(It.IsAny<Func<Task>>()), Times.Once);
@@ -124,14 +122,13 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
 
             CoinTradeDto coinTradeDto = new CoinTradeDto
             {
-                UserId = TestUser.DefaultId,
                 CoinSymbol = "BTC",
                 CoinAmount = 100
             };
 
             // Act & Assert
             Assert.ThrowsAsync<InsufficientFundsException>(async () =>
-                await _service.BuyAsync(coinTradeDto));
+                await _service.BuyAsync(TestUser.DefaultId, coinTradeDto));
         }
 
         [Test]
@@ -151,14 +148,13 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
 
             CoinTradeDto coinTradeDto = new CoinTradeDto
             {
-                UserId = TestUser.DefaultId,
                 CoinSymbol = "BTC",
                 CoinAmount = 100
             };
 
             // Act & Assert
             Assert.ThrowsAsync<InsufficientFundsException>(async () =>
-                await _service.SellAsync(coinTradeDto));
+                await _service.SellAsync(TestUser.DefaultId, coinTradeDto));
         }
 
         [Test]
