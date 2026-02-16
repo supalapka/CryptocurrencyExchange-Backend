@@ -19,7 +19,7 @@ namespace CryptocurrencyExchange.Tests.Domain
             Wallet wallet = new Wallet(TestUser.DefaultId, new[] { usdt });
 
             // Assert
-            Assert.That(wallet.GetBalance("usdt"), Is.EqualTo(1000));
+            Assert.That(wallet.GetBalance(CoinSymbol.Usdt.Value), Is.EqualTo(1000));
         }
 
         [Test]
@@ -32,7 +32,7 @@ namespace CryptocurrencyExchange.Tests.Domain
             Wallet wallet = new Wallet(TestUser.DefaultId, new[] { usdt, btc });
             WalletTradeCommand walletTradeCommand = new WalletTradeCommand
             (
-                coinSymbol: new CoinSymbol("btc"),
+                coinSymbol: CoinSymbol.Btc,
                 coinAmount: 1,
                 coinPrice: 500
             );
@@ -55,7 +55,7 @@ namespace CryptocurrencyExchange.Tests.Domain
             Wallet wallet = new Wallet(TestUser.DefaultId, new[] { usdt, btc });
             WalletTradeCommand walletTradeCommand = new WalletTradeCommand
             (
-                coinSymbol: new CoinSymbol("btc"),
+                coinSymbol: CoinSymbol.Btc,
                 coinAmount: 1,
                 coinPrice: 500
             );
@@ -74,7 +74,7 @@ namespace CryptocurrencyExchange.Tests.Domain
             Wallet wallet = new Wallet(TestUser.DefaultId, new[] { usdt, btc });
             WalletTradeCommand walletTradeCommand = new WalletTradeCommand
             (
-                coinSymbol: new CoinSymbol("btc"),
+                coinSymbol: CoinSymbol.Btc,
                 coinAmount: 1,
                 coinPrice: 500
             );
@@ -83,8 +83,8 @@ namespace CryptocurrencyExchange.Tests.Domain
             wallet.Sell(walletTradeCommand);
 
             // Assert
-            Assert.That(wallet.GetBalance("usdt"), Is.EqualTo(500));
-            Assert.That(wallet.GetBalance("btc"), Is.EqualTo(0));
+            Assert.That(wallet.GetBalance(CoinSymbol.Usdt.Value), Is.EqualTo(500));
+            Assert.That(wallet.GetBalance(CoinSymbol.Btc.Value), Is.EqualTo(0));
         }
 
         [Test]
@@ -97,7 +97,7 @@ namespace CryptocurrencyExchange.Tests.Domain
             Wallet wallet = new Wallet(TestUser.DefaultId, new[] { usdt, btc });
             WalletTradeCommand walletTradeCommand = new WalletTradeCommand
            (
-                coinSymbol: new CoinSymbol("btc"),
+                coinSymbol: CoinSymbol.Btc,
                coinAmount: 1,
                coinPrice: 500
            );

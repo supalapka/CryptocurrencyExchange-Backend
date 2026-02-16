@@ -31,10 +31,10 @@ namespace CryptocurrencyExchange.Infrastructure.Persistence.Repositories
         public async Task<TradeWalletItems> GetCoinsDataForTradeAsync(int userId, CoinSymbol coinSymbol)
         {
             List<WalletItem> coins = await _context.WalletItems.Where(x => x.UserId == userId
-            && (x.Symbol.Value == "usdt" || x.Symbol == coinSymbol)).ToListAsync();
+            && (x.Symbol.Value == CoinSymbol.Usdt.Value || x.Symbol == coinSymbol)).ToListAsync();
 
-            var usdt = coins.FirstOrDefault(x => x.Symbol.Value == "usdt")
-                ?? throw new WalletItemNotFoundException("USDT");
+            var usdt = coins.FirstOrDefault(x => x.Symbol.Value == CoinSymbol.Usdt.Value)
+                ?? throw new WalletItemNotFoundException(CoinSymbol.Usdt.Value);
 
             var coin = coins.FirstOrDefault(x => x.Symbol == coinSymbol)
                 ?? throw new WalletItemNotFoundException(coinSymbol.Value);

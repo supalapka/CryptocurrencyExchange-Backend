@@ -70,7 +70,7 @@ namespace CryptocurrencyExchange.Services.Auth
 
         private Task CreateStarterWalletAsync(User user)
         {
-            var walletItem = new WalletItem(user.Id, new CoinSymbol("usdt"));
+            var walletItem = new WalletItem(user.Id, new CoinSymbol(CoinSymbol.Usdt.Value));
             walletItem.AddAmount(5000); // give new users 5000 USDT to start with
 
             return _walletRepository.AddAsync(walletItem);

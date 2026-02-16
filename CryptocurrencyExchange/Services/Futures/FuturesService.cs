@@ -14,7 +14,7 @@ namespace CryptocurrencyExchange.Services.Futures
         private readonly IWalletItemRepository _walletItemRepository;
         private readonly IFutureRepository _futureRepository;
 
-        private readonly CoinSymbol UsdtSymbol = new CoinSymbol("usdt");
+        private readonly CoinSymbol UsdtSymbol = new CoinSymbol(CoinSymbol.Usdt.Value);
 
 
         public FuturesService(

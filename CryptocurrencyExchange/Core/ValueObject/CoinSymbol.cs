@@ -2,6 +2,8 @@
 {
     public readonly record struct CoinSymbol
     {
+        public static readonly CoinSymbol Usdt = new("usdt");
+        public static readonly CoinSymbol Btc = new("btc");
         public string Value { get; }
 
         public CoinSymbol(string value)

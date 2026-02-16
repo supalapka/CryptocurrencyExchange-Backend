@@ -47,16 +47,16 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
             var btc = WalletItemMother.CreateBtc(amount: 0);
 
             _marketService
-                .Setup(x => x.GetPrice("btc"))
+                .Setup(x => x.GetPrice(CoinSymbol.Btc.Value))
                 .ReturnsAsync(_btcPrice);
 
             _walletRepo
-                .Setup(x => x.GetCoinsDataForTradeAsync(TestUser.DefaultId, new CoinSymbol("btc")))
+                .Setup(x => x.GetCoinsDataForTradeAsync(TestUser.DefaultId, new CoinSymbol(CoinSymbol.Btc.Value)))
                 .ReturnsAsync(new TradeWalletItems(usdt, btc));
 
             CoinTradeDto coinTradeDto = new CoinTradeDto
             {
-                CoinSymbol = new CoinSymbol("btc"),
+                CoinSymbol = new CoinSymbol(CoinSymbol.Btc.Value),
                 CoinAmount = 1
             };
 
@@ -65,10 +65,10 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
 
             // Assert
             _uow.Verify(x => x.ExecuteInTransactionAsync(It.IsAny<Func<Task>>()), Times.Once);
-            _marketService.Verify(x => x.GetPrice("btc"), Times.Once);
+            _marketService.Verify(x => x.GetPrice(CoinSymbol.Btc.Value), Times.Once);
 
             _walletRepo.Verify(
-                x => x.GetCoinsDataForTradeAsync(TestUser.DefaultId, new CoinSymbol("btc")),
+                x => x.GetCoinsDataForTradeAsync(TestUser.DefaultId, new CoinSymbol(CoinSymbol.Btc.Value)),
                 Times.Once);
         }
 
@@ -80,16 +80,16 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
             var btc = WalletItemMother.CreateBtc(amount: 1);
 
             _marketService
-                .Setup(x => x.GetPrice("btc"))
+                .Setup(x => x.GetPrice(CoinSymbol.Btc.Value))
                 .ReturnsAsync(_btcPrice);
 
             _walletRepo
-                .Setup(x => x.GetCoinsDataForTradeAsync(TestUser.DefaultId, new CoinSymbol("btc")))
+                .Setup(x => x.GetCoinsDataForTradeAsync(TestUser.DefaultId, new CoinSymbol(CoinSymbol.Btc.Value)))
                 .ReturnsAsync(new TradeWalletItems(usdt, btc));
 
             CoinTradeDto coinTradeDto = new CoinTradeDto
             {
-                CoinSymbol = new CoinSymbol("BTC"),
+                CoinSymbol = new CoinSymbol(CoinSymbol.Btc.Value),
                 CoinAmount = 1
             };
 
@@ -98,10 +98,10 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
 
             // Assert
             _uow.Verify(x => x.ExecuteInTransactionAsync(It.IsAny<Func<Task>>()), Times.Once);
-            _marketService.Verify(x => x.GetPrice("btc"), Times.Once);
+            _marketService.Verify(x => x.GetPrice(CoinSymbol.Btc.Value), Times.Once);
 
             _walletRepo.Verify(
-                x => x.GetCoinsDataForTradeAsync(TestUser.DefaultId, new CoinSymbol("btc")),
+                x => x.GetCoinsDataForTradeAsync(TestUser.DefaultId, new CoinSymbol(CoinSymbol.Btc.Value)),
                 Times.Once);
         }
 
@@ -113,16 +113,16 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
             var btc = WalletItemMother.CreateBtc(amount: 0);
 
             _marketService
-                .Setup(x => x.GetPrice("btc"))
+                .Setup(x => x.GetPrice(CoinSymbol.Btc.Value))
                 .ReturnsAsync(_btcPrice);
 
             _walletRepo
-                .Setup(x => x.GetCoinsDataForTradeAsync(TestUser.DefaultId, new CoinSymbol("btc")))
+                .Setup(x => x.GetCoinsDataForTradeAsync(TestUser.DefaultId, new CoinSymbol(CoinSymbol.Btc.Value)))
                 .ReturnsAsync(new TradeWalletItems(usdt, btc));
 
             CoinTradeDto coinTradeDto = new CoinTradeDto
             {
-                CoinSymbol = new CoinSymbol("btc"),
+                CoinSymbol = new CoinSymbol(CoinSymbol.Btc.Value),
                 CoinAmount = 100
             };
 
@@ -139,16 +139,16 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
             var btc = WalletItemMother.CreateBtc(amount: 0);
 
             _marketService
-                .Setup(x => x.GetPrice("btc"))
+                .Setup(x => x.GetPrice(CoinSymbol.Btc.Value))
                 .ReturnsAsync(_btcPrice);
 
             _walletRepo
-                .Setup(x => x.GetCoinsDataForTradeAsync(TestUser.DefaultId, new CoinSymbol("btc")))
+                .Setup(x => x.GetCoinsDataForTradeAsync(TestUser.DefaultId, new CoinSymbol(CoinSymbol.Btc.Value)))
                 .ReturnsAsync(new TradeWalletItems(usdt, btc));
 
             CoinTradeDto coinTradeDto = new CoinTradeDto
             {
-                CoinSymbol = new CoinSymbol("btc"),
+                CoinSymbol = new CoinSymbol(CoinSymbol.Btc.Value),
                 CoinAmount = 100
             };
 
@@ -161,10 +161,10 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
         public async Task GetCoinAmountAsync_WhenItemNotExists_ShouldReturnZero()
         {
             _walletRepo
-                .Setup(x => x.GetAsync(TestUser.DefaultId, new CoinSymbol("btc")))
+                .Setup(x => x.GetAsync(TestUser.DefaultId, new CoinSymbol(CoinSymbol.Btc.Value)))
                 .ReturnsAsync((WalletItem?)null);
 
-            var amount = await _service.GetCoinAmountAsync(TestUser.DefaultId, new CoinSymbol("btc"));
+            var amount = await _service.GetCoinAmountAsync(TestUser.DefaultId, new CoinSymbol(CoinSymbol.Btc.Value));
 
             Assert.That(amount, Is.EqualTo(0));
         }

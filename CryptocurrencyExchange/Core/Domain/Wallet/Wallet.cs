@@ -20,7 +20,7 @@ namespace CryptocurrencyExchange.Core.Domain.Wallets
 
         public void Buy(WalletTradeCommand walletTradeCommand)
         {
-            var usdt = GetRequired(new CoinSymbol("usdt"));
+            var usdt = GetRequired(CoinSymbol.Usdt);
             var coin = GetOrCreate(walletTradeCommand.CoinSymbol);
 
             var roundedCoinAmount = MoneyPolicy
@@ -28,7 +28,7 @@ namespace CryptocurrencyExchange.Core.Domain.Wallets
             var usdToSpend = MoneyPolicy.RoundFiat(roundedCoinAmount * walletTradeCommand.CoinPrice);
 
             if (usdt.Amount < usdToSpend)
-                throw new InsufficientFundsException("USDT");
+                throw new InsufficientFundsException(CoinSymbol.Usdt.Value);
 
             usdt.RemoveAmount(usdToSpend);
             coin.AddAmount(roundedCoinAmount);
@@ -36,7 +36,7 @@ namespace CryptocurrencyExchange.Core.Domain.Wallets
 
         public void Sell(WalletTradeCommand walletTradeCommand)
         {
-            var usdt = GetRequired(new CoinSymbol("usdt"));
+            var usdt = GetRequired(new CoinSymbol(CoinSymbol.Usdt.Value));
             var coin = GetRequired(walletTradeCommand.CoinSymbol);
 
             if (coin.Amount < walletTradeCommand.CoinAmount)

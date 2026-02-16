@@ -1,4 +1,5 @@
 ﻿using CryptocurrencyExchange.Core.Interfaces;
+using CryptocurrencyExchange.Core.ValueObject;
 using Newtonsoft.Json;
 using System.Globalization;
 
@@ -11,7 +12,6 @@ namespace CryptocurrencyExchange.Infrastructure.Market
             public string? Price { get; init; }
         }
 
-        private const string UsdtSymbol = "USDT";
         private readonly HttpClient _httpClient;
 
         public BinanceMarketApiClient(HttpClient httpClient)
@@ -29,11 +29,11 @@ namespace CryptocurrencyExchange.Infrastructure.Market
 
         private string NormalizeSymbol(string coinSymbol)
         {
-            var normalizedSymbol = coinSymbol.ToUpper();
-            if (!normalizedSymbol.EndsWith(UsdtSymbol))
-                normalizedSymbol += UsdtSymbol;
+            string normalizedSymbol = coinSymbol;
+            if (!normalizedSymbol.EndsWith(CoinSymbol.Usdt.Value))
+                normalizedSymbol += CoinSymbol.Usdt.Value;
 
-            return normalizedSymbol;
+            return normalizedSymbol.ToUpper();
         }
 
         private async Task<string> GetCoinDataResponse(string symbol)

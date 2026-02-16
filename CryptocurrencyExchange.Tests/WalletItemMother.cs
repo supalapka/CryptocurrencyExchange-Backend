@@ -7,7 +7,7 @@ namespace CryptocurrencyExchange.Tests
     {
         public static WalletItem CreateUsdt(decimal amount)
         {
-            var item = new WalletItem(TestUser.DefaultId, new CoinSymbol("usdt"));
+            var item = new WalletItem(TestUser.DefaultId, CoinSymbol.Usdt);
             item.AddAmount(amount);
 
             return item;
@@ -15,7 +15,7 @@ namespace CryptocurrencyExchange.Tests
 
         public static WalletItem CreateBtc(decimal amount)
         {
-            var item = new WalletItem(TestUser.DefaultId, new CoinSymbol("btc"));
+            var item = new WalletItem(TestUser.DefaultId, CoinSymbol.Btc);
             item.AddAmount(amount);
 
             return item;
