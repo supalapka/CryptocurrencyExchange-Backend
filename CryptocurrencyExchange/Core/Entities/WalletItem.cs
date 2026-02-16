@@ -1,4 +1,5 @@
-﻿using CryptocurrencyExchange.Exceptions;
+﻿using CryptocurrencyExchange.Core.ValueObject;
+using CryptocurrencyExchange.Exceptions;
 
 namespace CryptocurrencyExchange.Core.Models
 {
@@ -7,15 +8,15 @@ namespace CryptocurrencyExchange.Core.Models
         public int Id { get; private set; }
         public int UserId { get; private set; }
         public User User { get; private set; }
-        public string Symbol { get; private set; } = string.Empty;
+        public CoinSymbol Symbol { get; private set; }
         public decimal Amount { get; private set; }
 
         private WalletItem() { } // for ORM
 
-        public WalletItem(int userId, string symbol)
+        public WalletItem(int userId, CoinSymbol symbol)
         {
             UserId = userId;
-            Symbol = symbol.ToLower();
+            Symbol = symbol;
             Amount = 0;
         }
 
@@ -26,7 +27,7 @@ namespace CryptocurrencyExchange.Core.Models
         public void RemoveAmount(decimal amount)
         {
             if (Amount < amount)
-                throw new InsufficientFundsException(Symbol);
+                throw new InsufficientFundsException(Symbol.Value);
             Amount -= amount;
         }
     }

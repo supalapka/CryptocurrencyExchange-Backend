@@ -1,5 +1,6 @@
 ﻿using CryptocurrencyExchange.Core.Domain.Wallet.Commands;
 using CryptocurrencyExchange.Core.Domain.Wallets;
+using CryptocurrencyExchange.Core.ValueObject;
 using CryptocurrencyExchange.Exceptions;
 using NUnit.Framework;
 
@@ -31,7 +32,7 @@ namespace CryptocurrencyExchange.Tests.Domain
             Wallet wallet = new Wallet(TestUser.DefaultId, new[] { usdt, btc });
             WalletTradeCommand walletTradeCommand = new WalletTradeCommand
             (
-                coinSymbol: "btc",
+                coinSymbol: new CoinSymbol("btc"),
                 coinAmount: 1,
                 coinPrice: 500
             );
@@ -54,7 +55,7 @@ namespace CryptocurrencyExchange.Tests.Domain
             Wallet wallet = new Wallet(TestUser.DefaultId, new[] { usdt, btc });
             WalletTradeCommand walletTradeCommand = new WalletTradeCommand
             (
-                coinSymbol: "btc",
+                coinSymbol: new CoinSymbol("btc"),
                 coinAmount: 1,
                 coinPrice: 500
             );
@@ -73,7 +74,7 @@ namespace CryptocurrencyExchange.Tests.Domain
             Wallet wallet = new Wallet(TestUser.DefaultId, new[] { usdt, btc });
             WalletTradeCommand walletTradeCommand = new WalletTradeCommand
             (
-                coinSymbol: "btc",
+                coinSymbol: new CoinSymbol("btc"),
                 coinAmount: 1,
                 coinPrice: 500
             );
@@ -96,7 +97,7 @@ namespace CryptocurrencyExchange.Tests.Domain
             Wallet wallet = new Wallet(TestUser.DefaultId, new[] { usdt, btc });
             WalletTradeCommand walletTradeCommand = new WalletTradeCommand
            (
-               coinSymbol: "btc",
+                coinSymbol: new CoinSymbol("btc"),
                coinAmount: 1,
                coinPrice: 500
            );

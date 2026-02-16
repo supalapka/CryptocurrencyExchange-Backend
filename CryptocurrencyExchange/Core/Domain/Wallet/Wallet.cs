@@ -1,7 +1,8 @@
-﻿using CryptocurrencyExchange.Core.Domain.Wallet.Commands;
+﻿using CryptocurrencyExchange.Core.Domain.Wallet;
+using CryptocurrencyExchange.Core.Domain.Wallet.Commands;
 using CryptocurrencyExchange.Core.Models;
+using CryptocurrencyExchange.Core.ValueObject;
 using CryptocurrencyExchange.Exceptions;
-using CryptocurrencyExchange.Core.Domain.Wallet;
 
 namespace CryptocurrencyExchange.Core.Domain.Wallets
 {
@@ -14,12 +15,12 @@ namespace CryptocurrencyExchange.Core.Domain.Wallets
         public Wallet(int userId, IEnumerable<WalletItem> items)
         {
             UserId = userId;
-            _items = items.ToDictionary(x => x.Symbol.ToLower());
+            _items = items.ToDictionary(x => x.Symbol.Value);
         }
 
         public void Buy(WalletTradeCommand walletTradeCommand)
         {
-            var usdt = GetRequired("usdt");
+            var usdt = GetRequired(new CoinSymbol("usdt"));
             var coin = GetOrCreate(walletTradeCommand.CoinSymbol);
 
             var roundedCoinAmount = MoneyPolicy
@@ -36,11 +37,11 @@ namespace CryptocurrencyExchange.Core.Domain.Wallets
 
         public void Sell(WalletTradeCommand walletTradeCommand)
         {
-            var usdt = GetRequired("usdt");
+            var usdt = GetRequired(new CoinSymbol("usdt"));
             var coin = GetRequired(walletTradeCommand.CoinSymbol);
 
             if (coin.Amount < walletTradeCommand.CoinAmount)
-                throw new InsufficientFundsException(walletTradeCommand.CoinSymbol.ToUpper());
+                throw new InsufficientFundsException(walletTradeCommand.CoinSymbol.Value);
 
             var usdtAmount = walletTradeCommand.CoinAmount * walletTradeCommand.CoinPrice;
             usdtAmount = MoneyPolicy.RoundFiat(usdtAmount);
@@ -52,21 +53,19 @@ namespace CryptocurrencyExchange.Core.Domain.Wallets
         public decimal GetBalance(string symbol) =>
             _items.TryGetValue(symbol.ToLower(), out var item) ? item.Amount : 0;
 
-        private WalletItem GetRequired(string symbol) =>
-            _items.TryGetValue(symbol.ToLower(), out var item)
+        private WalletItem GetRequired(CoinSymbol symbol) =>
+            _items.TryGetValue(symbol.Value, out var item)
                 ? item
                 : throw new InvalidOperationException($"Wallet item not found: {symbol}");
 
-        private WalletItem GetOrCreate(string symbol)
+        private WalletItem GetOrCreate(CoinSymbol symbol)
         {
-            symbol = symbol.ToLower();
-
-            if (_items.TryGetValue(symbol, out var item))
+            if (_items.TryGetValue(symbol.Value, out var item))
                 return item;
 
             item = new WalletItem(UserId, symbol);
 
-            _items[symbol] = item;
+            _items[symbol.Value] = item;
             return item;
         }
 

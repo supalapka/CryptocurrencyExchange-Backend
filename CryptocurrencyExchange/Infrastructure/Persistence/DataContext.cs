@@ -1,4 +1,5 @@
 ﻿using CryptocurrencyExchange.Core.Models;
+using CryptocurrencyExchange.Core.ValueObject;
 using Microsoft.EntityFrameworkCore;
 
 namespace CryptocurrencyExchange.Infrastructure.Persistence
@@ -14,5 +15,20 @@ namespace CryptocurrencyExchange.Infrastructure.Persistence
         public DbSet<FutureHistory> FutureHistory { get; set; }
         public DbSet<StakingCoin> StakingCoins { get; set; }
         public DbSet<Staking> Staking { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            ConfigureValueObjectConversions(modelBuilder);
+        }
+
+        private static void ConfigureValueObjectConversions(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<WalletItem>()
+             .Property(x => x.Symbol)
+             .HasConversion(
+                 v => v.Value,
+                 v => new CoinSymbol(v)
+             );
+        }
     }
 }

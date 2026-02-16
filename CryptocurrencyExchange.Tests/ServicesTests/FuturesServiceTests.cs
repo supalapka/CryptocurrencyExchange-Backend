@@ -42,7 +42,7 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
             };
 
             walletRepositoryMock
-                .Setup(x => x.GetAsync(TestUser.DefaultId, "usdt"))
+                .Setup(x => x.GetAsync(TestUser.DefaultId, new CoinSymbol("usdt")))
                 .ReturnsAsync(WalletItemMother.CreateUsdt(amount: userUsdtBalance));
 
             futuresDomainServiceMock
@@ -84,7 +84,7 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
 
 
             walletRepositoryMock
-                .Setup(x => x.GetAsync(TestUser.DefaultId, "usdt"))
+                .Setup(x => x.GetAsync(TestUser.DefaultId, new CoinSymbol("usdt")))
                 .ReturnsAsync(WalletItemMother.CreateUsdt(amount: 1));
 
             futuresDomainServiceMock
@@ -132,7 +132,7 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
             futureRepositoryMock.Setup(x => x.GetByIdAsync(position.Id))
                 .ReturnsAsync(position);
 
-            walletRepositoryMock.Setup(x => x.GetAsync(TestUser.DefaultId, "usdt"))
+            walletRepositoryMock.Setup(x => x.GetAsync(TestUser.DefaultId, new CoinSymbol("usdt")))
                 .ReturnsAsync(usdtWallet);
 
             unitOfWorkMock.Setup(x => x.ExecuteInTransactionAsync(It.IsAny<Func<Task>>()))

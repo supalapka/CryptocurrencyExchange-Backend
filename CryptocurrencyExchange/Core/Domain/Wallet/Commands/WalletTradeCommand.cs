@@ -1,14 +1,16 @@
-﻿namespace CryptocurrencyExchange.Core.Domain.Wallet.Commands
+﻿using CryptocurrencyExchange.Core.ValueObject;
+
+namespace CryptocurrencyExchange.Core.Domain.Wallet.Commands
 {
     public class WalletTradeCommand
     {
-        public string CoinSymbol { get; }
+        public CoinSymbol CoinSymbol { get; }
         public decimal CoinAmount { get; }
         public decimal CoinPrice { get; }
 
-        public WalletTradeCommand(string coinSymbol, decimal coinAmount, decimal coinPrice)
+        public WalletTradeCommand(CoinSymbol coinSymbol, decimal coinAmount, decimal coinPrice)
         {
-            CoinSymbol = coinSymbol.ToLower();
+            CoinSymbol = coinSymbol;
             CoinAmount = coinAmount;
             CoinPrice = coinPrice;
         }

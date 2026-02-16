@@ -1,4 +1,5 @@
 ﻿using CryptocurrencyExchange.Core.Models;
+using CryptocurrencyExchange.Core.ValueObject;
 using CryptocurrencyExchange.Services.WalletTrade;
 
 namespace CryptocurrencyExchange.Core.Interfaces.Services
@@ -7,8 +8,8 @@ namespace CryptocurrencyExchange.Core.Interfaces.Services
     {
         Task BuyAsync(int userId, CoinTradeDto coinTradeDto);
         Task SellAsync(int userId, CoinTradeDto coinTradeDto);
-        Task<decimal> GetCoinAmountAsync(int userId, string symbol);
+        Task<decimal> GetCoinAmountAsync(int userId, CoinSymbol symbol);
         Task<List<WalletItem>> GetFullWalletAsync(int userId);
-        Task<WalletItem> GetOrCreateWalletItem(int userId, string symbol);
+        Task<WalletItem> GetOrCreateWalletItem(int userId, CoinSymbol symbol);
     }
 }

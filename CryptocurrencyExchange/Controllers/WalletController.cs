@@ -1,5 +1,6 @@
 ﻿using CryptocurrencyExchange.Core.Interfaces.Services;
 using CryptocurrencyExchange.Core.Models;
+using CryptocurrencyExchange.Core.ValueObject;
 using CryptocurrencyExchange.Infrastructure.Persistence;
 using CryptocurrencyExchange.Services.WalletTrade;
 using Microsoft.AspNetCore.Authorization;
@@ -34,7 +35,7 @@ namespace CryptocurrencyExchange.Controllers
         {
             int userId = Convert.ToInt32(HttpContext.Items["UserId"]);
 
-            return await _walletService.GetCoinAmountAsync(userId, symbol);
+            return await _walletService.GetCoinAmountAsync(userId, new CoinSymbol(symbol));
         }
 
 

@@ -1,8 +1,10 @@
-﻿namespace CryptocurrencyExchange.Services.WalletTrade
+﻿using CryptocurrencyExchange.Core.ValueObject;
+
+namespace CryptocurrencyExchange.Services.WalletTrade
 {
     public class CoinTradeDto
     {
-        public string CoinSymbol { get; set; }
+        public CoinSymbol CoinSymbol { get; set; }
         public decimal CoinAmount { get; set; }
     }
 }
