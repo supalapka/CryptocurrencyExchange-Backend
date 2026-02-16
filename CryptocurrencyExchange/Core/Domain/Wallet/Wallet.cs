@@ -1,6 +1,6 @@
 ﻿using CryptocurrencyExchange.Core.Models;
 using CryptocurrencyExchange.Exceptions;
-using CryptocurrencyExchange.Utilities;
+using CryptocurrencyExchange.Core.Domain.Wallet;
 
 namespace CryptocurrencyExchange.Core.Domain.Wallets
 {
@@ -25,7 +25,7 @@ namespace CryptocurrencyExchange.Core.Domain.Wallets
                 throw new InsufficientFundsException("USDT");
 
             var coinAmount = usd / coinPrice;
-            coinAmount = MoneyPolicyUtils.RoundCoinAmountUpTo1USD(coinAmount, coinPrice);
+            coinAmount = MoneyPolicy.RoundDownWithMax1UsdLoss(coinAmount, coinPrice);
 
             usdt.RemoveAmount(usd);
             coin.AddAmount(coinAmount);
@@ -40,6 +40,7 @@ namespace CryptocurrencyExchange.Core.Domain.Wallets
                 throw new InsufficientFundsException(coinSymbol.ToUpper());
 
             var usdtAmount = coinPrice * amount;
+            usdtAmount = MoneyPolicy.RoundFiat(usdtAmount);
 
             usdt.AddAmount(usdtAmount);
             coin.RemoveAmount(amount);
