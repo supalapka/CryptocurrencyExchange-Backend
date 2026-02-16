@@ -26,7 +26,7 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
             // Arrange
             var futureDto = new FutureDto
             {
-                Symbol = "BTC",
+                Symbol = CoinSymbol.Btc.Value,
                 EntryPrice = 50000,
                 Margin = 500,
                 Leverage = 10,
@@ -38,11 +38,11 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
                 Id = 1,
                 UserId = TestUser.DefaultId,
                 Margin = 500,
-                Symbol = "BTC"
+                Symbol = CoinSymbol.Btc.Value
             };
 
             walletRepositoryMock
-                .Setup(x => x.GetAsync(TestUser.DefaultId, "usdt"))
+                .Setup(x => x.GetAsync(TestUser.DefaultId, new CoinSymbol(CoinSymbol.Usdt.Value)))
                 .ReturnsAsync(WalletItemMother.CreateUsdt(amount: userUsdtBalance));
 
             futuresDomainServiceMock
@@ -75,7 +75,7 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
             // Arrange
             var futureDto = new FutureDto
             {
-                Symbol = "BTC",
+                Symbol = CoinSymbol.Btc.Value,
                 EntryPrice = 50000,
                 Margin = 500,
                 Leverage = 10,
@@ -84,7 +84,7 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
 
 
             walletRepositoryMock
-                .Setup(x => x.GetAsync(TestUser.DefaultId, "usdt"))
+                .Setup(x => x.GetAsync(TestUser.DefaultId, new CoinSymbol(CoinSymbol.Usdt.Value)))
                 .ReturnsAsync(WalletItemMother.CreateUsdt(amount: 1));
 
             futuresDomainServiceMock
@@ -132,7 +132,7 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
             futureRepositoryMock.Setup(x => x.GetByIdAsync(position.Id))
                 .ReturnsAsync(position);
 
-            walletRepositoryMock.Setup(x => x.GetAsync(TestUser.DefaultId, "usdt"))
+            walletRepositoryMock.Setup(x => x.GetAsync(TestUser.DefaultId, new CoinSymbol(CoinSymbol.Usdt.Value)))
                 .ReturnsAsync(usdtWallet);
 
             unitOfWorkMock.Setup(x => x.ExecuteInTransactionAsync(It.IsAny<Func<Task>>()))

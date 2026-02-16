@@ -15,7 +15,7 @@ namespace CryptocurrencyExchange.Infrastructure.Persistence.Repositories
             _context = context;
         }
 
-        public Task<WalletItem?> GetAsync(int userId, string symbol) =>
+        public Task<WalletItem?> GetAsync(int userId, CoinSymbol symbol) =>
             _context.WalletItems.FirstOrDefaultAsync(x => x.UserId == userId && x.Symbol == symbol);
 
         public async Task AddAsync(WalletItem item)
@@ -28,16 +28,16 @@ namespace CryptocurrencyExchange.Infrastructure.Persistence.Repositories
             return _context.WalletItems.Where(x => x.UserId == userId && x.Amount > 0).ToListAsync();
         }
 
-        public async Task<TradeWalletItems> GetCoinsDataForTradeAsync(int userId, string coinSymbol)
+        public async Task<TradeWalletItems> GetCoinsDataForTradeAsync(int userId, CoinSymbol coinSymbol)
         {
             List<WalletItem> coins = await _context.WalletItems.Where(x => x.UserId == userId
-            && (x.Symbol == "usdt" || x.Symbol == coinSymbol)).ToListAsync();
+            && (x.Symbol.Value == CoinSymbol.Usdt.Value || x.Symbol == coinSymbol)).ToListAsync();
 
-            var usdt = coins.FirstOrDefault(x => x.Symbol == "usdt")
-                ?? throw new WalletItemNotFoundException("USDT");
+            var usdt = coins.FirstOrDefault(x => x.Symbol.Value == CoinSymbol.Usdt.Value)
+                ?? throw new WalletItemNotFoundException(CoinSymbol.Usdt.Value);
 
             var coin = coins.FirstOrDefault(x => x.Symbol == coinSymbol)
-                ?? throw new WalletItemNotFoundException(coinSymbol);
+                ?? throw new WalletItemNotFoundException(coinSymbol.Value);
 
             return new TradeWalletItems(usdt, coin);
         }

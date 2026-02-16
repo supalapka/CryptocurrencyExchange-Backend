@@ -2,6 +2,7 @@
 using CryptocurrencyExchange.Core.Interfaces.Repositories;
 using CryptocurrencyExchange.Core.Interfaces.Services;
 using CryptocurrencyExchange.Core.Models;
+using CryptocurrencyExchange.Core.ValueObject;
 using CryptocurrencyExchange.Exceptions;
 
 namespace CryptocurrencyExchange.Services.Futures
@@ -13,7 +14,7 @@ namespace CryptocurrencyExchange.Services.Futures
         private readonly IWalletItemRepository _walletItemRepository;
         private readonly IFutureRepository _futureRepository;
 
-        private const string UsdtSymbol = "usdt";
+        private readonly CoinSymbol UsdtSymbol = new CoinSymbol(CoinSymbol.Usdt.Value);
 
 
         public FuturesService(
@@ -37,7 +38,7 @@ namespace CryptocurrencyExchange.Services.Futures
             await _unitOfWork.ExecuteInTransactionAsync(async () =>
             {
                 var userUsdt = await _walletItemRepository.GetAsync(userId, UsdtSymbol)
-                    ?? throw new WalletItemNotFoundException(UsdtSymbol);
+                    ?? throw new WalletItemNotFoundException(UsdtSymbol.Value);
 
                 future = _futuresDomainService.OpenPosition(futureDto, userUsdt);
 
@@ -89,8 +90,8 @@ namespace CryptocurrencyExchange.Services.Futures
                 var position = await _futureRepository.GetByIdAsync(id)
                  ?? throw new Exception($"Futures position not found. ID: {id}");
 
-                var userUsdt = await _walletItemRepository.GetAsync(position.UserId, "usdt")
-                 ?? throw new WalletItemNotFoundException(UsdtSymbol);
+                var userUsdt = await _walletItemRepository.GetAsync(position.UserId, UsdtSymbol)
+                 ?? throw new WalletItemNotFoundException(UsdtSymbol.Value);
 
                 _futuresDomainService.ClosePosition(position, userUsdt, pnl);
 
