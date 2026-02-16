@@ -1,6 +1,7 @@
 ﻿using CryptocurrencyExchange.Core.Interfaces.Services;
 using CryptocurrencyExchange.Core.Models;
 using CryptocurrencyExchange.Infrastructure.Persistence;
+using CryptocurrencyExchange.Services.WalletTrade;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -38,31 +39,25 @@ namespace CryptocurrencyExchange.Controllers
 
 
         [HttpPost("auth/buy")]
-        public async Task<ActionResult> Buy([FromBody] BuySellCryptoModel buyCryptoModel)
+        public async Task<ActionResult> Buy([FromBody] CoinTradeDto coinTradeDto)
         {
             int userId = Convert.ToInt32(HttpContext.Items["UserId"]);
-            decimal usdAmount = (decimal)buyCryptoModel.Amount;
+            coinTradeDto.UserId = userId;
 
-            try
-            {
-                await _walletService.BuyAsync(userId, buyCryptoModel.CoinSymbol, usdAmount);
-            }
-            catch (Exception ex) { return BadRequest(ex.Message); }
+            await _walletService.BuyAsync(coinTradeDto);
+
             return Ok();
         }
 
 
         [HttpPost("auth/sell")]
-        public async Task<ActionResult> Sell([FromBody] BuySellCryptoModel buyCryptoModel)
+        public async Task<ActionResult> Sell([FromBody] CoinTradeDto coinTradeDto)
         {
             int userId = Convert.ToInt32(HttpContext.Items["UserId"]);
-            var coinAmount = buyCryptoModel.Amount;
+            coinTradeDto.UserId = userId;
 
-            try
-            {
-                await _walletService.SellAsync(userId, buyCryptoModel.CoinSymbol, coinAmount);
-            }
-            catch (Exception ex) { return BadRequest(ex.Message); }
+            await _walletService.SellAsync(coinTradeDto);
+
             return Ok();
         }
 
@@ -88,14 +83,5 @@ namespace CryptocurrencyExchange.Controllers
             public decimal amount { get; set; }
             public int receiver { get; set; }
         }
-
-        public class BuySellCryptoModel
-        {
-            public string CoinSymbol { get; set; } = string.Empty;
-            public decimal Amount { get; set; }
-            //if buy -> usd amount.
-            //if sell -> coin amount
-        }
-
     }
 }

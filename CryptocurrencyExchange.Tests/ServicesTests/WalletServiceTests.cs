@@ -5,6 +5,7 @@ using CryptocurrencyExchange.Core.Models;
 using CryptocurrencyExchange.Core.ValueObject;
 using CryptocurrencyExchange.Exceptions;
 using CryptocurrencyExchange.Services.Wallets;
+using CryptocurrencyExchange.Services.WalletTrade;
 using Moq;
 using NUnit.Framework;
 
@@ -53,8 +54,15 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
                 .Setup(x => x.GetCoinsDataForTradeAsync(TestUser.DefaultId, "btc"))
                 .ReturnsAsync(new TradeWalletItems(usdt, btc));
 
+            CoinTradeDto coinTradeDto = new CoinTradeDto
+            {
+                UserId = TestUser.DefaultId,
+                CoinSymbol = "BTC",
+                CoinAmount = 1
+            };
+
             // Act
-            await _service.BuyAsync(TestUser.DefaultId, "BTC", 1);
+            await _service.BuyAsync(coinTradeDto);
 
             // Assert
             _uow.Verify(x => x.ExecuteInTransactionAsync(It.IsAny<Func<Task>>()), Times.Once);
@@ -80,8 +88,15 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
                 .Setup(x => x.GetCoinsDataForTradeAsync(TestUser.DefaultId, "btc"))
                 .ReturnsAsync(new TradeWalletItems(usdt, btc));
 
+            CoinTradeDto coinTradeDto = new CoinTradeDto
+            {
+                UserId = TestUser.DefaultId,
+                CoinSymbol = "BTC",
+                CoinAmount = 1
+            };
+
             // Act
-            await _service.SellAsync(TestUser.DefaultId, "BTC", 1);
+            await _service.SellAsync(coinTradeDto);
 
             // Assert
             _uow.Verify(x => x.ExecuteInTransactionAsync(It.IsAny<Func<Task>>()), Times.Once);
@@ -107,9 +122,16 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
                 .Setup(x => x.GetCoinsDataForTradeAsync(TestUser.DefaultId, "btc"))
                 .ReturnsAsync(new TradeWalletItems(usdt, btc));
 
+            CoinTradeDto coinTradeDto = new CoinTradeDto
+            {
+                UserId = TestUser.DefaultId,
+                CoinSymbol = "BTC",
+                CoinAmount = 100
+            };
+
             // Act & Assert
             Assert.ThrowsAsync<InsufficientFundsException>(async () =>
-                await _service.BuyAsync(TestUser.DefaultId, "btc", coinAmount: 100));
+                await _service.BuyAsync(coinTradeDto));
         }
 
         [Test]
@@ -127,9 +149,16 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
                 .Setup(x => x.GetCoinsDataForTradeAsync(TestUser.DefaultId, "btc"))
                 .ReturnsAsync(new TradeWalletItems(usdt, btc));
 
+            CoinTradeDto coinTradeDto = new CoinTradeDto
+            {
+                UserId = TestUser.DefaultId,
+                CoinSymbol = "BTC",
+                CoinAmount = 100
+            };
+
             // Act & Assert
             Assert.ThrowsAsync<InsufficientFundsException>(async () =>
-                await _service.SellAsync(TestUser.DefaultId, "btc", 100));
+                await _service.SellAsync(coinTradeDto));
         }
 
         [Test]

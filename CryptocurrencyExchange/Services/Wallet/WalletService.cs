@@ -4,6 +4,7 @@ using CryptocurrencyExchange.Core.Interfaces;
 using CryptocurrencyExchange.Core.Interfaces.Repositories;
 using CryptocurrencyExchange.Core.Interfaces.Services;
 using CryptocurrencyExchange.Core.Models;
+using CryptocurrencyExchange.Services.WalletTrade;
 
 namespace CryptocurrencyExchange.Services.Wallets
 {
@@ -24,18 +25,20 @@ namespace CryptocurrencyExchange.Services.Wallets
             _unitOfWork = unitOfWork;
         }
 
-        public async Task BuyAsync(int userId, string coinSymbol, decimal coinAmount)
+        public async Task BuyAsync(CoinTradeDto coinTradeDto)
         {
             await _unitOfWork.ExecuteInTransactionAsync(async () =>
             {
-                coinSymbol = coinSymbol.ToLower();
-                var tradeCoinPrice = await _marketService.GetPrice(coinSymbol);
+                coinTradeDto.CoinSymbol = coinTradeDto.CoinSymbol.ToLower();
+                var tradeCoinPrice = await _marketService.GetPrice(coinTradeDto.CoinSymbol);
 
-                var tradeItems = await _walletItemRepository.GetCoinsDataForTradeAsync(userId, coinSymbol);
+                var tradeItems = await _walletItemRepository.GetCoinsDataForTradeAsync(coinTradeDto.UserId, coinTradeDto.CoinSymbol);
                 IEnumerable<WalletItem> walletItemsToTrade = new[] { tradeItems.BaseCurrency, tradeItems.TradedCurrency };
 
-                Wallet wallet = new Wallet(userId, walletItemsToTrade);
-                WalletTradeCommand walletTradeCommand = new WalletTradeCommand(coinSymbol, coinAmount, tradeCoinPrice);
+                WalletTradeCommand walletTradeCommand =
+                new WalletTradeCommand(coinTradeDto.CoinSymbol, coinTradeDto.CoinAmount, tradeCoinPrice);
+
+                Wallet wallet = new Wallet(coinTradeDto.UserId, walletItemsToTrade);
                 wallet.Buy(walletTradeCommand);
             });
         }
@@ -65,18 +68,20 @@ namespace CryptocurrencyExchange.Services.Wallets
             return item;
         }
 
-        public async Task SellAsync(int userId, string coinSymbol, decimal amount)
+        public async Task SellAsync(CoinTradeDto coinTradeDto)
         {
             await _unitOfWork.ExecuteInTransactionAsync(async () =>
             {
-                coinSymbol = coinSymbol.ToLower();
-                var tradeCoinPrice = await _marketService.GetPrice(coinSymbol);
+                coinTradeDto.CoinSymbol = coinTradeDto.CoinSymbol.ToLower();
+                var tradeCoinPrice = await _marketService.GetPrice(coinTradeDto.CoinSymbol);
 
-                var tradeItems = await _walletItemRepository.GetCoinsDataForTradeAsync(userId, coinSymbol);
+                var tradeItems = await _walletItemRepository.GetCoinsDataForTradeAsync(coinTradeDto.UserId, coinTradeDto.CoinSymbol);
                 IEnumerable<WalletItem> walletItemsToTrade = new[] { tradeItems.BaseCurrency, tradeItems.TradedCurrency };
 
-                Wallet wallet = new Wallet(userId, walletItemsToTrade);
-                WalletTradeCommand walletTradeCommand = new WalletTradeCommand(coinSymbol, amount, tradeCoinPrice);
+                WalletTradeCommand walletTradeCommand =
+                new WalletTradeCommand(coinTradeDto.CoinSymbol, coinTradeDto.CoinAmount, tradeCoinPrice);
+
+                Wallet wallet = new Wallet(coinTradeDto.UserId, walletItemsToTrade);
                 wallet.Sell(walletTradeCommand);
             });
         }
