@@ -29,6 +29,13 @@ namespace CryptocurrencyExchange.Infrastructure.Persistence
                  v => v.Value,
                  v => new CoinSymbol(v)
              );
+
+            modelBuilder.Entity<WalletItem>()
+               .Property(x => x.Amount)
+               .HasConversion(
+                   v => v.Value,
+                   v => new Balance(v)
+               );
         }
     }
 }
