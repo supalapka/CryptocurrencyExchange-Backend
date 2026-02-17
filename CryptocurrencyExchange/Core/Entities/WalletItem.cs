@@ -20,6 +20,13 @@ namespace CryptocurrencyExchange.Core.Models
             Amount = Balance.Zero;
         }
 
+        public WalletItem(User user, CoinSymbol symbol)
+        {
+            User = user;
+            Symbol = symbol;
+            Amount = Balance.Zero;
+        }
+
         public void AddAmount(decimal amount)
         {
             Amount += amount;

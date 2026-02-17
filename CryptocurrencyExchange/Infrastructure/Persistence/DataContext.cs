@@ -1,5 +1,6 @@
 ﻿using CryptocurrencyExchange.Core.Models;
 using CryptocurrencyExchange.Core.ValueObject;
+using CryptocurrencyExchange.Core.ValueObject.User;
 using Microsoft.EntityFrameworkCore;
 
 namespace CryptocurrencyExchange.Infrastructure.Persistence
@@ -36,6 +37,13 @@ namespace CryptocurrencyExchange.Infrastructure.Persistence
                    v => v.Value,
                    v => new Balance(v)
                );
+
+            modelBuilder.Entity<User>()
+                .Property(x => x.Email)
+                .HasConversion(
+                    v => v.Value,
+                    v => new Email(v)
+                );
         }
     }
 }

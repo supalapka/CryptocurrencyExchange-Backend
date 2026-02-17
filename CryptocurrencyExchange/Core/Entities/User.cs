@@ -1,15 +1,19 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using CryptocurrencyExchange.Core.ValueObject.User;
 
 namespace CryptocurrencyExchange.Core.Models
 {
     public class User
     {
-        public int Id { get; set; }
-        public string Email { get; set; } = string.Empty;
-        public byte[] PasswordHash { get; set; }
-        public byte[] PasswordSalt { get; set; }
+        public int Id { get; private set; }
+        public Email Email { get; private set; }
+        public byte[] PasswordHash { get; private set; }
+        public byte[] PasswordSalt { get; private set; }
 
-        public List<Notification> Notifications { get; set; }
-        public List<Future> Futures { get; set; }
+        public User(Email email, byte[] passwordHash, byte[] passwordSalt)
+        {
+            Email = email;
+            PasswordHash = passwordHash;
+            PasswordSalt = passwordSalt;
+        }
     }
 }
