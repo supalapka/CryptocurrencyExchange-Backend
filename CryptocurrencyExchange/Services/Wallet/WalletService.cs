@@ -47,7 +47,7 @@ namespace CryptocurrencyExchange.Services.Wallets
         {
             var walletItem = await _walletItemRepository.GetAsync(userId, symbol);
 
-            return walletItem?.Amount ?? 0;
+            return walletItem?.Amount ?? Balance.Zero;
         }
 
         public async Task<List<WalletItem>> GetFullWalletAsync(int userId)

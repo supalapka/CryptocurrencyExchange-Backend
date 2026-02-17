@@ -9,7 +9,7 @@ namespace CryptocurrencyExchange.Core.Models
         public int UserId { get; private set; }
         public User User { get; private set; }
         public CoinSymbol Symbol { get; private set; }
-        public decimal Amount { get; private set; }
+        public Balance Amount { get; private set; }
 
         private WalletItem() { } // for ORM
 
@@ -17,7 +17,7 @@ namespace CryptocurrencyExchange.Core.Models
         {
             UserId = userId;
             Symbol = symbol;
-            Amount = 0;
+            Amount = Balance.Zero;
         }
 
         public void AddAmount(decimal amount)
@@ -26,7 +26,7 @@ namespace CryptocurrencyExchange.Core.Models
         }
         public void RemoveAmount(decimal amount)
         {
-            if (Amount < amount)
+            if (Amount.Value < amount)
                 throw new InsufficientFundsException(Symbol.Value);
             Amount -= amount;
         }

@@ -41,8 +41,8 @@ namespace CryptocurrencyExchange.Tests.Domain
             wallet.Buy(walletTradeCommand);
 
             // Assert
-            Assert.That(usdt.Amount, Is.EqualTo(500));
-            Assert.That(btc.Amount, Is.EqualTo(1));
+            Assert.That(usdt.Amount, Is.EqualTo(new Balance(500)));
+            Assert.That(btc.Amount, Is.EqualTo(new Balance(1)));
         }
 
         [Test]
