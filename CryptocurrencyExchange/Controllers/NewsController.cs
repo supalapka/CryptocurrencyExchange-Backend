@@ -1,20 +1,12 @@
-﻿using CryptocurrencyExchange.Core.Interfaces.Services;
-using HtmlAgilityPack;
+﻿using CryptocurrencyExchange.Core.Entities;
+using CryptocurrencyExchange.Core.Interfaces.Services;
+using CryptocurrencyExchange.Infrastructure.News;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CryptocurrencyExchange.Controllers
 {
     public class NewsController : Controller
     {
-        public class News
-        {
-            public string Title { get; set; } = string.Empty;
-            public string Body { get; set; } = string.Empty;
-            public string Link { get; set; } = string.Empty;
-            public string ImagePath { get; set; } = string.Empty;
-            public DateTime Time { get; set; }
-        }
-
         private readonly ICryptoNewsUpdateRequester _cryptoNewsUpdateRequester;
 
         public NewsController(ICryptoNewsUpdateRequester cryptoNewsUpdateRequester)
@@ -26,54 +18,17 @@ namespace CryptocurrencyExchange.Controllers
         public async Task<IActionResult> UpdateNews(string coin)
         {
             await _cryptoNewsUpdateRequester.TriggerUpdate(coin);
+
             return Accepted();
         }
 
-        [HttpGet("/get-news")]
-        public async Task<ActionResult<News>> GetNews()
+        [HttpGet("/news/{coin}")]
+        public ActionResult<IEnumerable<CryptoNews>> Get(string coin)
         {
-            var newsList = new List<News>();
+            var result = CryptoNewsInMemoryStore.News.Values
+                .Where(n => n.Coin == coin);
 
-            var url = "https://cryptonews.com/";
-
-            var httpClient = new HttpClient();
-            var html = await httpClient.GetStringAsync(url);
-
-            var htmlDocument = new HtmlDocument();
-            htmlDocument.LoadHtml(html);
-
-            var newsHeadlines = new List<string>();
-            var newsHeadlineNodes = htmlDocument.DocumentNode.SelectNodes("//article[@class='mb-15 mb-sm-30 article-item']");
-
-            foreach (var node in newsHeadlineNodes)
-            {
-                News news = new News();
-
-                var imgNode = node.SelectSingleNode(".//div[@class='img-sized']/img");
-                string image = imgNode.GetAttributeValue("data-lazy-src", "");
-
-                var linkNode = node.SelectSingleNode(".//a[@class='article__title article__title--lg article__title--featured  mb-20']");
-                string link = url + linkNode.GetAttributeValue("href", "");
-
-                var bodyNode = node.SelectSingleNode(".//div[@class='mb-25 d-none d-md-block']");
-                var body = bodyNode.InnerText;
-
-                var timeNode = node.SelectSingleNode(".//div[@class='article__badge-date']");
-                string time = timeNode.GetAttributeValue("data-utctime", "");
-                DateTime dateTime = DateTime.Parse(time);
-
-                string title = linkNode.InnerText;
-
-                news.ImagePath = image;
-                news.Link = link;
-                news.Title = title;
-                news.Body = body;
-                news.Time = dateTime;
-                newsHeadlines.Add(node.InnerHtml);
-                newsList.Add(news);
-            }
-
-            return Ok(newsList);
+            return Ok(result);
         }
     }
 }

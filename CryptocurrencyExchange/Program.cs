@@ -29,12 +29,19 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddMassTransit(x =>
 {
+    x.AddConsumer<CryptoNewsConsumer>();
+
     x.UsingRabbitMq((context, cfg) =>
     {
         cfg.Host("localhost", "/", h =>
         {
             h.Username("guest");
             h.Password("guest");
+        });
+
+        cfg.ReceiveEndpoint("news.url-matched", e =>
+        {
+            e.ConfigureConsumer<CryptoNewsConsumer>(context);
         });
     });
 });
@@ -59,6 +66,7 @@ builder.Services.AddHttpClient<IMarketApiClient, BinanceMarketApiClient>(client 
 });
 
 builder.Services.AddScoped<ICryptoNewsUpdateRequester, CryptoNewsCrawlRequester>();
+builder.Services.AddScoped<ICryptoNewsRepository, NewPersistence>();
 
 builder.Services.AddScoped<IMarketService, MarketService>();
 builder.Services.AddScoped<IMarketPriceProvider, ApiMarketPriceProvider>();
