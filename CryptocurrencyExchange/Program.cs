@@ -3,6 +3,7 @@ using CryptocurrencyExchange.Core.Interfaces;
 using CryptocurrencyExchange.Core.Interfaces.Repositories;
 using CryptocurrencyExchange.Core.Interfaces.Services;
 using CryptocurrencyExchange.Infrastructure.Market;
+using CryptocurrencyExchange.Infrastructure.News;
 using CryptocurrencyExchange.Infrastructure.Persistence;
 using CryptocurrencyExchange.Infrastructure.Persistence.Repositories;
 using CryptocurrencyExchange.Infrastructure.Schedulers;
@@ -16,6 +17,7 @@ using CryptocurrencyExchange.Services.Market;
 using CryptocurrencyExchange.Services.Notifications;
 using CryptocurrencyExchange.Services.StakingServices;
 using CryptocurrencyExchange.Services.Wallets;
+using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -24,6 +26,20 @@ using System.Text;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+
+builder.Services.AddMassTransit(x =>
+{
+    x.UsingRabbitMq((context, cfg) =>
+    {
+        cfg.Host("localhost", "/", h =>
+        {
+            h.Username("guest");
+            h.Password("guest");
+        });
+    });
+});
+
+builder.Services.AddMassTransitHostedService();
 
 builder.Services
     .AddOptions<JwtOptions>()
@@ -41,6 +57,8 @@ builder.Services.AddHttpClient<IMarketApiClient, BinanceMarketApiClient>(client 
 {
     client.BaseAddress = new Uri("https://api.binance.com/api/v3/");
 });
+
+builder.Services.AddScoped<ICryptoNewsUpdateRequester, CryptoNewsCrawlRequester>();
 
 builder.Services.AddScoped<IMarketService, MarketService>();
 builder.Services.AddScoped<IMarketPriceProvider, ApiMarketPriceProvider>();

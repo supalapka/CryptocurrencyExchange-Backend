@@ -1,11 +1,11 @@
-﻿using HtmlAgilityPack;
+﻿using CryptocurrencyExchange.Core.Interfaces.Services;
+using HtmlAgilityPack;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CryptocurrencyExchange.Controllers
 {
     public class NewsController : Controller
     {
-
         public class News
         {
             public string Title { get; set; } = string.Empty;
@@ -13,8 +13,22 @@ namespace CryptocurrencyExchange.Controllers
             public string Link { get; set; } = string.Empty;
             public string ImagePath { get; set; } = string.Empty;
             public DateTime Time { get; set; }
-
         }
+
+        private readonly ICryptoNewsUpdateRequester _cryptoNewsUpdateRequester;
+
+        public NewsController(ICryptoNewsUpdateRequester cryptoNewsUpdateRequester)
+        {
+            _cryptoNewsUpdateRequester = cryptoNewsUpdateRequester;
+        }
+
+        [HttpPost("/update-news/{coin}")]
+        public async Task<IActionResult> UpdateNews(string coin)
+        {
+            await _cryptoNewsUpdateRequester.TriggerUpdate(coin);
+            return Accepted();
+        }
+
         [HttpGet("/get-news")]
         public async Task<ActionResult<News>> GetNews()
         {
