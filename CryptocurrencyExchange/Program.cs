@@ -3,6 +3,7 @@ using CryptocurrencyExchange.Core.Interfaces;
 using CryptocurrencyExchange.Core.Interfaces.Repositories;
 using CryptocurrencyExchange.Core.Interfaces.Services;
 using CryptocurrencyExchange.Infrastructure.Market;
+using CryptocurrencyExchange.Infrastructure.News;
 using CryptocurrencyExchange.Infrastructure.Persistence;
 using CryptocurrencyExchange.Infrastructure.Persistence.Repositories;
 using CryptocurrencyExchange.Infrastructure.Schedulers;
@@ -16,14 +17,47 @@ using CryptocurrencyExchange.Services.Market;
 using CryptocurrencyExchange.Services.Notifications;
 using CryptocurrencyExchange.Services.StakingServices;
 using CryptocurrencyExchange.Services.Wallets;
+using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+
+builder.Services
+    .AddOptions<RabbitMqOptions>()
+    .Bind(builder.Configuration.GetSection("RabbitMq"))
+    .Validate(o => !string.IsNullOrWhiteSpace(o.Host))
+    .Validate(o => !string.IsNullOrWhiteSpace(o.Username))
+    .Validate(o => !string.IsNullOrWhiteSpace(o.Password))
+    .ValidateOnStart();
+
+builder.Services.AddMassTransit(x =>
+{
+    x.AddConsumer<CryptoNewsConsumer>();
+
+    x.UsingRabbitMq((context, cfg) =>
+    {
+        var options = context.GetRequiredService<IOptions<RabbitMqOptions>>().Value;
+
+        cfg.Host(options.Host, options.VirtualHost, h =>
+        {
+            h.Username(options.Username);
+            h.Password(options.Password);
+        });
+
+        cfg.ReceiveEndpoint("news.url-matched", e =>
+        {
+            e.ConfigureConsumer<CryptoNewsConsumer>(context);
+        });
+    });
+});
+
+builder.Services.AddMassTransitHostedService();
 
 builder.Services
     .AddOptions<JwtOptions>()
@@ -41,6 +75,9 @@ builder.Services.AddHttpClient<IMarketApiClient, BinanceMarketApiClient>(client 
 {
     client.BaseAddress = new Uri("https://api.binance.com/api/v3/");
 });
+
+builder.Services.AddScoped<ICryptoNewsUpdateRequester, CryptoNewsCrawlRequester>();
+builder.Services.AddScoped<ICryptoNewsRepository, NewPersistence>();
 
 builder.Services.AddScoped<IMarketService, MarketService>();
 builder.Services.AddScoped<IMarketPriceProvider, ApiMarketPriceProvider>();
