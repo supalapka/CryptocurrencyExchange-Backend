@@ -55,11 +55,25 @@ The project includes scheduled background jobs used for staking reward calculati
 ---
 ## How to Run
 
-Requirements:
+### Requirements:
 - .NET 6
 - RabbitMQ (used for crypto-news only; configured in `Program.cs`; requires a running external crawler service)
 - Database connection string (configured via `appsettings.json`)
 
-Steps:
-1. Apply database migrations using `update-database` command in PM console
-2. Start the API
+### Steps:
+#### 1. Apply database migrations using `update-database` command in PM console
+#### 2. Configure RabbitMQ host and virtual host in `appsettings.json`:
+   ```json
+   "RabbitMq": {
+     "Host": "localhost",
+     "VirtualHost": "/"
+   }
+   ```
+   Configure RabbitMQ credentials using .NET user-secrets:
+
+    dotnet user-secrets set "RabbitMq:Username" "YourUsername"
+    dotnet user-secrets set "RabbitMq:Password" "YourPassword"
+
+#### 3. Start the API
+
+---

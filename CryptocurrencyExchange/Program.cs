@@ -20,6 +20,7 @@ using CryptocurrencyExchange.Services.Wallets;
 using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
@@ -27,16 +28,26 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
+builder.Services
+    .AddOptions<RabbitMqOptions>()
+    .Bind(builder.Configuration.GetSection("RabbitMq"))
+    .Validate(o => !string.IsNullOrWhiteSpace(o.Host))
+    .Validate(o => !string.IsNullOrWhiteSpace(o.Username))
+    .Validate(o => !string.IsNullOrWhiteSpace(o.Password))
+    .ValidateOnStart();
+
 builder.Services.AddMassTransit(x =>
 {
     x.AddConsumer<CryptoNewsConsumer>();
 
     x.UsingRabbitMq((context, cfg) =>
     {
-        cfg.Host("localhost", "/", h =>
+        var options = context.GetRequiredService<IOptions<RabbitMqOptions>>().Value;
+
+        cfg.Host(options.Host, options.VirtualHost, h =>
         {
-            h.Username("guest");
-            h.Password("guest");
+            h.Username(options.Username);
+            h.Password(options.Password);
         });
 
         cfg.ReceiveEndpoint("news.url-matched", e =>
