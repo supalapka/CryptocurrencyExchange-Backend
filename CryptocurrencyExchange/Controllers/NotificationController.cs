@@ -5,7 +5,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace CryptocurrencyExchange.Controllers
 {
-    public class NotificationController : Controller
+    [ApiController]
+    [Authorize]
+    public class NotificationController : ControllerBase
     {
         private readonly INotificationService _notificatinService;
 
@@ -14,20 +16,14 @@ namespace CryptocurrencyExchange.Controllers
             _notificatinService = notificatinService;
         }
 
-        public INotificationService NotificatinService => _notificatinService;
-
-        [Authorize]
         [HttpGet("auth/notifications/last")]
         public Notification GetLastNotification()
         {
             int userId = Convert.ToInt32(HttpContext.Items["UserId"]);
-            return NotificatinService.GetLastNotification(userId);
+            return _notificatinService.GetLastNotification(userId);
         }
 
-
-        [Authorize]
         [HttpGet("auth/notifications/read/{id}")]
-        public async Task Read(int id) => await NotificatinService.MarkAsRead(id);
-
+        public async Task Read(int id) => await _notificatinService.MarkAsRead(id);
     }
 }
