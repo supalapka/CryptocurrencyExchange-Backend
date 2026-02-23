@@ -29,17 +29,18 @@ namespace CryptocurrencyExchange.Services.StakingServices
 
         public async Task CreateUserStaking(int userId, int stakingCoinId, decimal amount, int durationInMonth)
         {
+            throw new NotImplementedException();
             await _unitOfWork.ExecuteInTransactionAsync(async () =>
              {
                  StakingCoin stakingCoin = await _stakingRepository.GetCoinByIdAsync(stakingCoinId)
                       ?? throw new StakingCoinNotFoundException(stakingCoinId.ToString());
 
-                 WalletItem coinWalletItem = await _walletItemRepository.GetAsync(userId, stakingCoin.Symbol)
-                      ?? throw new WalletItemNotFoundException($"staking coin not found: {stakingCoin.Symbol} in wallet");
+                 //WalletItem coinWalletItem = await _walletItemRepository.GetAsync(userId, stakingCoin.Symbol)
+                 //     ?? throw new WalletItemNotFoundException($"staking coin not found: {stakingCoin.Symbol} in wallet");
 
-                 Staking stakingData = _stakingDomainService.CreateStaking(coinWalletItem, stakingCoin, amount, durationInMonth);
+                 //Staking stakingData = _stakingDomainService.CreateStaking(coinWalletItem, stakingCoin, amount, durationInMonth);
 
-                 await _stakingRepository.AddAsync(stakingData);
+                 //await _stakingRepository.AddAsync(stakingData);
              });
         }
 
@@ -69,10 +70,12 @@ namespace CryptocurrencyExchange.Services.StakingServices
 
         public async Task PayStakingReward(Staking stakingData)
         {
-            WalletItem stakedCoinWalletItem = await _walletItemRepository.GetAsync(stakingData.UserId, stakingData.StakingCoin.Symbol)
-                ?? throw new WalletItemNotFoundException($"staking coin not found: {stakingData.StakingCoin.Symbol} in wallet");
+            throw new NotImplementedException();
 
-            _stakingDomainService.CompleteStaking(stakingData, stakedCoinWalletItem);
+            //WalletItem stakedCoinWalletItem = await _walletItemRepository.GetAsync(stakingData.UserId, stakingData.StakingCoin.Symbol)
+            //    ?? throw new WalletItemNotFoundException($"staking coin not found: {stakingData.StakingCoin.Symbol} in wallet");
+
+            //_stakingDomainService.CompleteStaking(stakingData, stakedCoinWalletItem);
         }
 
 
