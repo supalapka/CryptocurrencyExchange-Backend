@@ -2,12 +2,14 @@
 using CryptocurrencyExchange.Services.Futures;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace CryptocurrencyExchange.Controllers
 {
+    [ApiController]
     [Authorize]
     [Route("futures")]
-    public class FuturesController : Controller
+    public class FuturesController : ControllerBase
     {
 
         private readonly IFuturesService _futuresService;
@@ -20,7 +22,7 @@ namespace CryptocurrencyExchange.Controllers
         [HttpPost("create")]
         public async Task<ActionResult> CreateFuture([FromBody] FutureDto future)
         {
-            int userId = Convert.ToInt32(HttpContext.Items["UserId"]);
+            int userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
             int futureId = await _futuresService.CreateFutureAsync(future, userId);
             return Ok(futureId);
         }
@@ -29,7 +31,7 @@ namespace CryptocurrencyExchange.Controllers
         [HttpGet("list")]
         public async Task<List<FutureDto>> GetFutureList()
         {
-            int userId = Convert.ToInt32(HttpContext.Items["UserId"]);
+            int userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
             return await _futuresService.GetFuturePositions(userId);
         }
 
@@ -45,9 +47,8 @@ namespace CryptocurrencyExchange.Controllers
         [HttpGet("history/{page}")]
         public async Task<List<FutureHIstoryOutput>> GetHistory(int page)
         {
-            int userId = Convert.ToInt32(HttpContext.Items["UserId"]);
+            int userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
             return await _futuresService.GetHistoryAsync(userId, page);
         }
-
     }
 }

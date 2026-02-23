@@ -1,22 +1,21 @@
 ﻿using CryptocurrencyExchange.Core.Interfaces.Services;
 using CryptocurrencyExchange.Core.Models;
 using CryptocurrencyExchange.Core.ValueObject;
-using CryptocurrencyExchange.Infrastructure.Persistence;
 using CryptocurrencyExchange.Services.WalletTrade;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace CryptocurrencyExchange.Controllers
 {
+    [ApiController]
     [Authorize]
-    public class WalletController : Controller
+    public class WalletController : ControllerBase
     {
-        private readonly DataContext _dataContext;
         private readonly IWalletService _walletService;
 
-        public WalletController(DataContext dataContext, IWalletService walletService)
+        public WalletController(IWalletService walletService)
         {
-            _dataContext = dataContext;
             _walletService = walletService;
         }
 
@@ -24,7 +23,7 @@ namespace CryptocurrencyExchange.Controllers
         [HttpGet("auth/get-wallet")]
         public async Task<ActionResult<List<WalletItem>>> GetFullWallet()
         {
-            int userId = Convert.ToInt32(HttpContext.Items["UserId"]);
+            int userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
 
             return await _walletService.GetFullWalletAsync(userId);
         }
@@ -33,7 +32,7 @@ namespace CryptocurrencyExchange.Controllers
         [HttpGet("auth/coin-amount/{symbol}")]
         public async Task<ActionResult<decimal>> GetCoinAmount(string symbol)
         {
-            int userId = Convert.ToInt32(HttpContext.Items["UserId"]);
+            int userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
 
             return await _walletService.GetCoinAmountAsync(userId, new CoinSymbol(symbol));
         }
@@ -42,7 +41,7 @@ namespace CryptocurrencyExchange.Controllers
         [HttpPost("auth/buy")]
         public async Task<ActionResult> Buy([FromBody] CoinTradeDto coinTradeDto)
         {
-            int userId = Convert.ToInt32(HttpContext.Items["UserId"]);
+            int userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
             await _walletService.BuyAsync(userId, coinTradeDto);
 
             return Ok();
@@ -52,7 +51,7 @@ namespace CryptocurrencyExchange.Controllers
         [HttpPost("auth/sell")]
         public async Task<ActionResult> Sell([FromBody] CoinTradeDto coinTradeDto)
         {
-            int userId = Convert.ToInt32(HttpContext.Items["UserId"]);
+            int userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
             await _walletService.SellAsync(userId, coinTradeDto);
 
             return Ok();

@@ -1,6 +1,8 @@
 ﻿using CryptocurrencyExchange.Core.Interfaces.Services;
 using CryptocurrencyExchange.Services.Auth;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace CryptocurrencyExchange.Controllers
 {
@@ -23,7 +25,6 @@ namespace CryptocurrencyExchange.Controllers
             return Ok($"{userDto.Email} successfully registered");
         }
 
-
         [HttpPost("login")]
         public async Task<ActionResult<string>> Login(UserDto userDto)
         {
@@ -32,11 +33,11 @@ namespace CryptocurrencyExchange.Controllers
             return Ok(token);
         }
 
-
+        [Authorize]
         [HttpGet("email")]
         public async Task<ActionResult<string>> GetUserEmail()
         {
-            int userId = Convert.ToInt32(HttpContext.Items["UserId"]);
+            int userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
             string email = await _authService.GetEmailByIdAsync(userId);
 
             return Ok(email);

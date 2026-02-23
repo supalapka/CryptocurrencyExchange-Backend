@@ -1,6 +1,4 @@
-﻿using CryptocurrencyExchange.Middleware;
-
-namespace CryptocurrencyExchange.Extensions
+﻿namespace CryptocurrencyExchange.Extensions
 {
     public static class ApplicationBuilderExtensions
     {
@@ -16,7 +14,6 @@ namespace CryptocurrencyExchange.Extensions
             app.UseHttpsRedirection();
             app.UseAuthentication();
             app.UseAuthorization();
-            app.UseMiddleware<JwtMiddleware>();
             app.MapControllers();
 
             return app;
