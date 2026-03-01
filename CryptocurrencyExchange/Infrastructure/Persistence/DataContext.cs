@@ -16,10 +16,27 @@ namespace CryptocurrencyExchange.Infrastructure.Persistence
         public DbSet<FutureHistory> FutureHistory { get; set; }
         public DbSet<StakingCoin> StakingCoins { get; set; }
         public DbSet<Staking> Staking { get; set; }
+        public DbSet<LogEntry> LogEntries { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             ConfigureValueObjectConversions(modelBuilder);
+            ConfigureLogEntry(modelBuilder);
+        }
+
+        private static void ConfigureLogEntry(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<LogEntry>(b =>
+            {
+                b.HasKey(e => e.Id);
+                b.Property(e => e.Level).IsRequired().HasMaxLength(16);
+                b.Property(e => e.Category).IsRequired().HasMaxLength(512);
+                b.Property(e => e.Message).IsRequired();
+                b.Property(e => e.Exception);
+                b.Property(e => e.TimestampUtc).IsRequired();
+                b.HasIndex(e => e.TimestampUtc);
+                b.HasIndex(e => e.Level);
+            });
         }
 
         private static void ConfigureValueObjectConversions(ModelBuilder modelBuilder)
