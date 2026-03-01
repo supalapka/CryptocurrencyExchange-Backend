@@ -13,6 +13,7 @@ namespace CryptocurrencyExchange.Services.Futures
         private readonly IUnitOfWork _unitOfWork;
         private readonly IWalletItemRepository _walletItemRepository;
         private readonly IFutureRepository _futureRepository;
+        private readonly ILogger<FuturesService> _logger;
 
         private readonly CoinSymbol UsdtSymbol = new CoinSymbol(CoinSymbol.Usdt.Value);
 
@@ -21,18 +22,22 @@ namespace CryptocurrencyExchange.Services.Futures
             IFuturesDomainService futuresDomainService,
             IUnitOfWork unitOfWork,
             IWalletItemRepository walletItemRepository,
-            IFutureRepository futureRepository
-            )
+            IFutureRepository futureRepository,
+            ILogger<FuturesService> logger)
         {
             _futuresDomainService = futuresDomainService;
             _unitOfWork = unitOfWork;
             _walletItemRepository = walletItemRepository;
             _futureRepository = futureRepository;
+            _logger = logger;
         }
 
 
         public async Task<int> CreateFutureAsync(FutureDto futureDto, int userId)
         {
+            _logger.LogInformation("User {UserId} opening {Position} position on {Symbol} with {Leverage}x leverage",
+                userId, futureDto.Position, futureDto.Symbol, futureDto.Leverage);
+
             Future future = null!;
 
             await _unitOfWork.ExecuteInTransactionAsync(async () =>
@@ -45,6 +50,7 @@ namespace CryptocurrencyExchange.Services.Futures
                 await _futureRepository.AddAsync(future);
             });
 
+            _logger.LogInformation("User {UserId} opened future position {FutureId}", userId, future.Id);
             return future.Id;
         }
 
@@ -71,6 +77,8 @@ namespace CryptocurrencyExchange.Services.Futures
 
         public async Task LiquidatePosition(int id, double markPrice)
         {
+            _logger.LogWarning("Liquidating future position {FutureId} at mark price {MarkPrice}", id, markPrice);
+
             await _unitOfWork.ExecuteInTransactionAsync(async () =>
             {
                 var position = await _futureRepository.GetByIdAsync(id)
@@ -80,11 +88,16 @@ namespace CryptocurrencyExchange.Services.Futures
 
                 await _futureRepository.AddPositionToHistoryAsync(position, markPrice);
             });
+
+            _logger.LogWarning("Future position {FutureId} was liquidated", id);
         }
 
 
         public async Task ClosePosition(int id, decimal pnl, double markPrice)
         {
+            _logger.LogInformation("Closing future position {FutureId} with PnL {Pnl} at mark price {MarkPrice}",
+                id, pnl, markPrice);
+
             await _unitOfWork.ExecuteInTransactionAsync(async () =>
             {
                 var position = await _futureRepository.GetByIdAsync(id)
@@ -97,6 +110,8 @@ namespace CryptocurrencyExchange.Services.Futures
 
                 await _futureRepository.AddPositionToHistoryAsync(position, markPrice);
             });
+
+            _logger.LogInformation("Future position {FutureId} closed successfully", id);
         }
 
 

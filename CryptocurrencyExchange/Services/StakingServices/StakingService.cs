@@ -12,18 +12,20 @@ namespace CryptocurrencyExchange.Services.StakingServices
         private readonly IWalletItemRepository _walletItemRepository;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IStakingDomainService _stakingDomainService;
+        private readonly ILogger<StakingService> _logger;
 
         public StakingService(
             IStakingRepository stakingRepository,
             IWalletItemRepository walletItemRepository,
             IUnitOfWork unitOfWork,
-            IStakingDomainService stakingDomainService
-            )
+            IStakingDomainService stakingDomainService,
+            ILogger<StakingService> logger)
         {
             _stakingRepository = stakingRepository;
             _walletItemRepository = walletItemRepository;
             _unitOfWork = unitOfWork;
             _stakingDomainService = stakingDomainService;
+            _logger = logger;
         }
 
 
@@ -51,17 +53,17 @@ namespace CryptocurrencyExchange.Services.StakingServices
 
             List<Staking> stakings = await _stakingRepository.GetAllActiveStakingsAsync();
 
+            _logger.LogInformation("Checking {Count} active stakings for expiry", stakings.Count);
+
             await _unitOfWork.ExecuteInTransactionAsync(async () =>
             {
                 foreach (var stakingData in stakings)
                 {
                     if (_stakingDomainService.IsExpired(stakingData))
                     {
+                        _logger.LogInformation("Staking {StakingId} for user {UserId} has expired, paying reward",
+                            stakingData.Id, stakingData.UserId);
                         await PayStakingReward(stakingData);
-                    }
-                    else
-                    {
-                        // The staking period has not ended yet
                     }
                 }
             });

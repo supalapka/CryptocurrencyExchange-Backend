@@ -16,19 +16,22 @@ namespace CryptocurrencyExchange.Services.Auth
         private readonly IAuthDomainService _authDomainService;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ITokenService _tokenService;
+        private readonly ILogger<AuthService> _logger;
 
         public AuthService(IUserRepository
             userRepository,
             IUnitOfWork unitOfWork,
             IWalletItemRepository walletRepository,
             IAuthDomainService authDomainService,
-            ITokenService tokenService)
+            ITokenService tokenService,
+            ILogger<AuthService> logger)
         {
             _userRepository = userRepository;
             _unitOfWork = unitOfWork;
             _walletRepository = walletRepository;
             _authDomainService = authDomainService;
             _tokenService = tokenService;
+            _logger = logger;
         }
 
         public async Task<string> LoginAsync(string email, string password)
@@ -36,19 +39,28 @@ namespace CryptocurrencyExchange.Services.Auth
             var user = await _userRepository.GetByEmailAsync(email);
 
             if (user == null)
+            {
+                _logger.LogWarning("Login failed: user not found for email {Email}", email);
                 throw new UserNotFoundException();
+            }
 
             if (!_authDomainService.VerifyPassword(password, user))
+            {
+                _logger.LogWarning("Login failed: wrong password for user {UserId}", user.Id);
                 throw new Exception("Wrong Password");
+            }
 
+            _logger.LogInformation("User {UserId} logged in successfully", user.Id);
             return _tokenService.CreateToken(user);
-
         }
 
         public async Task RegisterAsync(string email, string password)
         {
             if (await _userRepository.UserExists(email))
+            {
+                _logger.LogWarning("Registration failed: email {Email} already exists", email);
                 throw new UserAlreadyExistsException();
+            }
 
             await _unitOfWork.ExecuteInTransactionAsync(async () =>
             {
@@ -58,6 +70,8 @@ namespace CryptocurrencyExchange.Services.Auth
 
                 await CreateStarterWalletAsync(user);
             });
+
+            _logger.LogInformation("New user registered with email {Email}", email);
         }
 
         public async Task<string> GetEmailByIdAsync(int userId)

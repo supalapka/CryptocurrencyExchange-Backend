@@ -14,20 +14,25 @@ namespace CryptocurrencyExchange.Services.Wallets
         private readonly IMarketService _marketService;
         private readonly IWalletItemRepository _walletItemRepository;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly ILogger<WalletService> _logger;
 
         public WalletService(
             IMarketService marketService,
             IWalletItemRepository walletItemRepository,
-            IUnitOfWork unitOfWork
-            )
+            IUnitOfWork unitOfWork,
+            ILogger<WalletService> logger)
         {
             _marketService = marketService;
             _walletItemRepository = walletItemRepository;
             _unitOfWork = unitOfWork;
+            _logger = logger;
         }
 
         public async Task BuyAsync(int userId, CoinTradeDto coinTradeDto)
         {
+            _logger.LogInformation("User {UserId} buying {Amount} {Symbol}",
+                userId, coinTradeDto.CoinAmount, coinTradeDto.CoinSymbol);
+
             await _unitOfWork.ExecuteInTransactionAsync(async () =>
             {
                 IEnumerable<WalletItem> walletItemsToTrade = await GetWalletTradeItems(userId, coinTradeDto);
@@ -36,6 +41,9 @@ namespace CryptocurrencyExchange.Services.Wallets
                 Wallet wallet = new Wallet(userId, walletItemsToTrade);
                 wallet.Buy(walletTradeCommand);
             });
+
+            _logger.LogInformation("User {UserId} successfully bought {Amount} {Symbol}",
+                userId, coinTradeDto.CoinAmount, coinTradeDto.CoinSymbol);
         }
 
         public async Task<decimal> GetCoinAmountAsync(int userId, CoinSymbol symbol)
@@ -65,6 +73,9 @@ namespace CryptocurrencyExchange.Services.Wallets
 
         public async Task SellAsync(int userId, CoinTradeDto coinTradeDto)
         {
+            _logger.LogInformation("User {UserId} selling {Amount} {Symbol}",
+                userId, coinTradeDto.CoinAmount, coinTradeDto.CoinSymbol);
+
             await _unitOfWork.ExecuteInTransactionAsync(async () =>
             {
                 IEnumerable<WalletItem> walletItemsToTrade = await GetWalletTradeItems(userId, coinTradeDto);
@@ -73,6 +84,9 @@ namespace CryptocurrencyExchange.Services.Wallets
                 Wallet wallet = new Wallet(userId, walletItemsToTrade);
                 wallet.Sell(walletTradeCommand);
             });
+
+            _logger.LogInformation("User {UserId} successfully sold {Amount} {Symbol}",
+                userId, coinTradeDto.CoinAmount, coinTradeDto.CoinSymbol);
         }
 
         private async Task<IEnumerable<WalletItem>> GetWalletTradeItems(int userId, CoinTradeDto coinTradeDto)

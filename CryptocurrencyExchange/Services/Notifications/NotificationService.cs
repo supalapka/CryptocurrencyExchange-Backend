@@ -7,11 +7,14 @@ namespace CryptocurrencyExchange.Services.Notifications
     public class NotificationService : INotificationService
     {
         private readonly DataContext _dataContext;
+        private readonly ILogger<NotificationService> _logger;
 
-        public NotificationService(DataContext context)
+        public NotificationService(DataContext context, ILogger<NotificationService> logger)
         {
             _dataContext = context;
+            _logger = logger;
         }
+
         public async Task CreateNotification(string message, int receiverId)
         {
             var notification = new Notification()
@@ -24,6 +27,8 @@ namespace CryptocurrencyExchange.Services.Notifications
 
             _dataContext.Notifications.Add(notification);
             await _dataContext.SaveChangesAsync();
+
+            _logger.LogInformation("Notification created for user {UserId}: {Message}", receiverId, message);
         }
 
 
