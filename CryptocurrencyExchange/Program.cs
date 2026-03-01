@@ -8,6 +8,7 @@ builder.Services.AddExternalApiInfrastructureServices();
 builder.Services.AddMessagingInfrastructure(builder.Configuration);
 builder.Services.AddSecurityInfrastructure(builder.Configuration);
 builder.Services.AddBackgroundJobs();
+builder.Services.AddDatabaseLogging();
 
 // application
 builder.Services.AddApplicationServices();

@@ -1,6 +1,7 @@
 ﻿using CryptocurrencyExchange.Core.Interfaces;
 using CryptocurrencyExchange.Core.Interfaces.Repositories;
 using CryptocurrencyExchange.Core.Interfaces.Services;
+using CryptocurrencyExchange.Infrastructure.Logging;
 using CryptocurrencyExchange.Infrastructure.Market;
 using CryptocurrencyExchange.Infrastructure.News;
 using CryptocurrencyExchange.Infrastructure.Persistence;
@@ -133,6 +134,14 @@ namespace CryptocurrencyExchange.Extensions
         this IServiceCollection services)
         {
             services.AddHostedService<StakingScheduler>();
+            return services;
+        }
+
+        public static IServiceCollection AddDatabaseLogging(this IServiceCollection services)
+        {
+            services.AddSingleton<LogQueue>();
+            services.AddSingleton<ILoggerProvider, DatabaseLoggerProvider>();
+            services.AddHostedService<DatabaseLogWriterService>();
             return services;
         }
     }
