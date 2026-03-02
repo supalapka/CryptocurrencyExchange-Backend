@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace CryptocurrencyExchange.Presentation.Controllers
 {
+    [Obsolete("Not in use.")]
     [ApiController]
     [Authorize]
     public class NotificationController : ControllerBase

@@ -4,6 +4,7 @@ using CryptocurrencyExchange.Infrastructure.Persistence;
 
 namespace CryptocurrencyExchange.Application.Notifications
 {
+    [Obsolete("Not in use.")]
     public class NotificationService : INotificationService
     {
         private readonly DataContext _dataContext;
