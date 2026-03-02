@@ -1,5 +1,5 @@
 ﻿using CryptocurrencyExchange.Core.Models;
-using CryptocurrencyExchange.Application.Futures;
+using CryptocurrencyExchange.Core.ReadModels;
 
 namespace CryptocurrencyExchange.Core.Interfaces.Repositories
 {
