@@ -4,7 +4,6 @@ using CryptocurrencyExchange.Core.Interfaces.Services;
 using CryptocurrencyExchange.Core.Models;
 using CryptocurrencyExchange.Core.ValueObject;
 using CryptocurrencyExchange.Exceptions;
-using CryptocurrencyExchange.Infrastructure.Security;
 using CryptocurrencyExchange.Services.Interfaces;
 
 namespace CryptocurrencyExchange.Services.Auth
