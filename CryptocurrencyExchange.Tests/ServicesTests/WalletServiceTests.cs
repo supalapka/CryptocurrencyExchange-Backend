@@ -1,11 +1,12 @@
-﻿using CryptocurrencyExchange.Core.Interfaces;
+﻿using CryptocurrencyExchange.Application.Wallet;
+using CryptocurrencyExchange.Application.Wallets;
+using CryptocurrencyExchange.Core.Interfaces;
 using CryptocurrencyExchange.Core.Interfaces.Repositories;
 using CryptocurrencyExchange.Core.Interfaces.Services;
 using CryptocurrencyExchange.Core.Models;
 using CryptocurrencyExchange.Core.ValueObject;
 using CryptocurrencyExchange.Exceptions;
-using CryptocurrencyExchange.Services.Wallets;
-using CryptocurrencyExchange.Services.WalletTrade;
+using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using NUnit.Framework;
 
@@ -35,7 +36,8 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
             _service = new WalletService(
                 _marketService.Object,
                 _walletRepo.Object,
-                _uow.Object
+                _uow.Object,
+                NullLogger<WalletService>.Instance
             );
         }
 
