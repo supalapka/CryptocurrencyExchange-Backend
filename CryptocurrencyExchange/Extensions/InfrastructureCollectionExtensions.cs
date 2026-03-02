@@ -45,12 +45,10 @@ namespace CryptocurrencyExchange.Extensions
 
         public static IServiceCollection AddExternalApiInfrastructureServices(this IServiceCollection services)
         {
-            services.AddHttpClient<IMarketApiClient, BinanceMarketApiClient>(client =>
-            {
-                client.BaseAddress = new Uri("https://api.binance.com/api/v3/");
-            });
+            services.AddHttpClient<IMarketApiClient, BinanceMarketApiClient>();
+            services.AddHttpClient<IMarketApiClient, BybitMarketApiClient>();
+            services.AddSingleton<IMarketPriceProvider, RoutingApiMarketPriceProvider>();
 
-            services.AddScoped<IMarketPriceProvider, ApiMarketPriceProvider>();
             services.AddScoped<ICryptoNewsUpdateRequester, CryptoNewsCrawlRequester>();
 
             return services;

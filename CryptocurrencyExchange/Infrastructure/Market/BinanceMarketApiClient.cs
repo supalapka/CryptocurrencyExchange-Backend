@@ -17,6 +17,7 @@ namespace CryptocurrencyExchange.Infrastructure.Market
         public BinanceMarketApiClient(HttpClient httpClient)
         {
             _httpClient = httpClient;
+            _httpClient.BaseAddress = new Uri("https://api.binance.com/api/v3/");
         }
 
         public async Task<decimal> GetUsdtPriceAsync(string symbol)
