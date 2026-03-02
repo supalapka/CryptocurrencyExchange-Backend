@@ -3,6 +3,7 @@ using CryptocurrencyExchange.Application.Futures;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using CryptocurrencyExchange.Core.ReadModels;
 
 namespace CryptocurrencyExchange.Presentation.Controllers
 {

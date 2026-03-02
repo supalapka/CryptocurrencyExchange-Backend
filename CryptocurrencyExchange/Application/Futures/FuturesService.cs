@@ -2,6 +2,7 @@ using CryptocurrencyExchange.Core.Interfaces;
 using CryptocurrencyExchange.Core.Interfaces.Repositories;
 using CryptocurrencyExchange.Core.Interfaces.Services;
 using CryptocurrencyExchange.Core.Models;
+using CryptocurrencyExchange.Core.ReadModels;
 using CryptocurrencyExchange.Core.ValueObject;
 using CryptocurrencyExchange.Exceptions;
 
