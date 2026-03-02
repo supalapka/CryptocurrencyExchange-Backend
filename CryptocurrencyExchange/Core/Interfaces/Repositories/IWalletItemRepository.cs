@@ -7,8 +7,8 @@ namespace CryptocurrencyExchange.Core.Interfaces.Repositories
     {
         Task<List<WalletItem>> GetNonEmptyByUserAsync(int userId);
 
-        Task<WalletItem?> GetAsync(int userId, string symbol);
+        Task<WalletItem?> GetAsync(int userId, CoinSymbol symbol);
         Task AddAsync(WalletItem item);
-        Task<TradeWalletItems> GetCoinsDataForTradeAsync(int userId, string coinSymbol);
+        Task<TradeWalletItems> GetCoinsDataForTradeAsync(int userId, CoinSymbol coinSymbol);
     }
 }

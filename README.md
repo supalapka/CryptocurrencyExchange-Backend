@@ -5,6 +5,8 @@ Front-end parts:
 - https://github.com/supalapka/CryptocurrencyExchange-Frontend
 - https://github.com/supalapka/CryptocurrencyExchange-Frontend-React
 
+External services connected via RabbitMQ:
+- https://github.com/supalapka/Crawler — crawls and parses cryptocurrency news based on filters
 
 ## Overview
 
@@ -21,6 +23,8 @@ The project is built as a modular monolith with a clear separation between HTTP 
 - Staking with scheduled reward (demo account)
 - Notifications and news
 - Integration with external market APIs (Binance)
+- Asynchronous processing and service communication using **RabbitMQ**
+- Structured logging to SQL Server and **Elasticsearch** with Kibana visualization
 
 ---
 ## Architecture
@@ -52,10 +56,32 @@ The project includes scheduled background jobs used for staking reward calculati
 ---
 ## How to Run
 
-Requirements:
+### Requirements:
 - .NET 6
+- Docker (for Elasticsearch and Kibana)
+- RabbitMQ (used for crypto-news only; configured in `Program.cs`; requires a running external crawler service)
 - Database connection string (configured via `appsettings.json`)
 
-Steps:
-1. Apply database migrations using `update-database` command in PM console
-2. Start the API
+### Steps:
+#### 1. Apply database migrations using `update-database` command in PM console
+
+#### 2. Configure RabbitMQ host and virtual host in `appsettings.json`:
+   ```json
+   "RabbitMq": {
+     "Host": "localhost",
+     "VirtualHost": "/"
+   }
+   ```
+   Configure RabbitMQ credentials using .NET user-secrets:
+
+    dotnet user-secrets set "RabbitMq:Username" "YourUsername"
+    dotnet user-secrets set "RabbitMq:Password" "YourPassword"
+
+#### 3. Start Elasticsearch and Kibana via Docker:
+   ```bash
+   docker-compose -f docker-compose.elk.yml up -d
+   ```
+   - Elasticsearch will be available at `http://localhost:9200`
+   - Kibana will be available at `http://localhost:5601`
+
+#### 4. Start the API

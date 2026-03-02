@@ -8,11 +8,14 @@ namespace CryptocurrencyExchange.Core.Domain
     {
         public User CreateUser(string email, string password)
         {
-            var user = new User();
-            user.Email = email;
             CreatePasswordHash(password, out byte[] PasswordHash, out byte[] PasswordSalt);
-            user.PasswordHash = PasswordHash;
-            user.PasswordSalt = PasswordSalt;
+
+            var user = new User
+            (
+                email: new ValueObject.User.Email(email),
+                passwordHash: PasswordHash,
+                passwordSalt: PasswordSalt
+            );
 
             return user;
         }

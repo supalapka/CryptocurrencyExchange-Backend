@@ -1,4 +1,5 @@
-﻿using CryptocurrencyExchange.Core.Models;
+﻿using CryptocurrencyExchange.Core.Interfaces;
+using CryptocurrencyExchange.Core.Models;
 using CryptocurrencyExchange.Options;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;

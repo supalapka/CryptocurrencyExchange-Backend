@@ -1,10 +1,11 @@
-﻿using CryptocurrencyExchange.Core.Interfaces;
+﻿using CryptocurrencyExchange.Application.Futures;
+using CryptocurrencyExchange.Core.Interfaces;
 using CryptocurrencyExchange.Core.Interfaces.Repositories;
 using CryptocurrencyExchange.Core.Models;
+using CryptocurrencyExchange.Core.ReadModels;
 using CryptocurrencyExchange.Core.ValueObject;
 using CryptocurrencyExchange.Exceptions;
-using CryptocurrencyExchange.Services;
-using CryptocurrencyExchange.Services.Futures;
+using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using NUnit.Framework;
 
@@ -26,7 +27,7 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
             // Arrange
             var futureDto = new FutureDto
             {
-                Symbol = "BTC",
+                Symbol = CoinSymbol.Btc.Value,
                 EntryPrice = 50000,
                 Margin = 500,
                 Leverage = 10,
@@ -38,11 +39,11 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
                 Id = 1,
                 UserId = TestUser.DefaultId,
                 Margin = 500,
-                Symbol = "BTC"
+                Symbol = CoinSymbol.Btc.Value
             };
 
             walletRepositoryMock
-                .Setup(x => x.GetAsync(TestUser.DefaultId, "usdt"))
+                .Setup(x => x.GetAsync(TestUser.DefaultId, new CoinSymbol(CoinSymbol.Usdt.Value)))
                 .ReturnsAsync(WalletItemMother.CreateUsdt(amount: userUsdtBalance));
 
             futuresDomainServiceMock
@@ -57,7 +58,8 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
                 futuresDomainServiceMock.Object,
                 unitOfWorkMock.Object,
                 walletRepositoryMock.Object,
-                futureRepositoryMock.Object);
+                futureRepositoryMock.Object,
+                NullLogger<FuturesService>.Instance);
 
             // Act
             var resultId = await service.CreateFutureAsync(futureDto, TestUser.DefaultId);
@@ -75,7 +77,7 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
             // Arrange
             var futureDto = new FutureDto
             {
-                Symbol = "BTC",
+                Symbol = CoinSymbol.Btc.Value,
                 EntryPrice = 50000,
                 Margin = 500,
                 Leverage = 10,
@@ -84,7 +86,7 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
 
 
             walletRepositoryMock
-                .Setup(x => x.GetAsync(TestUser.DefaultId, "usdt"))
+                .Setup(x => x.GetAsync(TestUser.DefaultId, new CoinSymbol(CoinSymbol.Usdt.Value)))
                 .ReturnsAsync(WalletItemMother.CreateUsdt(amount: 1));
 
             futuresDomainServiceMock
@@ -99,7 +101,8 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
                 futuresDomainServiceMock.Object,
                 unitOfWorkMock.Object,
                 walletRepositoryMock.Object,
-                futureRepositoryMock.Object);
+                futureRepositoryMock.Object,
+                NullLogger<FuturesService>.Instance);
 
             // Act & Assert
             Assert.ThrowsAsync<InsufficientFundsException>(async () =>
@@ -132,7 +135,7 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
             futureRepositoryMock.Setup(x => x.GetByIdAsync(position.Id))
                 .ReturnsAsync(position);
 
-            walletRepositoryMock.Setup(x => x.GetAsync(TestUser.DefaultId, "usdt"))
+            walletRepositoryMock.Setup(x => x.GetAsync(TestUser.DefaultId, new CoinSymbol(CoinSymbol.Usdt.Value)))
                 .ReturnsAsync(usdtWallet);
 
             unitOfWorkMock.Setup(x => x.ExecuteInTransactionAsync(It.IsAny<Func<Task>>()))
@@ -148,7 +151,8 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
                 futuresDomainServiceMock.Object,
                 unitOfWorkMock.Object,
                 walletRepositoryMock.Object,
-                futureRepositoryMock.Object);
+                futureRepositoryMock.Object,
+                NullLogger<FuturesService>.Instance);
 
             // Act
             await service.ClosePosition(position.Id, pnl, 9000);

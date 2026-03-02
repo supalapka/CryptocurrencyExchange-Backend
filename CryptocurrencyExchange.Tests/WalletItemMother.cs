@@ -1,4 +1,5 @@
 ﻿using CryptocurrencyExchange.Core.Models;
+using CryptocurrencyExchange.Core.ValueObject;
 
 namespace CryptocurrencyExchange.Tests
 {
@@ -6,32 +7,26 @@ namespace CryptocurrencyExchange.Tests
     {
         public static WalletItem CreateUsdt(decimal amount)
         {
-            return new WalletItem
-            {
-                UserId = TestUser.DefaultId,
-                Symbol = "usdt",
-                Amount = amount
-            };
+            var item = new WalletItem(TestUser.DefaultId, CoinSymbol.Usdt);
+            item.AddAmount(amount);
+
+            return item;
         }
 
         public static WalletItem CreateBtc(decimal amount)
         {
-            return new WalletItem
-            {
-                UserId = TestUser.DefaultId,
-                Symbol = "btc",
-                Amount = amount
-            };
+            var item = new WalletItem(TestUser.DefaultId, CoinSymbol.Btc);
+            item.AddAmount(amount);
+
+            return item;
         }
 
         public static WalletItem CreateItem(string symbol, decimal amount)
         {
-            return new WalletItem
-            {
-                UserId = TestUser.DefaultId,
-                Symbol = symbol.ToLower(),
-                Amount = amount
-            };
+            var item = new WalletItem(TestUser.DefaultId, new CoinSymbol(symbol));
+            item.AddAmount(amount);
+
+            return item;
         }
     }
 }
