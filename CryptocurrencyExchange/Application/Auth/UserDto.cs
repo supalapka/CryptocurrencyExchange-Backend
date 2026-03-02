@@ -1,4 +1,4 @@
-﻿namespace CryptocurrencyExchange.Services.Auth
+namespace CryptocurrencyExchange.Application.Auth
 {
     public class UserDto
     {

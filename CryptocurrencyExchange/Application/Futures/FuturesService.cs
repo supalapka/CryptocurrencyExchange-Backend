@@ -1,11 +1,11 @@
-﻿using CryptocurrencyExchange.Core.Interfaces;
+using CryptocurrencyExchange.Core.Interfaces;
 using CryptocurrencyExchange.Core.Interfaces.Repositories;
 using CryptocurrencyExchange.Core.Interfaces.Services;
 using CryptocurrencyExchange.Core.Models;
 using CryptocurrencyExchange.Core.ValueObject;
 using CryptocurrencyExchange.Exceptions;
 
-namespace CryptocurrencyExchange.Services.Futures
+namespace CryptocurrencyExchange.Application.Futures
 {
     public class FuturesService : IFuturesService
     {

@@ -1,4 +1,4 @@
-﻿using CryptocurrencyExchange.Core.Interfaces;
+using CryptocurrencyExchange.Core.Interfaces;
 using CryptocurrencyExchange.Core.Interfaces.Repositories;
 using CryptocurrencyExchange.Core.Interfaces.Services;
 using CryptocurrencyExchange.Core.Models;
@@ -6,7 +6,7 @@ using CryptocurrencyExchange.Core.ValueObject;
 using CryptocurrencyExchange.Exceptions;
 using CryptocurrencyExchange.Services.Interfaces;
 
-namespace CryptocurrencyExchange.Services.Auth
+namespace CryptocurrencyExchange.Application.Auth
 {
     public class AuthService : IAuthService
     {
@@ -84,7 +84,7 @@ namespace CryptocurrencyExchange.Services.Auth
         private Task CreateStarterWalletAsync(User user)
         {
             var walletItem = new WalletItem(user, new CoinSymbol(CoinSymbol.Usdt.Value));
-            walletItem.AddAmount(5000); // give new users 5000 USDT to start with
+            walletItem.AddAmount(5000);
 
             return _walletRepository.AddAsync(walletItem);
         }

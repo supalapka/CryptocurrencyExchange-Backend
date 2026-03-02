@@ -1,7 +1,7 @@
-﻿using CryptocurrencyExchange.Core.Interfaces;
+using CryptocurrencyExchange.Core.Interfaces;
 using CryptocurrencyExchange.Core.Interfaces.Services;
 
-namespace CryptocurrencyExchange.Services.Market
+namespace CryptocurrencyExchange.Application.Market
 {
     public class MarketService : IMarketService
     {

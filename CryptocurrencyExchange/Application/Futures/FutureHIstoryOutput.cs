@@ -1,6 +1,6 @@
-﻿using CryptocurrencyExchange.Core.ValueObject;
+using CryptocurrencyExchange.Core.ValueObject;
 
-namespace CryptocurrencyExchange.Services.Futures
+namespace CryptocurrencyExchange.Application.Futures
 {
     public class FutureHIstoryOutput
     {

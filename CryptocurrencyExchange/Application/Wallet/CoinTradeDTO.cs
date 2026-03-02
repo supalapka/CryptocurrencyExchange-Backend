@@ -1,6 +1,6 @@
-﻿using CryptocurrencyExchange.Core.ValueObject;
+using CryptocurrencyExchange.Core.ValueObject;
 
-namespace CryptocurrencyExchange.Services.WalletTrade
+namespace CryptocurrencyExchange.Application.Wallet
 {
     public class CoinTradeDto
     {

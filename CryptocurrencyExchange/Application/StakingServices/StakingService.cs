@@ -1,10 +1,10 @@
-﻿using CryptocurrencyExchange.Core.Interfaces;
+using CryptocurrencyExchange.Core.Interfaces;
 using CryptocurrencyExchange.Core.Interfaces.Repositories;
 using CryptocurrencyExchange.Core.Interfaces.Services;
 using CryptocurrencyExchange.Core.Models;
 using CryptocurrencyExchange.Exceptions;
 
-namespace CryptocurrencyExchange.Services.StakingServices
+namespace CryptocurrencyExchange.Application.StakingServices
 {
     public class StakingService : IStakingService
     {
@@ -36,13 +36,6 @@ namespace CryptocurrencyExchange.Services.StakingServices
              {
                  StakingCoin stakingCoin = await _stakingRepository.GetCoinByIdAsync(stakingCoinId)
                       ?? throw new StakingCoinNotFoundException(stakingCoinId.ToString());
-
-                 //WalletItem coinWalletItem = await _walletItemRepository.GetAsync(userId, stakingCoin.Symbol)
-                 //     ?? throw new WalletItemNotFoundException($"staking coin not found: {stakingCoin.Symbol} in wallet");
-
-                 //Staking stakingData = _stakingDomainService.CreateStaking(coinWalletItem, stakingCoin, amount, durationInMonth);
-
-                 //await _stakingRepository.AddAsync(stakingData);
              });
         }
 
@@ -73,11 +66,6 @@ namespace CryptocurrencyExchange.Services.StakingServices
         public async Task PayStakingReward(Staking stakingData)
         {
             throw new NotImplementedException();
-
-            //WalletItem stakedCoinWalletItem = await _walletItemRepository.GetAsync(stakingData.UserId, stakingData.StakingCoin.Symbol)
-            //    ?? throw new WalletItemNotFoundException($"staking coin not found: {stakingData.StakingCoin.Symbol} in wallet");
-
-            //_stakingDomainService.CompleteStaking(stakingData, stakedCoinWalletItem);
         }
 
 

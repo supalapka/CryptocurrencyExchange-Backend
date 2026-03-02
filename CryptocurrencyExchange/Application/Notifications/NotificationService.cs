@@ -1,8 +1,8 @@
-﻿using CryptocurrencyExchange.Core.Interfaces.Services;
+using CryptocurrencyExchange.Core.Interfaces.Services;
 using CryptocurrencyExchange.Core.Models;
 using CryptocurrencyExchange.Infrastructure.Persistence;
 
-namespace CryptocurrencyExchange.Services.Notifications
+namespace CryptocurrencyExchange.Application.Notifications
 {
     public class NotificationService : INotificationService
     {

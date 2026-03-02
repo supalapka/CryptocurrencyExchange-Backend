@@ -1,13 +1,13 @@
-﻿using CryptocurrencyExchange.Core.Domain.Wallet.Commands;
-using CryptocurrencyExchange.Core.Domain.Wallets;
+using CryptocurrencyExchange.Core.Domain.Wallet.Commands;
 using CryptocurrencyExchange.Core.Interfaces;
 using CryptocurrencyExchange.Core.Interfaces.Repositories;
 using CryptocurrencyExchange.Core.Interfaces.Services;
 using CryptocurrencyExchange.Core.Models;
 using CryptocurrencyExchange.Core.ValueObject;
-using CryptocurrencyExchange.Services.WalletTrade;
+using CryptocurrencyExchange.Application.Wallet;
+using WalletAggregate = CryptocurrencyExchange.Core.Domain.Wallets.Wallet;
 
-namespace CryptocurrencyExchange.Services.Wallets
+namespace CryptocurrencyExchange.Application.Wallets
 {
     public class WalletService : IWalletService
     {
@@ -38,7 +38,7 @@ namespace CryptocurrencyExchange.Services.Wallets
                 IEnumerable<WalletItem> walletItemsToTrade = await GetWalletTradeItems(userId, coinTradeDto);
                 WalletTradeCommand walletTradeCommand = await CreateWalletTradeCommand(userId, coinTradeDto);
 
-                Wallet wallet = new Wallet(userId, walletItemsToTrade);
+                WalletAggregate wallet = new WalletAggregate(userId, walletItemsToTrade);
                 wallet.Buy(walletTradeCommand);
             });
 
@@ -81,7 +81,7 @@ namespace CryptocurrencyExchange.Services.Wallets
                 IEnumerable<WalletItem> walletItemsToTrade = await GetWalletTradeItems(userId, coinTradeDto);
                 WalletTradeCommand walletTradeCommand = await CreateWalletTradeCommand(userId, coinTradeDto);
 
-                Wallet wallet = new Wallet(userId, walletItemsToTrade);
+                WalletAggregate wallet = new WalletAggregate(userId, walletItemsToTrade);
                 wallet.Sell(walletTradeCommand);
             });
 

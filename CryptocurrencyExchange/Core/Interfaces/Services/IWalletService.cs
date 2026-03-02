@@ -1,6 +1,6 @@
 ﻿using CryptocurrencyExchange.Core.Models;
 using CryptocurrencyExchange.Core.ValueObject;
-using CryptocurrencyExchange.Services.WalletTrade;
+using CryptocurrencyExchange.Application.Wallet;
 
 namespace CryptocurrencyExchange.Core.Interfaces.Services
 {

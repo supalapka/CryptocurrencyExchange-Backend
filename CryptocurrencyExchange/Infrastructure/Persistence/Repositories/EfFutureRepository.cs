@@ -1,6 +1,6 @@
 ﻿using CryptocurrencyExchange.Core.Interfaces.Repositories;
 using CryptocurrencyExchange.Core.Models;
-using CryptocurrencyExchange.Services.Futures;
+using CryptocurrencyExchange.Application.Futures;
 using Microsoft.EntityFrameworkCore;
 
 namespace CryptocurrencyExchange.Infrastructure.Persistence.Repositories

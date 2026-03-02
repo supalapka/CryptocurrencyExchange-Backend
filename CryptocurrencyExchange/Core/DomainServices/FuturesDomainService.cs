@@ -1,7 +1,7 @@
 ﻿using CryptocurrencyExchange.Core.Interfaces;
 using CryptocurrencyExchange.Core.Models;
 using CryptocurrencyExchange.Exceptions;
-using CryptocurrencyExchange.Services.Futures;
+using CryptocurrencyExchange.Application.Futures;
 
 namespace CryptocurrencyExchange.Core.Domain
 {
