@@ -1,10 +1,10 @@
-﻿using CryptocurrencyExchange.Core.Interfaces.Services;
+using CryptocurrencyExchange.Core.Interfaces.Services;
 using CryptocurrencyExchange.Services.Auth;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
-namespace CryptocurrencyExchange.Controllers
+namespace CryptocurrencyExchange.Presentation.Controllers
 {
     [ApiController]
     public class AuthController : ControllerBase

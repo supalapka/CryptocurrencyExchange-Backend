@@ -1,9 +1,9 @@
-﻿using CryptocurrencyExchange.Core.Entities;
+using CryptocurrencyExchange.Core.Entities;
 using CryptocurrencyExchange.Core.Interfaces.Services;
 using CryptocurrencyExchange.Infrastructure.News;
 using Microsoft.AspNetCore.Mvc;
 
-namespace CryptocurrencyExchange.Controllers
+namespace CryptocurrencyExchange.Presentation.Controllers
 {
     public class NewsController : Controller
     {

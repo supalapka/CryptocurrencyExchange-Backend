@@ -1,7 +1,7 @@
-﻿using CryptocurrencyExchange.Core.Interfaces.Services;
+using CryptocurrencyExchange.Core.Interfaces.Services;
 using Microsoft.AspNetCore.Mvc;
 
-namespace CryptocurrencyExchange.Controllers
+namespace CryptocurrencyExchange.Presentation.Controllers
 {
     [Route("market")]
     public class MarketController : Controller
@@ -17,5 +17,3 @@ namespace CryptocurrencyExchange.Controllers
         public async Task<decimal> GetPrice(string symbol) => await _marketService.GetPrice(symbol);
     }
 }
-
-

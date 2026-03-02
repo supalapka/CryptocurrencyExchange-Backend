@@ -1,4 +1,4 @@
-﻿using CryptocurrencyExchange.Core.Interfaces.Services;
+using CryptocurrencyExchange.Core.Interfaces.Services;
 using CryptocurrencyExchange.Core.Models;
 using CryptocurrencyExchange.Core.ValueObject;
 using CryptocurrencyExchange.Services.WalletTrade;
@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
-namespace CryptocurrencyExchange.Controllers
+namespace CryptocurrencyExchange.Presentation.Controllers
 {
     [ApiController]
     [Authorize]
@@ -56,21 +56,6 @@ namespace CryptocurrencyExchange.Controllers
 
             return Ok();
         }
-
-
-        //[HttpPost("auth/send")]
-        //public async Task<IActionResult> SendCrypto([FromBody] SendCryptoModel model)
-        //{
-        //    int userId = Convert.ToInt32(HttpContext.Items["UserId"]);
-
-        //    try
-        //    {
-        //        await _walletService.SendCryptoAsync(userId, model.symbol, model.amount, model.receiver);
-        //    }
-        //    catch (Exception ex) { return BadRequest(ex.Message); }
-
-        //    return Ok();
-        //}
 
 
         public class SendCryptoModel

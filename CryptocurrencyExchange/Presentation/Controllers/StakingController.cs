@@ -1,9 +1,9 @@
-﻿using CryptocurrencyExchange.Core.Interfaces.Services;
+using CryptocurrencyExchange.Core.Interfaces.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
-namespace CryptocurrencyExchange.Controllers
+namespace CryptocurrencyExchange.Presentation.Controllers
 {
     [Route("staking")]
     [ApiController]
