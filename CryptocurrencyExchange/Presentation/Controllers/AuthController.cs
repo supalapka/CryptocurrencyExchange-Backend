@@ -2,14 +2,12 @@ using CryptocurrencyExchange.Core.Interfaces.Services;
 using CryptocurrencyExchange.Application.Auth;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 
 namespace CryptocurrencyExchange.Presentation.Controllers
 {
-    [ApiController]
-    public class AuthController : ControllerBase
+    public class AuthController : ApiControllerBase
     {
-        public readonly IAuthService _authService;
+        private readonly IAuthService _authService;
 
         public AuthController(IAuthService authService)
         {
@@ -17,6 +15,7 @@ namespace CryptocurrencyExchange.Presentation.Controllers
         }
 
 
+        [AllowAnonymous]
         [HttpPost("register")]
         public async Task<ActionResult> Register(UserDto userDto)
         {
@@ -25,6 +24,7 @@ namespace CryptocurrencyExchange.Presentation.Controllers
             return Ok($"{userDto.Email} successfully registered");
         }
 
+        [AllowAnonymous]
         [HttpPost("login")]
         public async Task<ActionResult<string>> Login(UserDto userDto)
         {
@@ -37,8 +37,7 @@ namespace CryptocurrencyExchange.Presentation.Controllers
         [HttpGet("email")]
         public async Task<ActionResult<string>> GetUserEmail()
         {
-            int userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
-            string email = await _authService.GetEmailByIdAsync(userId);
+            string email = await _authService.GetEmailByIdAsync(UserId);
 
             return Ok(email);
         }

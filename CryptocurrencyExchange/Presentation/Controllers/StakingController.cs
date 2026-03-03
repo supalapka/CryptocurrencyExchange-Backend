@@ -1,13 +1,11 @@
 using CryptocurrencyExchange.Core.Interfaces.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 
 namespace CryptocurrencyExchange.Presentation.Controllers
 {
     [Route("staking")]
-    [ApiController]
-    public class StakingController : ControllerBase
+    public class StakingController : ApiControllerBase
     {
         private readonly IStakingService _stakingService;
 
@@ -27,7 +25,7 @@ namespace CryptocurrencyExchange.Presentation.Controllers
         [Authorize]
         public IActionResult GetUserStakings()
         {
-            int userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            int userId = UserId;
 
             return Ok(_stakingService.GetStakingsByUser(userId));
         }
@@ -37,10 +35,9 @@ namespace CryptocurrencyExchange.Presentation.Controllers
         [Authorize]
         public async Task<IActionResult> CreateStaking(StakingInput input)
         {
-            int userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
             try
             {
-                await _stakingService.CreateUserStaking(userId, input.stakingCoinId, input.Amount, input.DurationInMonth);
+                await _stakingService.CreateUserStaking(UserId, input.stakingCoinId, input.Amount, input.DurationInMonth);
             }
             catch (Exception ex)
             {
