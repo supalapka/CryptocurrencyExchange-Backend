@@ -46,7 +46,7 @@ namespace CryptocurrencyExchange.Application.Auth
             if (!_authDomainService.VerifyPassword(password, user))
             {
                 _logger.LogWarning("Login failed: wrong password for user {UserId}", user.Id);
-                throw new Exception("Wrong Password");
+                throw new InvalidPasswordException();
             }
 
             _logger.LogInformation("User {UserId} logged in successfully", user.Id);
