@@ -1,4 +1,5 @@
 using CryptocurrencyExchange.Core.Domain;
+using CryptocurrencyExchange.Core.ValueObject.User;
 using NUnit.Framework;
 
 namespace CryptocurrencyExchange.Tests.Domain
@@ -17,7 +18,7 @@ namespace CryptocurrencyExchange.Tests.Domain
         [Test]
         public void CreateUser_ReturnsUserWithHashedPassword()
         {
-            var user = _service.CreateUser("test@example.com", "password123");
+            var user = _service.CreateUser(new Email("test@example.com"), new Password("password123"));
 
             Assert.That(user, Is.Not.Null);
             Assert.That(user.Email.Value, Is.EqualTo("test@example.com"));
@@ -28,8 +29,8 @@ namespace CryptocurrencyExchange.Tests.Domain
         [Test]
         public void VerifyPassword_WithCorrectPassword_ReturnsTrue()
         {
-            var user = _service.CreateUser("test@example.com", "password123");
-            var result = _service.VerifyPassword("password123", user);
+            var user = _service.CreateUser(new Email("test@example.com"), new Password("password123"));
+            var result = _service.VerifyPassword(new Password("password123"), user);
 
             Assert.That(result, Is.True);
         }
@@ -37,8 +38,8 @@ namespace CryptocurrencyExchange.Tests.Domain
         [Test]
         public void VerifyPassword_WithWrongPassword_ReturnsFalse()
         {
-            var user = _service.CreateUser("test@example.com", "password123");
-            var result = _service.VerifyPassword("wrongpassword", user);
+            var user = _service.CreateUser(new Email("test@example.com"), new Password("password123"));
+            var result = _service.VerifyPassword(new Password("wrongpassword"), user);
 
             Assert.That(result, Is.False);
         }

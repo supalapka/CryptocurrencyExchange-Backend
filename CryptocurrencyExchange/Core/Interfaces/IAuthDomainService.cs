@@ -1,10 +1,11 @@
-﻿using CryptocurrencyExchange.Core.Models;
+using CryptocurrencyExchange.Core.Models;
+using CryptocurrencyExchange.Core.ValueObject.User;
 
-namespace CryptocurrencyExchange.Services.Interfaces
+namespace CryptocurrencyExchange.Core.Interfaces
 {
     public interface IAuthDomainService
     {
-        User CreateUser(string email, string password);
-        bool VerifyPassword(string password, User user);
+        User CreateUser(Email email, Password password);
+        bool VerifyPassword(Password password, User user);
     }
 }
