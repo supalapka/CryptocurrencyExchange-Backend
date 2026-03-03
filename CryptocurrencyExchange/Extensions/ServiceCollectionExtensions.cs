@@ -6,8 +6,9 @@ using CryptocurrencyExchange.Application.Futures;
 using CryptocurrencyExchange.Application.Market;
 using CryptocurrencyExchange.Application.Notifications;
 using CryptocurrencyExchange.Application.StakingServices;
+using CryptocurrencyExchange.Application.Users;
 using CryptocurrencyExchange.Application.Wallets;
-using CryptocurrencyExchange.Services.Interfaces;
+
 
 namespace CryptocurrencyExchange.Extensions
 {
@@ -20,6 +21,7 @@ namespace CryptocurrencyExchange.Extensions
             services.AddScoped<IWalletService, WalletService>();
             services.AddScoped<IFuturesService, FuturesService>();
             services.AddScoped<IAuthService, AuthService>();
+            services.AddScoped<IUserService, UserService>();
             services.AddScoped<INotificationService, NotificationService>();
 
             services.AddScoped<IStakingDomainService, StakingDomainService>();
