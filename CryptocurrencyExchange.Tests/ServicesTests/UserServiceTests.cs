@@ -32,7 +32,6 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
         public async Task GetEmailByIdAsync_WhenUserExists_ReturnsEmail()
         {
             _userRepo.Setup(x => x.GetEmailByIdAsync(TestUser.DefaultId)).ReturnsAsync("test@example.com");
-
             var result = await _service.GetEmailByIdAsync(TestUser.DefaultId);
 
             Assert.That(result, Is.EqualTo("test@example.com"));

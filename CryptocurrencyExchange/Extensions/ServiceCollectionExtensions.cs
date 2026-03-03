@@ -9,7 +9,6 @@ using CryptocurrencyExchange.Application.StakingServices;
 using CryptocurrencyExchange.Application.Users;
 using CryptocurrencyExchange.Application.Wallets;
 
-
 namespace CryptocurrencyExchange.Extensions
 {
     public static class ServiceCollectionExtensions
