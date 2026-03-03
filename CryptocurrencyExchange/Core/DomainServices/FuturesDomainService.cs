@@ -1,7 +1,7 @@
 ﻿using CryptocurrencyExchange.Core.Interfaces;
 using CryptocurrencyExchange.Core.Models;
-using CryptocurrencyExchange.Exceptions;
 using CryptocurrencyExchange.Core.ReadModels;
+using CryptocurrencyExchange.Exceptions;
 
 namespace CryptocurrencyExchange.Core.Domain
 {
@@ -15,7 +15,7 @@ namespace CryptocurrencyExchange.Core.Domain
 
             return future;
         }
-       
+
         public void ClosePosition(Future position, WalletItem usdtItem, decimal pnl)
         {
             MarkPositionAsCompleted(position);
@@ -44,7 +44,7 @@ namespace CryptocurrencyExchange.Core.Domain
           new()
           {
               Symbol = dto.Symbol,
-              EntryPrice = dto.EntryPrice,
+              EntryPrice = (double)dto.EntryPrice,
               Margin = dto.Margin,
               UserId = userId,
               IsCompleted = false,

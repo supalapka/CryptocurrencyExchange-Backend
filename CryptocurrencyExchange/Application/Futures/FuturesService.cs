@@ -64,14 +64,14 @@ namespace CryptocurrencyExchange.Application.Futures
             return positions
                .OrderByDescending(x => x.Id)
                .Select(x => new FutureDto
-               {
-                   Id = x.Id,
-                   Symbol = x.Symbol,
-                   EntryPrice = x.EntryPrice,
-                   Margin = x.Margin,
-                   Leverage = x.Leverage,
-                   Position = x.Position
-               })
+               (
+                   Id: x.Id,
+                   Symbol: x.Symbol,
+                   EntryPrice: (decimal)x.EntryPrice,
+                   Margin: x.Margin,
+                   Leverage: x.Leverage,
+                   Position: x.Position
+               ))
                .ToList();
         }
 

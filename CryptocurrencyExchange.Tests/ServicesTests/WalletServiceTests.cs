@@ -57,10 +57,10 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
                 .ReturnsAsync(new TradeWalletItems(usdt, btc));
 
             CoinTradeDto coinTradeDto = new CoinTradeDto
-            {
-                CoinSymbol = new CoinSymbol(CoinSymbol.Btc.Value),
-                CoinAmount = 1
-            };
+            (
+                CoinSymbol: new CoinSymbol(CoinSymbol.Btc.Value),
+                CoinAmount: 1
+            );
 
             // Act
             await _service.BuyAsync(TestUser.DefaultId, coinTradeDto);
@@ -89,11 +89,7 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
                 .Setup(x => x.GetCoinsDataForTradeAsync(TestUser.DefaultId, new CoinSymbol(CoinSymbol.Btc.Value)))
                 .ReturnsAsync(new TradeWalletItems(usdt, btc));
 
-            CoinTradeDto coinTradeDto = new CoinTradeDto
-            {
-                CoinSymbol = new CoinSymbol(CoinSymbol.Btc.Value),
-                CoinAmount = 1
-            };
+            CoinTradeDto coinTradeDto = new CoinTradeDto(CoinSymbol.Btc, CoinAmount: 1);
 
             // Act
             await _service.SellAsync(TestUser.DefaultId, coinTradeDto);
@@ -122,11 +118,7 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
                 .Setup(x => x.GetCoinsDataForTradeAsync(TestUser.DefaultId, new CoinSymbol(CoinSymbol.Btc.Value)))
                 .ReturnsAsync(new TradeWalletItems(usdt, btc));
 
-            CoinTradeDto coinTradeDto = new CoinTradeDto
-            {
-                CoinSymbol = new CoinSymbol(CoinSymbol.Btc.Value),
-                CoinAmount = 100
-            };
+            CoinTradeDto coinTradeDto = new CoinTradeDto(CoinSymbol.Btc, CoinAmount: 100);
 
             // Act & Assert
             Assert.ThrowsAsync<InsufficientFundsException>(async () =>
@@ -148,11 +140,7 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
                 .Setup(x => x.GetCoinsDataForTradeAsync(TestUser.DefaultId, new CoinSymbol(CoinSymbol.Btc.Value)))
                 .ReturnsAsync(new TradeWalletItems(usdt, btc));
 
-            CoinTradeDto coinTradeDto = new CoinTradeDto
-            {
-                CoinSymbol = new CoinSymbol(CoinSymbol.Btc.Value),
-                CoinAmount = 100
-            };
+            CoinTradeDto coinTradeDto = new CoinTradeDto(CoinSymbol.Btc, CoinAmount: 100);
 
             // Act & Assert
             Assert.ThrowsAsync<InsufficientFundsException>(async () =>

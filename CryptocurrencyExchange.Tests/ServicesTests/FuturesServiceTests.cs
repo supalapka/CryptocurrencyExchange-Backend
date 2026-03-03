@@ -26,13 +26,14 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
         {
             // Arrange
             var futureDto = new FutureDto
-            {
-                Symbol = CoinSymbol.Btc.Value,
-                EntryPrice = 50000,
-                Margin = 500,
-                Leverage = 10,
-                Position = PositionType.Long
-            };
+            (
+                 Id: TestUser.DefaultId,
+                Symbol: CoinSymbol.Btc.Value,
+                EntryPrice: 50000,
+                Margin: 500,
+                Leverage: 10,
+                Position: PositionType.Long
+            );
 
             var expectedFuture = new Future
             {
@@ -76,13 +77,14 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
         {
             // Arrange
             var futureDto = new FutureDto
-            {
-                Symbol = CoinSymbol.Btc.Value,
-                EntryPrice = 50000,
-                Margin = 500,
-                Leverage = 10,
-                Position = PositionType.Long
-            };
+            (
+                 Id: TestUser.DefaultId,
+                Symbol: CoinSymbol.Btc.Value,
+                EntryPrice: 50000,
+                Margin: 500,
+                Leverage: 10,
+                Position: PositionType.Long
+            );
 
 
             walletRepositoryMock
