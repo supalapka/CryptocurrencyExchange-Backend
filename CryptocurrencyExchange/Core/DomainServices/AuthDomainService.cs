@@ -1,43 +1,32 @@
-﻿using CryptocurrencyExchange.Core.Models;
-using CryptocurrencyExchange.Services.Interfaces;
+using CryptocurrencyExchange.Core.Interfaces;
+using CryptocurrencyExchange.Core.Models;
+using CryptocurrencyExchange.Core.ValueObject.User;
 using System.Security.Cryptography;
+using System.Text;
 
 namespace CryptocurrencyExchange.Core.Domain
 {
     public class AuthDomainService : IAuthDomainService
     {
-        public User CreateUser(string email, string password)
+        public User CreateUser(Email email, Password password)
         {
-            CreatePasswordHash(password, out byte[] PasswordHash, out byte[] PasswordSalt);
-
-            var user = new User
-            (
-                email: new ValueObject.User.Email(email),
-                passwordHash: PasswordHash,
-                passwordSalt: PasswordSalt
-            );
-
-            return user;
+            var (hash, salt) = CreatePasswordHash(password);
+            return new User(email, hash, salt);
         }
 
-
-
-        private void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
+        public bool VerifyPassword(Password password, User user)
         {
-            using (var hmac = new HMACSHA512())
-            {
-                passwordSalt = hmac.Key;
-                passwordHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
-            }
+            using var hmac = new HMACSHA512(user.PasswordSalt);
+            var computeHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(password));
+            return computeHash.SequenceEqual(user.PasswordHash);
         }
 
-        public bool VerifyPassword(string password, User user)
+        private static (byte[] Hash, byte[] Salt) CreatePasswordHash(Password password)
         {
-            using (var hmac = new HMACSHA512(user.PasswordSalt))
-            {
-                var computeHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
-                return computeHash.SequenceEqual(user.PasswordHash);
-            }
+            using var hmac = new HMACSHA512();
+            var salt = hmac.Key;
+            var hash = hmac.ComputeHash(Encoding.UTF8.GetBytes(password));
+            return (hash, salt);
         }
     }
 }

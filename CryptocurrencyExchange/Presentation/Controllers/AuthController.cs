@@ -1,34 +1,37 @@
 using CryptocurrencyExchange.Core.Interfaces.Services;
+using CryptocurrencyExchange.Core.ValueObject.User;
 using CryptocurrencyExchange.Application.Auth;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 
 namespace CryptocurrencyExchange.Presentation.Controllers
 {
-    [ApiController]
-    public class AuthController : ControllerBase
+    public class AuthController : ApiControllerBase
     {
-        public readonly IAuthService _authService;
+        private readonly IAuthService _authService;
+        private readonly IUserService _userService;
 
-        public AuthController(IAuthService authService)
+        public AuthController(IAuthService authService, IUserService userService)
         {
             _authService = authService;
+            _userService = userService;
         }
 
-
+        [AllowAnonymous]
         [HttpPost("register")]
         public async Task<ActionResult> Register(UserDto userDto)
         {
-            await _authService.RegisterAsync(userDto.Email, userDto.Password);
+            var email = new Email(userDto.Email);
+            await _authService.RegisterAsync(email, new Password(userDto.Password));
 
-            return Ok($"{userDto.Email} successfully registered");
+            return Ok($"{email} successfully registered");
         }
 
+        [AllowAnonymous]
         [HttpPost("login")]
         public async Task<ActionResult<string>> Login(UserDto userDto)
         {
-            var token = await _authService.LoginAsync(userDto.Email, userDto.Password);
+            var token = await _authService.LoginAsync(new Email(userDto.Email), new Password(userDto.Password));
 
             return Ok(token);
         }
@@ -37,8 +40,7 @@ namespace CryptocurrencyExchange.Presentation.Controllers
         [HttpGet("email")]
         public async Task<ActionResult<string>> GetUserEmail()
         {
-            int userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
-            string email = await _authService.GetEmailByIdAsync(userId);
+            string email = await _userService.GetEmailByIdAsync(UserId);
 
             return Ok(email);
         }

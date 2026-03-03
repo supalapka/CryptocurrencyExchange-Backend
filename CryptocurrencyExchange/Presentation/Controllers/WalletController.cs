@@ -4,13 +4,11 @@ using CryptocurrencyExchange.Core.ValueObject;
 using CryptocurrencyExchange.Application.Wallet;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 
 namespace CryptocurrencyExchange.Presentation.Controllers
 {
-    [ApiController]
     [Authorize]
-    public class WalletController : ControllerBase
+    public class WalletController : ApiControllerBase
     {
         private readonly IWalletService _walletService;
 
@@ -23,7 +21,7 @@ namespace CryptocurrencyExchange.Presentation.Controllers
         [HttpGet("auth/get-wallet")]
         public async Task<ActionResult<List<WalletItem>>> GetFullWallet()
         {
-            int userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            int userId = UserId;
 
             return await _walletService.GetFullWalletAsync(userId);
         }
@@ -32,17 +30,14 @@ namespace CryptocurrencyExchange.Presentation.Controllers
         [HttpGet("auth/coin-amount/{symbol}")]
         public async Task<ActionResult<decimal>> GetCoinAmount(string symbol)
         {
-            int userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
-
-            return await _walletService.GetCoinAmountAsync(userId, new CoinSymbol(symbol));
+            return await _walletService.GetCoinAmountAsync(UserId, new CoinSymbol(symbol));
         }
 
 
         [HttpPost("auth/buy")]
         public async Task<ActionResult> Buy([FromBody] CoinTradeDto coinTradeDto)
         {
-            int userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
-            await _walletService.BuyAsync(userId, coinTradeDto);
+            await _walletService.BuyAsync(UserId, coinTradeDto);
 
             return Ok();
         }
@@ -51,8 +46,7 @@ namespace CryptocurrencyExchange.Presentation.Controllers
         [HttpPost("auth/sell")]
         public async Task<ActionResult> Sell([FromBody] CoinTradeDto coinTradeDto)
         {
-            int userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
-            await _walletService.SellAsync(userId, coinTradeDto);
+            await _walletService.SellAsync(UserId, coinTradeDto);
 
             return Ok();
         }

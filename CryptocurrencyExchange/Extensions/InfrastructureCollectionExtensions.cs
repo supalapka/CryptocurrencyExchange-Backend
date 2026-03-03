@@ -8,6 +8,7 @@ using CryptocurrencyExchange.Infrastructure.Persistence;
 using CryptocurrencyExchange.Infrastructure.Persistence.Repositories;
 using CryptocurrencyExchange.Infrastructure.Schedulers;
 using CryptocurrencyExchange.Infrastructure.Security;
+using CryptocurrencyExchange.Infrastructure.Wallets;
 using CryptocurrencyExchange.Options;
 using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -69,6 +70,7 @@ namespace CryptocurrencyExchange.Extensions
             services.AddMassTransit(x =>
             {
                 x.AddConsumer<CryptoNewsConsumer>();
+                x.AddConsumer<StarterWalletConsumer>();
 
                 x.UsingRabbitMq((context, cfg) =>
                 {
@@ -85,6 +87,11 @@ namespace CryptocurrencyExchange.Extensions
                     cfg.ReceiveEndpoint("news.url-matched", e =>
                     {
                         e.ConfigureConsumer<CryptoNewsConsumer>(context);
+                    });
+
+                    cfg.ReceiveEndpoint("user.registered.starter-wallet", e =>
+                    {
+                        e.ConfigureConsumer<StarterWalletConsumer>(context);
                     });
                 });
             });

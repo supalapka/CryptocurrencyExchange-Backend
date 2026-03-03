@@ -1,92 +1,77 @@
+using CryptocurrencyExchange.Core.Events;
 using CryptocurrencyExchange.Core.Interfaces;
 using CryptocurrencyExchange.Core.Interfaces.Repositories;
 using CryptocurrencyExchange.Core.Interfaces.Services;
 using CryptocurrencyExchange.Core.Models;
-using CryptocurrencyExchange.Core.ValueObject;
+using CryptocurrencyExchange.Core.ValueObject.User;
 using CryptocurrencyExchange.Exceptions;
-using CryptocurrencyExchange.Services.Interfaces;
+using MassTransit;
 
 namespace CryptocurrencyExchange.Application.Auth
 {
     public class AuthService : IAuthService
     {
         private readonly IUserRepository _userRepository;
-        private readonly IWalletItemRepository _walletRepository;
         private readonly IAuthDomainService _authDomainService;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ITokenService _tokenService;
+        private readonly IPublishEndpoint _publishEndpoint;
         private readonly ILogger<AuthService> _logger;
 
-        public AuthService(IUserRepository
-            userRepository,
+        public AuthService(
+            IUserRepository userRepository,
             IUnitOfWork unitOfWork,
-            IWalletItemRepository walletRepository,
             IAuthDomainService authDomainService,
             ITokenService tokenService,
+            IPublishEndpoint publishEndpoint,
             ILogger<AuthService> logger)
         {
             _userRepository = userRepository;
             _unitOfWork = unitOfWork;
-            _walletRepository = walletRepository;
             _authDomainService = authDomainService;
             _tokenService = tokenService;
+            _publishEndpoint = publishEndpoint;
             _logger = logger;
         }
 
-        public async Task<string> LoginAsync(string email, string password)
+        public async Task<string> LoginAsync(Email email, Password password)
         {
             var user = await _userRepository.GetByEmailAsync(email);
 
             if (user == null)
             {
-                _logger.LogWarning("Login failed: user not found for email {Email}", email);
+                _logger.LogWarning("Login failed: user not found for email {Email}", email.Value);
                 throw new UserNotFoundException();
             }
 
             if (!_authDomainService.VerifyPassword(password, user))
             {
                 _logger.LogWarning("Login failed: wrong password for user {UserId}", user.Id);
-                throw new Exception("Wrong Password");
+                throw new InvalidPasswordException();
             }
 
             _logger.LogInformation("User {UserId} logged in successfully", user.Id);
             return _tokenService.CreateToken(user);
         }
 
-        public async Task RegisterAsync(string email, string password)
+        public async Task RegisterAsync(Email email, Password password)
         {
             if (await _userRepository.UserExists(email))
             {
-                _logger.LogWarning("Registration failed: email {Email} already exists", email);
+                _logger.LogWarning("Registration failed: email {Email} already exists", email.Value);
                 throw new UserAlreadyExistsException();
             }
 
+            User user = null;
             await _unitOfWork.ExecuteInTransactionAsync(async () =>
             {
-                User user = _authDomainService.CreateUser(email, password);
-
+                user = _authDomainService.CreateUser(email, password);
                 await _userRepository.AddUserAsync(user);
-
-                await CreateStarterWalletAsync(user);
             });
 
-            _logger.LogInformation("New user registered with email {Email}", email);
-        }
+            await _publishEndpoint.Publish(new UserRegisteredEvent(user.Id));
 
-        public async Task<string> GetEmailByIdAsync(int userId)
-        {
-            string email = await _userRepository.GetEmailByIdAsync(userId)
-                ?? throw new UserNotFoundException();
-
-            return email;
-        }
-
-        private Task CreateStarterWalletAsync(User user)
-        {
-            var walletItem = new WalletItem(user, new CoinSymbol(CoinSymbol.Usdt.Value));
-            walletItem.AddAmount(5000);
-
-            return _walletRepository.AddAsync(walletItem);
+            _logger.LogInformation("New user registered with email {Email}", email.Value);
         }
     }
 }
