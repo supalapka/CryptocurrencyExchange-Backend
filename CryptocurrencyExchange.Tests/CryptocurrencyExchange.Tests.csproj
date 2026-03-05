@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\CryptocurrencyExchange\CryptocurrencyExchange.csproj" />
+    <ProjectReference Include="..\CryptocurrencyExchange.EmailService\CryptocurrencyExchange.EmailService.csproj" />
   </ItemGroup>
 
 </Project>

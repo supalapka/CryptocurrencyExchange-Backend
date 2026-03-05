@@ -28,5 +28,13 @@ namespace CryptocurrencyExchange.Tests
 
             return item;
         }
+
+        public static WalletItem CreateItem(int userId, string symbol, decimal amount)
+        {
+            var item = new WalletItem(userId, new CoinSymbol(symbol));
+            item.AddAmount(amount);
+
+            return item;
+        }
     }
 }

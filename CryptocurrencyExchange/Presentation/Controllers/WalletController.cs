@@ -50,13 +50,5 @@ namespace CryptocurrencyExchange.Presentation.Controllers
 
             return Ok();
         }
-
-
-        public class SendCryptoModel
-        {
-            public string symbol { get; set; } = string.Empty;
-            public decimal amount { get; set; }
-            public int receiver { get; set; }
-        }
     }
 }

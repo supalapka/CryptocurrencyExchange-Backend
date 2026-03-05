@@ -17,6 +17,7 @@ namespace CryptocurrencyExchange.Infrastructure.Persistence
         public DbSet<StakingCoin> StakingCoins { get; set; }
         public DbSet<Staking> Staking { get; set; }
         public DbSet<LogEntry> LogEntries { get; set; }
+        public DbSet<Transfer> Transfers { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -61,6 +62,24 @@ namespace CryptocurrencyExchange.Infrastructure.Persistence
                     v => v.Value,
                     v => new Email(v)
                 );
+
+            modelBuilder.Entity<Transfer>()
+                .Property(x => x.Symbol)
+                .HasConversion(
+                    v => v.Value,
+                    v => new CoinSymbol(v)
+                );
+
+            modelBuilder.Entity<Transfer>()
+                .Property(x => x.Code)
+                .HasConversion(
+                    v => v.Value,
+                    v => new VerificationCode(v)
+                );
+
+            modelBuilder.Entity<Transfer>()
+                .Property(x => x.Status)
+                .HasConversion<string>();
         }
     }
 }
