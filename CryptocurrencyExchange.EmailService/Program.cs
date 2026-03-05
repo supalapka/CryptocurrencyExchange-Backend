@@ -41,6 +41,7 @@ var host = Host.CreateDefaultBuilder(args)
         services.AddMassTransit(x =>
         {
             x.AddConsumer<SendVerificationEmailConsumer>();
+            x.AddConsumer<SendWelcomeEmailConsumer>();
 
             x.UsingRabbitMq((ctx, cfg) =>
             {
@@ -56,6 +57,8 @@ var host = Host.CreateDefaultBuilder(args)
                 {
                     e.ConfigureConsumer<SendVerificationEmailConsumer>(ctx);
                 });
+
+                cfg.ConfigureEndpoints(ctx);
             });
         });
     })

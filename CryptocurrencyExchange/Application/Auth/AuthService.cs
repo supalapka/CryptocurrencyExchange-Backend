@@ -69,7 +69,7 @@ namespace CryptocurrencyExchange.Application.Auth
                 await _userRepository.AddUserAsync(user);
             });
 
-            await _publishEndpoint.Publish(new UserRegisteredEvent(user.Id));
+            await _publishEndpoint.Publish(new UserRegisteredEvent(user.Id, user.Email));
 
             _logger.LogInformation("New user registered with email {Email}", email.Value);
         }

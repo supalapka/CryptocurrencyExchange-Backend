@@ -29,7 +29,7 @@ namespace CryptocurrencyExchange.Tests.Infrastructure
         public async Task Consume_CreatesWalletAndCommits()
         {
             var context = Mock.Of<ConsumeContext<UserRegisteredEvent>>(
-                c => c.Message == new UserRegisteredEvent(TestUser.DefaultId));
+                c => c.Message == new UserRegisteredEvent(TestUser.DefaultId, "test@test.com"));
 
             await _consumer.Consume(context);
 
