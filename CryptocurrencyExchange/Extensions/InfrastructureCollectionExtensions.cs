@@ -90,10 +90,7 @@ namespace CryptocurrencyExchange.Extensions
                         e.ConfigureConsumer<CryptoNewsConsumer>(context);
                     });
 
-                    cfg.ReceiveEndpoint("user.registered.starter-wallet", e =>
-                    {
-                        e.ConfigureConsumer<StarterWalletConsumer>(context);
-                    });
+                    cfg.ConfigureEndpoints(context);
                 });
             });
 
