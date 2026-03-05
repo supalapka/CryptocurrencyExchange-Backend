@@ -2,24 +2,23 @@ using CryptocurrencyExchange.EmailService.Interfaces;
 using CryptocurrencyExchange.EmailService.Consumers;
 using CryptocurrencyExchange.EmailService.Infrastructure;
 using CryptocurrencyExchange.EmailService.Options;
+using CryptocurrencyExchange.Extensions;
 using CryptocurrencyExchange.Options;
 using MassTransit;
 using Microsoft.Extensions.Options;
-using Serilog;
+
+var configuration = new ConfigurationBuilder()
+    .AddJsonFile("appsettings.json")
+    .AddEnvironmentVariables()
+    .Build();
 
 var host = Host.CreateDefaultBuilder(args)
-    .UseSerilog((context, _, config) =>
-    {
-        config.ReadFrom.Configuration(context.Configuration)
-              .Enrich.FromLogContext();
-    })
+    .AddElasticLogging(configuration)
     .ConfigureServices((context, services) =>
     {
-        var configuration = context.Configuration;
-
         services
             .AddOptions<SmtpOptions>()
-            .Bind(configuration.GetSection("Smtp"))
+            .Bind(context.Configuration.GetSection("Smtp"))
             .Configure(o => o.Password = Environment.GetEnvironmentVariable("SMTP_PASSWORD") ?? o.Password)
             .Validate(o => !string.IsNullOrWhiteSpace(o.Host), "Smtp:Host is required")
             .Validate(o => o.Port > 0, "Smtp:Port must be positive")
@@ -30,7 +29,7 @@ var host = Host.CreateDefaultBuilder(args)
 
         services
             .AddOptions<RabbitMqOptions>()
-            .Bind(configuration.GetSection("RabbitMq"))
+            .Bind(context.Configuration.GetSection("RabbitMq"))
             .Validate(o => !string.IsNullOrWhiteSpace(o.Host))
             .Validate(o => !string.IsNullOrWhiteSpace(o.Username))
             .Validate(o => !string.IsNullOrWhiteSpace(o.Password))
