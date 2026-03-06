@@ -22,7 +22,38 @@ namespace CryptocurrencyExchange.Infrastructure.Persistence
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             ConfigureValueObjectConversions(modelBuilder);
+            ConfigureRelationships(modelBuilder);
             ConfigureLogEntry(modelBuilder);
+        }
+
+        private static void ConfigureRelationships(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Future>()
+                .HasOne<User>()
+                .WithMany()
+                .HasForeignKey(f => f.UserId);
+
+            modelBuilder.Entity<FutureHistory>()
+                .HasOne<Future>()
+                .WithMany()
+                .HasForeignKey(fh => fh.FutureId);
+
+            modelBuilder.Entity<Staking>()
+                .HasOne<User>()
+                .WithMany()
+                .HasForeignKey(s => s.UserId);
+
+            modelBuilder.Entity<Transfer>()
+                .HasOne<User>()
+                .WithMany()
+                .HasForeignKey(t => t.SenderId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Transfer>()
+                .HasOne<User>()
+                .WithMany()
+                .HasForeignKey(t => t.ReceiverId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
 
         private static void ConfigureLogEntry(ModelBuilder modelBuilder)
