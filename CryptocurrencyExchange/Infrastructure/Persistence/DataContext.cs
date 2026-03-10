@@ -28,6 +28,9 @@ namespace CryptocurrencyExchange.Infrastructure.Persistence
 
         private static void ConfigureRelationships(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<WalletItem>()
+                .HasKey(w => new { w.UserId, w.Symbol });
+
             modelBuilder.Entity<Future>()
                 .HasOne<User>()
                 .WithMany()

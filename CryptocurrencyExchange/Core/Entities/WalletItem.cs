@@ -5,7 +5,6 @@ namespace CryptocurrencyExchange.Core.Models
 {
     public class WalletItem
     {
-        public int Id { get; private set; }
         public int UserId { get; private set; }
         public User User { get; private set; }
         public CoinSymbol Symbol { get; private set; }
