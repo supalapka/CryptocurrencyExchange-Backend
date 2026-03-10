@@ -57,7 +57,7 @@ The project includes scheduled background jobs used for staking reward calculati
 ## How to Run
 
 ### Requirements:
-- .NET 6
+- .NET 7
 - Docker (for Elasticsearch and Kibana)
 - RabbitMQ (used for crypto-news only; configured in `Program.cs`; requires a running external crawler service)
 - Database connection string (configured via `appsettings.json`)
