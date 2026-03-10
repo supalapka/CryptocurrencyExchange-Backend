@@ -12,12 +12,14 @@ using CryptocurrencyExchange.Infrastructure.Wallets;
 using CryptocurrencyExchange.Options;
 using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using Serilog.Sinks.Elasticsearch;
 using System.Text;
+using System.Threading.RateLimiting;
 
 namespace CryptocurrencyExchange.Extensions
 {
@@ -131,6 +133,41 @@ namespace CryptocurrencyExchange.Extensions
                 });
 
             services.AddScoped<ITokenService, JwtTokenService>();
+
+            return services;
+        }
+
+        public static IServiceCollection AddRateLimiting(
+        this IServiceCollection services,
+        IConfiguration configuration)
+        {
+            services
+                .AddOptions<RateLimitingOptions>()
+                .Bind(configuration.GetSection("RateLimiting"))
+                .Validate(o => o.PermitLimit > 0, "PermitLimit must be greater than 0")
+                .Validate(o => o.WindowSeconds > 0, "WindowSeconds must be greater than 0")
+                .Validate(o => o.QueueLimit >= 0, "QueueLimit must not be negative")
+                .ValidateOnStart();
+
+            var options = configuration
+                .GetSection("RateLimiting")
+                .Get<RateLimitingOptions>()
+                ?? throw new InvalidOperationException("RateLimiting configuration is missing");
+
+            services.AddRateLimiter(limiter =>
+            {
+                limiter.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+                limiter.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(context =>
+                    RateLimitPartition.GetFixedWindowLimiter(
+                        context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+                        _ => new FixedWindowRateLimiterOptions
+                        {
+                            PermitLimit = options.PermitLimit,
+                            Window = TimeSpan.FromSeconds(options.WindowSeconds),
+                            QueueLimit = options.QueueLimit,
+                            QueueProcessingOrder = QueueProcessingOrder.OldestFirst
+                        }));
+            });
 
             return services;
         }

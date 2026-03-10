@@ -1,4 +1,6 @@
-﻿namespace CryptocurrencyExchange.Extensions
+﻿using Microsoft.AspNetCore.HttpOverrides;
+
+namespace CryptocurrencyExchange.Extensions
 {
     public static class ApplicationBuilderExtensions
     {
@@ -10,7 +12,12 @@
                 app.UseSwaggerUI();
             }
 
+            app.UseForwardedHeaders(new ForwardedHeadersOptions
+            {
+                ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+            });
             app.UseCors();
+            app.UseRateLimiter();
             app.UseHttpsRedirection();
             app.UseAuthentication();
             app.UseAuthorization();
