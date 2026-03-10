@@ -2,6 +2,7 @@ using CryptocurrencyExchange.Core.Entities;
 using CryptocurrencyExchange.Core.Interfaces.Services;
 using CryptocurrencyExchange.Infrastructure.News;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OutputCaching;
 
 namespace CryptocurrencyExchange.Presentation.Controllers
 {
@@ -23,6 +24,7 @@ namespace CryptocurrencyExchange.Presentation.Controllers
         }
 
         [HttpGet("/news/{coin}")]
+        [OutputCache(Duration = 15, VaryByRouteValueNames = new[] { "coin" })]
         public ActionResult<IEnumerable<CryptoNews>> Get(string coin)
         {
             var result = CryptoNewsInMemoryStore.News.Values
