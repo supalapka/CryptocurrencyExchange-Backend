@@ -11,6 +11,7 @@ builder.Services.AddExternalApiInfrastructureServices();
 builder.Services.AddMessagingInfrastructure(builder.Configuration);
 builder.Services.AddSecurityInfrastructure(builder.Configuration);
 builder.Services.AddRateLimiting(builder.Configuration);
+builder.Services.AddOutputCaching();
 builder.Services.AddBackgroundJobs();
 builder.Services.AddDatabaseLogging();
 

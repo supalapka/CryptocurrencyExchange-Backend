@@ -18,6 +18,7 @@ namespace CryptocurrencyExchange.Extensions
             });
             app.UseCors();
             app.UseRateLimiter();
+            app.UseOutputCache();
             app.UseHttpsRedirection();
             app.UseAuthentication();
             app.UseAuthorization();

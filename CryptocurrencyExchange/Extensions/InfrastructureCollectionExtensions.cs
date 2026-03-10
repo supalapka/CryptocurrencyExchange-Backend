@@ -172,6 +172,12 @@ namespace CryptocurrencyExchange.Extensions
             return services;
         }
 
+        public static IServiceCollection AddOutputCaching(this IServiceCollection services)
+        {
+            services.AddOutputCache();
+            return services;
+        }
+
         public static IServiceCollection AddBackgroundJobs(
         this IServiceCollection services)
         {

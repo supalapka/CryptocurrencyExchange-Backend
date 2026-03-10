@@ -1,6 +1,7 @@
 using CryptocurrencyExchange.Core.Interfaces.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OutputCaching;
 
 namespace CryptocurrencyExchange.Presentation.Controllers
 {
@@ -15,6 +16,7 @@ namespace CryptocurrencyExchange.Presentation.Controllers
         }
 
         [HttpGet("available-coins")]
+        [OutputCache(Duration = 86400)]
         public async Task<IActionResult> GetCoins()
         {
             return Ok(await _stakingService.GetCoinsAsync());
