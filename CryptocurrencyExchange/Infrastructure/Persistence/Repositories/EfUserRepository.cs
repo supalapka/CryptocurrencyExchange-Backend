@@ -1,5 +1,6 @@
 ﻿using CryptocurrencyExchange.Core.Interfaces.Repositories;
 using CryptocurrencyExchange.Core.Models;
+using CryptocurrencyExchange.Core.ValueObject;
 using Microsoft.EntityFrameworkCore;
 
 namespace CryptocurrencyExchange.Infrastructure.Persistence.Repositories
@@ -32,6 +33,19 @@ namespace CryptocurrencyExchange.Infrastructure.Persistence.Repositories
         public async Task<string?> GetEmailByIdAsync(int userId)
         {
             return await dataContext.Users.Where(u => u.Id == userId).Select(u => u.Email).FirstOrDefaultAsync();
+        }
+
+        public async Task<List<string>> GetEmailsForStakingPromotionAsync(decimal minimumUsdtBalance)
+        {
+            var activeStakeUserIds = dataContext.Staking
+                .Where(s => !s.IsCompleted)
+                .Select(s => s.UserId);
+
+            return await dataContext.WalletItems
+                .Where(w => w.Symbol == CoinSymbol.Usdt && (decimal)w.Amount >= minimumUsdtBalance)
+                .Where(w => !activeStakeUserIds.Contains(w.UserId))
+                .Select(w => w.User.Email.Value)
+                .ToListAsync();
         }
     }
 }

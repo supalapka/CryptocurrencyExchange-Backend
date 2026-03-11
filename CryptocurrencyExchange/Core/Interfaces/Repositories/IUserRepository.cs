@@ -8,5 +8,6 @@ namespace CryptocurrencyExchange.Core.Interfaces.Repositories
         Task<User> GetByEmailAsync(string email);
         Task<string> GetEmailByIdAsync(int userId);
         Task AddUserAsync(User user);
+        Task<List<string>> GetEmailsForStakingPromotionAsync(decimal minimumUsdtBalance);
     }
 }
