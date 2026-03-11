@@ -1,10 +1,17 @@
 using CryptocurrencyExchange.Extensions;
+using CryptocurrencyExchange.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // infrastructure
 builder.Logging.ClearProviders();
 builder.Host.AddElasticLogging(builder.Configuration);
+
+builder.Services
+    .AddOptions<StakingPromotionOptions>()
+    .Bind(builder.Configuration.GetSection("StakingPromotion"))
+    .Validate(o => o.MinimumUsdtBalance > 0, "MinimumUsdtBalance must be positive")
+    .ValidateOnStart();
 
 builder.Services.AddPersistenceInfrastructureServices(builder.Configuration);
 builder.Services.AddExternalApiInfrastructureServices();
