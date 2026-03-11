@@ -185,6 +185,19 @@ namespace CryptocurrencyExchange.Extensions
             return services;
         }
 
+        public static IServiceCollection AddStakingPromotionOptions(
+        this IServiceCollection services,
+        IConfiguration configuration)
+        {
+            services
+                .AddOptions<StakingPromotionOptions>()
+                .Bind(configuration.GetSection("StakingPromotion"))
+                .Validate(o => o.MinimumUsdtBalance > 0, "MinimumUsdtBalance must be positive")
+                .ValidateOnStart();
+
+            return services;
+        }
+
         public static IServiceCollection AddDatabaseLogging(this IServiceCollection services)
         {
             services.AddSingleton<LogQueue>();

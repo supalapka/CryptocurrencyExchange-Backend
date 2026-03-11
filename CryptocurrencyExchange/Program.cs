@@ -1,5 +1,4 @@
 using CryptocurrencyExchange.Extensions;
-using CryptocurrencyExchange.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -7,17 +6,12 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Logging.ClearProviders();
 builder.Host.AddElasticLogging(builder.Configuration);
 
-builder.Services
-    .AddOptions<StakingPromotionOptions>()
-    .Bind(builder.Configuration.GetSection("StakingPromotion"))
-    .Validate(o => o.MinimumUsdtBalance > 0, "MinimumUsdtBalance must be positive")
-    .ValidateOnStart();
-
 builder.Services.AddPersistenceInfrastructureServices(builder.Configuration);
 builder.Services.AddExternalApiInfrastructureServices();
 builder.Services.AddMessagingInfrastructure(builder.Configuration);
 builder.Services.AddSecurityInfrastructure(builder.Configuration);
 builder.Services.AddRateLimiting(builder.Configuration);
+builder.Services.AddStakingPromotionOptions(builder.Configuration);
 builder.Services.AddOutputCaching();
 builder.Services.AddBackgroundJobs();
 builder.Services.AddDatabaseLogging();
