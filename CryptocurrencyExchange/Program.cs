@@ -2,19 +2,26 @@ using CryptocurrencyExchange.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// infrastructure
+// logging
 builder.Logging.ClearProviders();
 builder.Host.AddElasticLogging(builder.Configuration);
+builder.Services.AddDatabaseLogging();
 
+// persistence & external APIs
 builder.Services.AddPersistenceInfrastructureServices(builder.Configuration);
 builder.Services.AddExternalApiInfrastructureServices();
+
+// messaging & background jobs
 builder.Services.AddMessagingInfrastructure(builder.Configuration);
+builder.Services.AddBackgroundJobs();
+
+// security & rate limiting
 builder.Services.AddSecurityInfrastructure(builder.Configuration);
 builder.Services.AddRateLimiting(builder.Configuration);
+
+// configuration
 builder.Services.AddStakingPromotionOptions(builder.Configuration);
 builder.Services.AddOutputCaching();
-builder.Services.AddBackgroundJobs();
-builder.Services.AddDatabaseLogging();
 
 // application
 builder.Services.AddApplicationServices();
