@@ -41,6 +41,7 @@ var host = Host.CreateDefaultBuilder(args)
         {
             x.AddConsumer<SendVerificationEmailConsumer>();
             x.AddConsumer<SendWelcomeEmailConsumer>();
+            x.AddConsumer<SendStakingPromotionEmailConsumer>();
 
             x.UsingRabbitMq((ctx, cfg) =>
             {
