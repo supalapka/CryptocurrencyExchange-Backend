@@ -2,6 +2,7 @@ using CryptocurrencyExchange.Core.Events;
 using CryptocurrencyExchange.Core.ValueObject.User;
 using CryptocurrencyExchange.EmailService.Interfaces;
 using CryptocurrencyExchange.EmailService.Persistence;
+using CryptocurrencyExchange.EmailService.Exceptions;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,6 +12,7 @@ namespace CryptocurrencyExchange.EmailService.Consumers
     {
         private const string EmailType = "StakingPromotion";
         private const int CooldownDays = 30;
+        private const int DailyLimit = 200; // HARDODED VALUE FOR SMPT MAILING
 
         private readonly IEmailSender _emailSender;
         private readonly EmailDbContext _dbContext;
@@ -30,6 +32,13 @@ namespace CryptocurrencyExchange.EmailService.Consumers
         {
             var message = context.Message;
             var email = new Email(message.Email);
+
+            var todayStart = DateTime.UtcNow.Date;
+            var sentToday = await _dbContext.SentEmails
+                .CountAsync(e => e.SentAtUtc >= todayStart);
+
+            if (sentToday >= DailyLimit)
+                throw new EmailSendLimitExceededException(DailyLimit);
 
             var recentlySent = await _dbContext.SentEmails.AnyAsync(e =>
                 e.EmailAddress == email.Value
