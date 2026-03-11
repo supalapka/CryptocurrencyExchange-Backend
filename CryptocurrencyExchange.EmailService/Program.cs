@@ -2,9 +2,11 @@ using CryptocurrencyExchange.EmailService.Interfaces;
 using CryptocurrencyExchange.EmailService.Consumers;
 using CryptocurrencyExchange.EmailService.Infrastructure;
 using CryptocurrencyExchange.EmailService.Options;
+using CryptocurrencyExchange.EmailService.Persistence;
 using CryptocurrencyExchange.Extensions;
 using CryptocurrencyExchange.Options;
 using MassTransit;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
 var configuration = new ConfigurationBuilder()
@@ -35,6 +37,9 @@ var host = Host.CreateDefaultBuilder(args)
             .Validate(o => !string.IsNullOrWhiteSpace(o.Password))
             .ValidateOnStart();
 
+        services.AddDbContext<EmailDbContext>(options =>
+            options.UseSqlServer(context.Configuration.GetConnectionString("EmailDb")));
+
         services.AddSingleton<IEmailSender, MailKitEmailSender>();
 
         services.AddMassTransit(x =>
@@ -63,5 +68,11 @@ var host = Host.CreateDefaultBuilder(args)
         });
     })
     .Build();
+
+using (var scope = host.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<EmailDbContext>();
+    await db.Database.EnsureCreatedAsync();
+}
 
 await host.RunAsync();
