@@ -22,7 +22,8 @@ namespace CryptocurrencyExchange.Extensions
             services.AddDbContext<DataContext>(options =>
             {
                 options.UseSqlServer(
-                    configuration.GetConnectionString("DefaultConnection"));
+                    configuration.GetConnectionString("DefaultConnection"),
+                    o => o.CommandTimeout(300));
             });
 
             services.AddScoped<IUnitOfWork, EfUniOfWork>();

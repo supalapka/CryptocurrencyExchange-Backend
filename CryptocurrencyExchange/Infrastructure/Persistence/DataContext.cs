@@ -23,7 +23,18 @@ namespace CryptocurrencyExchange.Infrastructure.Persistence
         {
             ConfigureValueObjectConversions(modelBuilder);
             ConfigureRelationships(modelBuilder);
+            ConfigureUser(modelBuilder);
             ConfigureLogEntry(modelBuilder);
+        }
+
+        private static void ConfigureUser(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<User>()
+                .Property(u => u.Email)
+                .HasMaxLength(256);
+
+            modelBuilder.Entity<User>()
+                .HasIndex(u => u.Email);
         }
 
         private static void ConfigureRelationships(ModelBuilder modelBuilder)
