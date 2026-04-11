@@ -24,7 +24,15 @@ namespace CryptocurrencyExchange.Infrastructure.Persistence
             ConfigureValueObjectConversions(modelBuilder);
             ConfigureRelationships(modelBuilder);
             ConfigureUser(modelBuilder);
+            ConfigureFuture(modelBuilder);
             ConfigureLogEntry(modelBuilder);
+        }
+
+        private static void ConfigureFuture(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Future>()
+                .HasIndex(f => f.UserId)
+                .IncludeProperties(f => new { f.Symbol, f.Margin });
         }
 
         private static void ConfigureUser(ModelBuilder modelBuilder)
