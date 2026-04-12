@@ -20,7 +20,8 @@
 ## Data Access
 14. All database access must go through repositories — `DataContext` must not be referenced outside `Infrastructure/`.
 15. Schema changes require a new migration — existing migrations must never be modified.
+16. Always generate migrations using the EF CLI (`dotnet ef migrations add`) — never create migration files manually.
 
 ## Infrastructure
-16. Bind configuration to typed `Options/` classes with startup validation — never inject `IConfiguration` directly into services.
-17. Use Serilog for all logging — `Console.WriteLine` and `Debug.Write` are prohibited.
+17. Bind configuration to typed `Options/` classes with startup validation — never inject `IConfiguration` directly into services.
+18. Use Serilog for all logging — `Console.WriteLine` and `Debug.Write` are prohibited.

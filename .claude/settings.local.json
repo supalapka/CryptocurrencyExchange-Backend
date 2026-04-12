@@ -5,7 +5,8 @@
       "Bash(grep:*)",
       "Bash(dotnet sln:*)",
       "Bash(dotnet build:*)",
-      "Bash(dotnet test:*)"
+      "Bash(dotnet test:*)",
+      "Bash(dotnet ef:*)"
     ]
   }
 }
