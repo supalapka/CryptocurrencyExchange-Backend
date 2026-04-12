@@ -20,6 +20,7 @@ namespace CryptocurrencyExchange.Core.Domain
                 Amount = amountToStake,
                 DurationInMonth = durationInMonth,
                 StartDate = DateTime.Today,
+                EndDate = DateTime.Today.AddDays(durationInMonth * 30),
                 IsCompleted = false
             };
 

@@ -24,6 +24,14 @@ namespace CryptocurrencyExchange.Infrastructure.Persistence.Repositories
             return await _context.Staking.Where(x => x.IsCompleted == false).ToListAsync();
         }
 
+        public async Task<List<Staking>> GetExpiredActiveStakingsAsync()
+        {
+            return await _context.Staking
+                .Include(s => s.StakingCoin)
+                .Where(x => !x.IsCompleted && x.EndDate <= DateTime.Now)
+                .ToListAsync();
+        }
+
         public async Task<List<StakingCoin>> GetAllStakingCoinsAsync()
         {
             return await _context.StakingCoins.ToListAsync();

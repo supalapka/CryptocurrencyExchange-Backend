@@ -10,5 +10,6 @@ namespace CryptocurrencyExchange.Core.Interfaces.Repositories
         Task<List<Staking>> GetStakingsByUserAsync(int userId);
         Task <List<StakingCoin>> GetAllStakingCoinsAsync();
         Task<List<Staking>> GetAllActiveStakingsAsync();
+        Task<List<Staking>> GetExpiredActiveStakingsAsync();
     }
 }

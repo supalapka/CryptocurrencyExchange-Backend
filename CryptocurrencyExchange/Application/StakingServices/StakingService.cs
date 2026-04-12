@@ -42,22 +42,17 @@ namespace CryptocurrencyExchange.Application.StakingServices
 
         public async Task CheckForExpiredStakings()
         {
-            DateTime currentDateTime = DateTime.Now;
+            List<Staking> stakings = await _stakingRepository.GetExpiredActiveStakingsAsync();
 
-            List<Staking> stakings = await _stakingRepository.GetAllActiveStakingsAsync();
-
-            _logger.LogInformation("Checking {Count} active stakings for expiry", stakings.Count);
+            _logger.LogInformation("Checking {Count} expired active stakings", stakings.Count);
 
             await _unitOfWork.ExecuteInTransactionAsync(async () =>
             {
                 foreach (var stakingData in stakings)
                 {
-                    if (_stakingDomainService.IsExpired(stakingData))
-                    {
-                        _logger.LogInformation("Staking {StakingId} for user {UserId} has expired, paying reward",
-                            stakingData.Id, stakingData.UserId);
-                        await PayStakingReward(stakingData);
-                    }
+                    _logger.LogInformation("Staking {StakingId} for user {UserId} has expired, paying reward",
+                        stakingData.Id, stakingData.UserId);
+                    await PayStakingReward(stakingData);
                 }
             });
         }
