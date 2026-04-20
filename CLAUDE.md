@@ -25,3 +25,8 @@
 ## Infrastructure
 17. Bind configuration to typed `Options/` classes with startup validation — never inject `IConfiguration` directly into services.
 18. Use Serilog for all logging — `Console.WriteLine` and `Debug.Write` are prohibited.
+
+## Agent Pipeline
+19. Use the planner → coder agent pipeline for all features: invoke `planner` agent with the feature request, review the JSON plan, then invoke `coder` agent with the plan.
+20. Before running the planner, ensure `.claude/context.md` and `.claude/index.json` exist and are current — if stale or missing, run the `explorer` and `indexer` agents first.
+21. Re-run `explorer` after structural changes (new projects, new layers); re-run `indexer` after adding new source files.
