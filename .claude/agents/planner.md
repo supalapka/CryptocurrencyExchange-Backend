@@ -15,10 +15,12 @@ You are a planning agent. Produce a valid JSON implementation plan. Do not write
 
 ## Workflow
 
-1. Read `.claude/context.md` if it exists — use it for stable facts (project structure, patterns, conventions, key locations)
-2. Use Grep and Glob only for feature-specific discovery — find files directly relevant to this feature, do not re-scan what context.md already documents
-3. Produce the JSON plan
-4. Append newly discovered patterns to `.claude/context.md` — only entries not already present, one line per pattern under the relevant section. Do not rewrite the file, only append.
+1. Read `.claude/context.md` — use it for stable facts (project structure, patterns, conventions, key locations)
+2. Read `.claude/index.json` — this is a per-file index with summaries and keywords for every source file
+3. From the feature request, identify relevant files by matching concepts against `summary` and `keywords` in the index — select at most 20 files
+4. Read the full content of the 3 most relevant files only — do not read others unless strictly necessary
+5. Produce the JSON plan
+6. Append newly discovered patterns to `.claude/context.md` — only entries not already present, one line per pattern. Do not rewrite the file, only append.
 
 ## Rules
 
