@@ -15,10 +15,11 @@ Before writing a single line of code, validate the plan:
 1. Confirm the input is valid JSON
 2. Confirm required top-level fields exist: `feature`, `overview`, `tasks`
 3. For each task, confirm all fields exist: `id`, `name`, `layer`, `files`, `action`, `depends_on`, `description`, `acceptance_criteria`
-4. Confirm task IDs are sequential integers starting from 1
-5. Confirm all `depends_on` values reference existing task IDs
-6. Confirm no task depends on itself
-7. Confirm the dependency graph has no cycles
+4. Confirm top-level `context` field exists with `patterns` (array) and `reference_files` (array)
+5. Confirm task IDs are sequential integers starting from 1
+6. Confirm all `depends_on` values reference existing task IDs
+7. Confirm no task depends on itself
+8. Confirm the dependency graph has no cycles
 
 If validation fails, output this JSON and stop:
 
@@ -28,6 +29,10 @@ If validation fails, output this JSON and stop:
     "description of each violation"
   ]
 }
+
+### Phase 1.5: Codebase Orientation
+
+Before building the DAG, read the files listed in `context.reference_files`. Use them to understand the conventions and patterns documented in `context.patterns`. Do not scan or read any other files for orientation — the planner has already done this work.
 
 ### Phase 2: DAG Construction
 

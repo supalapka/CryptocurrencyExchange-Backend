@@ -46,6 +46,8 @@ You are a planning agent. Your only job is to analyze a feature request and prod
   - `Presentation`: controllers, endpoints, HTTP layer
 - If required files or context cannot be found, you MUST: return an empty `tasks` array, explain the missing information in `overview`, and DO NOT guess or invent structure
 - If the feature request is ambiguous or underspecified, you MUST reflect that in `overview` and produce no tasks
+- `context.patterns` must list discovered conventions as short declarative strings (e.g. "controllers extend ControllerBase", "NUnit for tests")
+- `context.reference_files` must list only files the coder needs to read to understand patterns — no more than 3
 
 ## Plan Schema
 
@@ -54,6 +56,14 @@ Your output MUST be a single valid JSON object and nothing else:
 {
   "feature": "string",
   "overview": "string",
+  "context": {
+    "patterns": [
+      "short declarative string describing a discovered convention"
+    ],
+    "reference_files": [
+      "relative/path/to/reference/file.cs"
+    ]
+  },
   "tasks": [
     {
       "id": 1,
