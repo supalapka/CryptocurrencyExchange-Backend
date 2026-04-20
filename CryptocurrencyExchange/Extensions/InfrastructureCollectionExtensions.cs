@@ -34,6 +34,7 @@ namespace CryptocurrencyExchange.Extensions
             services.AddScoped<ICryptoNewsRepository, NewPersistence>();
             services.AddScoped<IUserRepository, EfUserRepository>();
             services.AddScoped<ITransferRepository, EfTransferRepository>();
+            services.AddScoped<IDatabaseHealthChecker, EfDatabaseHealthChecker>();
 
             return services;
         }

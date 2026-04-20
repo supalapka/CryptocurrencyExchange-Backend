@@ -9,6 +9,7 @@ using CryptocurrencyExchange.Application.StakingServices;
 using CryptocurrencyExchange.Application.Users;
 using CryptocurrencyExchange.Application.StakingPromotion;
 using CryptocurrencyExchange.Application.Transfers;
+using CryptocurrencyExchange.Application.Health;
 using CryptocurrencyExchange.Application.Wallets;
 
 namespace CryptocurrencyExchange.Extensions
@@ -26,6 +27,7 @@ namespace CryptocurrencyExchange.Extensions
             services.AddScoped<INotificationService, NotificationService>();
             services.AddScoped<ITransferService, TransferService>();
             services.AddScoped<IStakingPromotionService, StakingPromotionService>();
+            services.AddScoped<IHealthService, HealthService>();
 
             services.AddScoped<IStakingDomainService, StakingDomainService>();
             services.AddScoped<IFuturesDomainService, FuturesDomainService>();
