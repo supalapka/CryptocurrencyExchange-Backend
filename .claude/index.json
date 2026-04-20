@@ -1,0 +1,800 @@
+[
+  {
+    "path": "CryptocurrencyExchange/AssemblyInfo.cs",
+    "layer": "Core",
+    "summary": "Configures assembly-level visibility for test access.",
+    "keywords": ["assembly", "internal", "tests"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Options/JwtOptions.cs",
+    "layer": "Infrastructure",
+    "summary": "Configuration options for JWT token generation and expiration.",
+    "keywords": ["jwt", "token", "authentication", "config"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Options/ElasticsearchOptions.cs",
+    "layer": "Infrastructure",
+    "summary": "Configuration options for Elasticsearch logging and indexing.",
+    "keywords": ["elasticsearch", "logging", "config"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Options/RabbitMqOptions.cs",
+    "layer": "Infrastructure",
+    "summary": "Configuration options for RabbitMQ message broker connection.",
+    "keywords": ["rabbitmq", "messaging", "config"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Options/RateLimitingOptions.cs",
+    "layer": "Infrastructure",
+    "summary": "Configuration options for API rate limiting policies.",
+    "keywords": ["rate-limiting", "api", "config"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Options/StakingPromotionOptions.cs",
+    "layer": "Infrastructure",
+    "summary": "Configuration options for staking promotion email campaigns.",
+    "keywords": ["staking", "promotion", "config"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Core/Interfaces/IStakingDomainService.cs",
+    "layer": "Core",
+    "summary": "Contract for staking domain operations including creation and expiry validation.",
+    "keywords": ["staking", "domain", "interface"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Core/Interfaces/IUnitOfWork.cs",
+    "layer": "Core",
+    "summary": "Contract for unit of work pattern with transaction support.",
+    "keywords": ["unit-of-work", "transaction", "persistence"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Core/Interfaces/IMarketApiClient.cs",
+    "layer": "Core",
+    "summary": "Contract for market API clients providing cryptocurrency price data.",
+    "keywords": ["market", "price", "api"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Core/Interfaces/IMarketPriceProvider.cs",
+    "layer": "Core",
+    "summary": "Contract for market price data aggregation from multiple sources.",
+    "keywords": ["market", "price", "provider"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Core/Interfaces/ITokenService.cs",
+    "layer": "Core",
+    "summary": "Contract for generating authentication tokens for users.",
+    "keywords": ["token", "authentication", "jwt"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Core/Interfaces/IFuturesDomainService.cs",
+    "layer": "Core",
+    "summary": "Contract for futures trading domain logic including position management.",
+    "keywords": ["futures", "trading", "domain"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Core/Interfaces/IAuthDomainService.cs",
+    "layer": "Core",
+    "summary": "Contract for user authentication domain operations with password handling.",
+    "keywords": ["auth", "password", "user", "domain"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Core/Interfaces/Services/INotificatinService.cs",
+    "layer": "Core",
+    "summary": "Contract for user notification management operations.",
+    "keywords": ["notifications", "user", "messaging"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Core/Interfaces/Services/IStakingService.cs",
+    "layer": "Core",
+    "summary": "Contract for staking application workflows and reward processing.",
+    "keywords": ["staking", "rewards", "service"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Core/Interfaces/Services/IMarketService.cs",
+    "layer": "Core",
+    "summary": "Contract for market price data retrieval.",
+    "keywords": ["market", "price", "service"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Core/Interfaces/Services/IFuturesService.cs",
+    "layer": "Core",
+    "summary": "Contract for futures trading application logic and position management.",
+    "keywords": ["futures", "trading", "service"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Core/Interfaces/Services/IWalletService.cs",
+    "layer": "Core",
+    "summary": "Contract for wallet operations including coin trading and balance queries.",
+    "keywords": ["wallet", "trading", "balance"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Core/Interfaces/Services/ICryptoNewsUpdateRequester.cs",
+    "layer": "Core",
+    "summary": "Contract for triggering cryptocurrency news crawling operations.",
+    "keywords": ["news", "crypto", "update"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Core/Interfaces/Services/IAuthService.cs",
+    "layer": "Core",
+    "summary": "Contract for user registration and login workflows.",
+    "keywords": ["auth", "registration", "login"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Core/Interfaces/Services/IUserService.cs",
+    "layer": "Core",
+    "summary": "Contract for user information retrieval operations.",
+    "keywords": ["user", "service", "email"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Core/Interfaces/Services/ITransferService.cs",
+    "layer": "Core",
+    "summary": "Contract for inter-user fund transfer operations with verification.",
+    "keywords": ["transfer", "funds", "verification"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Core/Interfaces/Services/IStakingPromotionService.cs",
+    "layer": "Core",
+    "summary": "Contract for sending staking promotion emails to eligible users.",
+    "keywords": ["staking", "promotion", "email"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Core/Interfaces/Repositories/ICryptoNewsRepository.cs",
+    "layer": "Core",
+    "summary": "Contract for cryptocurrency news data persistence.",
+    "keywords": ["news", "crypto", "repository"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Core/Interfaces/Repositories/IFutureRepository.cs",
+    "layer": "Core",
+    "summary": "Contract for futures trading data persistence and queries.",
+    "keywords": ["futures", "repository", "persistence"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Core/Interfaces/Repositories/IWalletItemRepository.cs",
+    "layer": "Core",
+    "summary": "Contract for wallet item data persistence and queries.",
+    "keywords": ["wallet", "repository", "persistence"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Core/Interfaces/Repositories/IUserRepository.cs",
+    "layer": "Core",
+    "summary": "Contract for user data persistence and queries.",
+    "keywords": ["user", "repository", "persistence"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Core/Interfaces/Repositories/ITransferRepository.cs",
+    "layer": "Core",
+    "summary": "Contract for fund transfer data persistence and queries.",
+    "keywords": ["transfer", "repository", "persistence"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Core/Interfaces/Repositories/IStakingRepository.cs",
+    "layer": "Core",
+    "summary": "Contract for staking data persistence and queries.",
+    "keywords": ["staking", "repository", "persistence"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Core/Entities/User.cs",
+    "layer": "Core",
+    "summary": "User aggregate root with authentication credentials.",
+    "keywords": ["user", "auth", "password"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Core/Entities/WalletItem.cs",
+    "layer": "Core",
+    "summary": "Wallet item entity managing user coin balances.",
+    "keywords": ["wallet", "balance", "coin"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Core/Entities/Future.cs",
+    "layer": "Core",
+    "summary": "Futures position entity with leverage and entry price tracking.",
+    "keywords": ["futures", "position", "trading"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Core/Entities/FutureHistory.cs",
+    "layer": "Core",
+    "summary": "Historical record of futures position closures with liquidation status.",
+    "keywords": ["futures", "history", "liquidation"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Core/Entities/Staking.cs",
+    "layer": "Core",
+    "summary": "Staking position entity with duration and reward tracking.",
+    "keywords": ["staking", "rewards", "duration"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Core/Entities/StakingCoin.cs",
+    "layer": "Core",
+    "summary": "Staking coin configuration with monthly reward rates.",
+    "keywords": ["staking", "coin", "rewards"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Core/Entities/Notification.cs",
+    "layer": "Core",
+    "summary": "User notification entity with read status tracking.",
+    "keywords": ["notification", "message", "user"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Core/Entities/CryptoNews.cs",
+    "layer": "Core",
+    "summary": "Cryptocurrency news article entity with coin association.",
+    "keywords": ["news", "crypto", "article"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Core/Entities/LogEntry.cs",
+    "layer": "Core",
+    "summary": "Structured application log entry with timestamp and category.",
+    "keywords": ["logging", "audit", "entry"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Core/Entities/Transfer.cs",
+    "layer": "Core",
+    "summary": "Inter-user fund transfer aggregate with verification code and status tracking.",
+    "keywords": ["transfer", "funds", "verification"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Core/ValueObject/Balance.cs",
+    "layer": "Core",
+    "summary": "Value object representing validated non-negative account balance.",
+    "keywords": ["balance", "value-object", "validation"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Core/ValueObject/CoinSymbol.cs",
+    "layer": "Core",
+    "summary": "Value object representing validated cryptocurrency symbol.",
+    "keywords": ["coin", "symbol", "value-object"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Core/ValueObject/PositionType.cs",
+    "layer": "Core",
+    "summary": "Enumeration for long and short trading positions.",
+    "keywords": ["position", "trading", "enum"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Core/ValueObject/TradeWalletItems.cs",
+    "layer": "Core",
+    "summary": "Value object pairing base currency and traded currency wallet items.",
+    "keywords": ["wallet", "trade", "value-object"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Core/ValueObject/VerificationCode.cs",
+    "layer": "Core",
+    "summary": "Value object representing validated 6-digit verification code.",
+    "keywords": ["verification", "code", "value-object"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Core/ValueObject/User/Email.cs",
+    "layer": "Core",
+    "summary": "Value object representing validated email address with normalization.",
+    "keywords": ["email", "validation", "value-object"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Core/ValueObject/User/Password.cs",
+    "layer": "Core",
+    "summary": "Value object representing user password with secure masking.",
+    "keywords": ["password", "auth", "value-object"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Core/Events/UserRegisteredEvent.cs",
+    "layer": "Core",
+    "summary": "Domain event published when a new user registers.",
+    "keywords": ["event", "registration", "user"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Core/Events/SendVerificationEmailCommand.cs",
+    "layer": "Core",
+    "summary": "Command for sending email verification codes to users.",
+    "keywords": ["email", "verification", "command"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Core/Events/SendStakingPromotionEmailCommand.cs",
+    "layer": "Core",
+    "summary": "Command for sending staking promotion emails.",
+    "keywords": ["email", "staking", "promotion"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Core/Exceptions/UserNotFoundException.cs",
+    "layer": "Core",
+    "summary": "Exception thrown when user lookup fails.",
+    "keywords": ["exception", "user", "error"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Core/Exceptions/UserAlreadyExistsException.cs",
+    "layer": "Core",
+    "summary": "Exception thrown when registering duplicate email address.",
+    "keywords": ["exception", "user", "registration"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Core/Exceptions/InvalidEmailException.cs",
+    "layer": "Core",
+    "summary": "Exception thrown for invalid email format.",
+    "keywords": ["exception", "email", "validation"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Core/Exceptions/InvalidPasswordException.cs",
+    "layer": "Core",
+    "summary": "Exception thrown for invalid password or authentication failure.",
+    "keywords": ["exception", "password", "auth"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Core/Exceptions/WalletItemNotFoundException.cs",
+    "layer": "Core",
+    "summary": "Exception thrown when wallet coin balance lookup fails.",
+    "keywords": ["exception", "wallet", "error"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Core/Exceptions/InsufficientFundsException.cs",
+    "layer": "Core",
+    "summary": "Exception thrown when transaction exceeds available balance.",
+    "keywords": ["exception", "funds", "balance"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Core/Exceptions/StakingCoinNotFoundException.cs",
+    "layer": "Core",
+    "summary": "Exception thrown when staking coin configuration is not found.",
+    "keywords": ["exception", "staking", "error"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Core/Exceptions/EmailSendingFailedException.cs",
+    "layer": "Core",
+    "summary": "Exception thrown when email delivery fails.",
+    "keywords": ["exception", "email", "error"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Core/Exceptions/InvalidVerificationCodeException.cs",
+    "layer": "Core",
+    "summary": "Exception thrown when verification code validation fails.",
+    "keywords": ["exception", "verification", "error"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Core/Exceptions/SelfTransferException.cs",
+    "layer": "Core",
+    "summary": "Exception thrown when user attempts to transfer funds to themselves.",
+    "keywords": ["exception", "transfer", "error"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Core/Exceptions/TransferNotFoundException.cs",
+    "layer": "Core",
+    "summary": "Exception thrown when fund transfer record is not found.",
+    "keywords": ["exception", "transfer", "error"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Core/ReadModels/FutureDto.cs",
+    "layer": "Core",
+    "summary": "Read model for futures position display with all trading parameters.",
+    "keywords": ["futures", "dto", "read-model"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Core/ReadModels/FutureHIstoryOutput.cs",
+    "layer": "Core",
+    "summary": "Read model for completed futures position history display.",
+    "keywords": ["futures", "history", "read-model"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Core/DomainServices/AuthDomainService.cs",
+    "layer": "Core",
+    "summary": "Domain service for password hashing and user authentication logic.",
+    "keywords": ["auth", "password", "domain-service"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Core/DomainServices/FuturesDomainService.cs",
+    "layer": "Core",
+    "summary": "Domain service for futures position lifecycle and PnL calculation.",
+    "keywords": ["futures", "trading", "domain-service"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Core/DomainServices/StakingDomainService.cs",
+    "layer": "Core",
+    "summary": "Domain service for staking position creation and reward calculation.",
+    "keywords": ["staking", "rewards", "domain-service"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Core/Domain/Wallet/Wallet.cs",
+    "layer": "Core",
+    "summary": "Wallet aggregate managing coin balances and trade execution.",
+    "keywords": ["wallet", "aggregate", "trading"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Core/Domain/Wallet/Commands/WalletTradeCommand.cs",
+    "layer": "Core",
+    "summary": "Command object for wallet coin trading operations.",
+    "keywords": ["wallet", "trade", "command"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Application/Market/MarketService.cs",
+    "layer": "Application",
+    "summary": "Application service providing market price data to upper layers.",
+    "keywords": ["market", "price", "service"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Application/Notifications/NotificationService.cs",
+    "layer": "Application",
+    "summary": "Application service for notification management (deprecated).",
+    "keywords": ["notification", "service", "obsolete"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Application/Wallet/WalletService.cs",
+    "layer": "Application",
+    "summary": "Application service orchestrating wallet trading and balance operations.",
+    "keywords": ["wallet", "trading", "service"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Application/Wallet/CoinTradeDTO.cs",
+    "layer": "Application",
+    "summary": "Data transfer object for coin trading request parameters.",
+    "keywords": ["wallet", "dto", "trading"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Application/Auth/AuthService.cs",
+    "layer": "Application",
+    "summary": "Application service orchestrating user registration and login workflows.",
+    "keywords": ["auth", "registration", "login"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Application/Auth/UserDto.cs",
+    "layer": "Application",
+    "summary": "Data transfer object for user authentication credentials.",
+    "keywords": ["auth", "dto", "user"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Application/Users/UserService.cs",
+    "layer": "Application",
+    "summary": "Application service for user information retrieval.",
+    "keywords": ["user", "service", "query"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Application/Futures/FuturesService.cs",
+    "layer": "Application",
+    "summary": "Application service orchestrating futures position lifecycle operations.",
+    "keywords": ["futures", "trading", "service"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Application/Transfer/TransferService.cs",
+    "layer": "Application",
+    "summary": "Application service orchestrating inter-user fund transfers with verification.",
+    "keywords": ["transfer", "funds", "verification"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Application/Transfer/InitiateTransferDto.cs",
+    "layer": "Application",
+    "summary": "Data transfer object for initiating fund transfers.",
+    "keywords": ["transfer", "dto", "initiate"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Application/Transfer/ConfirmTransferDto.cs",
+    "layer": "Application",
+    "summary": "Data transfer object for confirming fund transfers with verification code.",
+    "keywords": ["transfer", "dto", "confirm"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Application/StakingServices/StakingService.cs",
+    "layer": "Application",
+    "summary": "Application service orchestrating staking workflows and reward distribution.",
+    "keywords": ["staking", "rewards", "service"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Application/StakingPromotion/StakingPromotionService.cs",
+    "layer": "Application",
+    "summary": "Application service for broadcasting staking promotion campaigns via email.",
+    "keywords": ["staking", "promotion", "email"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Infrastructure/Market/ApiMarketPriceProvider.cs",
+    "layer": "Infrastructure",
+    "summary": "Market price provider adapter wrapping market API client.",
+    "keywords": ["market", "price", "api"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Infrastructure/Market/BinanceMarketApiClient.cs",
+    "layer": "Infrastructure",
+    "summary": "Binance API client for cryptocurrency price retrieval.",
+    "keywords": ["market", "api", "binance"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Infrastructure/Market/BybitMarketApiClient.cs",
+    "layer": "Infrastructure",
+    "summary": "Bybit API client for cryptocurrency price retrieval.",
+    "keywords": ["market", "api", "bybit"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Infrastructure/Market/RoutingApiMarketPriceProvider.cs",
+    "layer": "Infrastructure",
+    "summary": "Market price provider using round-robin load balancing across multiple API clients.",
+    "keywords": ["market", "routing", "load-balancing"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Infrastructure/Security/JwtTokenService.cs",
+    "layer": "Infrastructure",
+    "summary": "JWT token generation service for user authentication.",
+    "keywords": ["jwt", "token", "auth"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Infrastructure/Logging/DatabaseLogger.cs",
+    "layer": "Infrastructure",
+    "summary": "Logger implementation persisting logs to database via channel.",
+    "keywords": ["logging", "database", "logger"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Infrastructure/Logging/DatabaseLoggerProvider.cs",
+    "layer": "Infrastructure",
+    "summary": "Logger provider factory creating database loggers.",
+    "keywords": ["logging", "database", "provider"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Infrastructure/Logging/DatabaseLogWriterService.cs",
+    "layer": "Infrastructure",
+    "summary": "Background service batching and persisting logs to database.",
+    "keywords": ["logging", "background-service", "batch"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Infrastructure/Logging/LogQueue.cs",
+    "layer": "Infrastructure",
+    "summary": "Bounded channel queue for asynchronous log entry buffering.",
+    "keywords": ["logging", "queue", "channel"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Infrastructure/News/Contracts.cs",
+    "layer": "Infrastructure",
+    "summary": "Message contracts for cryptocurrency news crawling events.",
+    "keywords": ["news", "messaging", "contracts"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Infrastructure/News/CryptoNewsConsumer.cs",
+    "layer": "Infrastructure",
+    "summary": "Message consumer persisting matched cryptocurrency news articles.",
+    "keywords": ["news", "consumer", "messaging"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Infrastructure/News/CryptoNewsCrawlRequester.cs",
+    "layer": "Infrastructure",
+    "summary": "Service triggering cryptocurrency news crawling via message broker.",
+    "keywords": ["news", "crawling", "messaging"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Infrastructure/News/CryptoNewsInMemoryStore.cs",
+    "layer": "Infrastructure",
+    "summary": "In-memory concurrent dictionary cache for cryptocurrency news articles.",
+    "keywords": ["news", "cache", "memory"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Infrastructure/News/NewPersistence.cs",
+    "layer": "Infrastructure",
+    "summary": "Crypto news repository implementation using in-memory store.",
+    "keywords": ["news", "repository", "persistence"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Infrastructure/Persistence/DataContext.cs",
+    "layer": "Infrastructure",
+    "summary": "Entity Framework database context with model configuration.",
+    "keywords": ["database", "context", "ef"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Infrastructure/Persistence/EfUniOfWork.cs",
+    "layer": "Infrastructure",
+    "summary": "Unit of work implementation using Entity Framework with transactional support.",
+    "keywords": ["unit-of-work", "transaction", "ef"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Infrastructure/Persistence/Repositories/EfFutureRepository.cs",
+    "layer": "Infrastructure",
+    "summary": "Futures repository implementation using Entity Framework.",
+    "keywords": ["futures", "repository", "ef"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Infrastructure/Persistence/Repositories/EfTransferRepository.cs",
+    "layer": "Infrastructure",
+    "summary": "Transfer repository implementation using Entity Framework.",
+    "keywords": ["transfer", "repository", "ef"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Infrastructure/Persistence/Repositories/WalletItemRepository.cs",
+    "layer": "Infrastructure",
+    "summary": "Wallet item repository implementation with optimized queries for trading.",
+    "keywords": ["wallet", "repository", "ef"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Infrastructure/Persistence/Repositories/EfUserRepository.cs",
+    "layer": "Infrastructure",
+    "summary": "User repository implementation with email and staking promotion queries.",
+    "keywords": ["user", "repository", "ef"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Infrastructure/Persistence/Repositories/EfStakingRepository.cs",
+    "layer": "Infrastructure",
+    "summary": "Staking repository implementation with expiry filtering.",
+    "keywords": ["staking", "repository", "ef"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Infrastructure/Schedulers/StakingScheduler.cs",
+    "layer": "Infrastructure",
+    "summary": "Background service checking for expired staking positions daily.",
+    "keywords": ["staking", "scheduler", "background"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Infrastructure/Wallets/StarterWalletConsumer.cs",
+    "layer": "Infrastructure",
+    "summary": "Message consumer creating initial wallet with startup balance on user registration.",
+    "keywords": ["wallet", "consumer", "registration"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Presentation/Controllers/ApiControllerBase.cs",
+    "layer": "Presentation",
+    "summary": "Base controller class extracting user ID from JWT claims.",
+    "keywords": ["controller", "auth", "api"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Presentation/Controllers/MarketController.cs",
+    "layer": "Presentation",
+    "summary": "HTTP API endpoint for cryptocurrency price queries.",
+    "keywords": ["market", "price", "endpoint"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Presentation/Controllers/GraphCOntroller.cs",
+    "layer": "Presentation",
+    "summary": "HTTP API endpoint for OHLCV candle chart data from Binance.",
+    "keywords": ["chart", "candles", "endpoint"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Presentation/Controllers/AuthController.cs",
+    "layer": "Presentation",
+    "summary": "HTTP API endpoints for user registration, login, and email retrieval.",
+    "keywords": ["auth", "registration", "endpoint"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Presentation/Controllers/WalletController.cs",
+    "layer": "Presentation",
+    "summary": "HTTP API endpoints for wallet viewing and coin trading operations.",
+    "keywords": ["wallet", "trading", "endpoint"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Presentation/Controllers/FuturesController.cs",
+    "layer": "Presentation",
+    "summary": "HTTP API endpoints for futures position creation, listing, and closure.",
+    "keywords": ["futures", "trading", "endpoint"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Presentation/Controllers/TransferController.cs",
+    "layer": "Presentation",
+    "summary": "HTTP API endpoints for initiating and confirming inter-user fund transfers.",
+    "keywords": ["transfer", "funds", "endpoint"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Presentation/Controllers/StakingController.cs",
+    "layer": "Presentation",
+    "summary": "HTTP API endpoints for staking operations and coin configuration.",
+    "keywords": ["staking", "endpoint", "rewards"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Presentation/Controllers/NewsController.cs",
+    "layer": "Presentation",
+    "summary": "HTTP API endpoints for cryptocurrency news retrieval and crawling triggers.",
+    "keywords": ["news", "crypto", "endpoint"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Presentation/Controllers/AdminController.cs",
+    "layer": "Presentation",
+    "summary": "HTTP API endpoint for admin operations including staking promotion email broadcast.",
+    "keywords": ["admin", "staking", "endpoint"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Presentation/Controllers/NotificationController.cs",
+    "layer": "Presentation",
+    "summary": "HTTP API endpoints for user notification management (deprecated).",
+    "keywords": ["notification", "endpoint", "obsolete"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Presentation/Controllers/SeedController.cs",
+    "layer": "Presentation",
+    "summary": "HTTP API endpoint for bulk database seeding with test data.",
+    "keywords": ["seeding", "test-data", "endpoint"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Presentation/Controllers/PingController.cs",
+    "layer": "Presentation",
+    "summary": "HTTP API health check endpoint returning PONG response.",
+    "keywords": ["health-check", "ping", "endpoint"]
+  },
+  {
+    "path": "CryptocurrencyExchange.Tests/TestUser.cs",
+    "layer": "Tests",
+    "summary": "Test helper providing default test user ID constant.",
+    "keywords": ["test", "helper", "user"]
+  },
+  {
+    "path": "CryptocurrencyExchange.Tests/WalletItemMother.cs",
+    "layer": "Tests",
+    "summary": "Object mother factory for creating test wallet items.",
+    "keywords": ["test", "factory", "wallet"]
+  },
+  {
+    "path": "CryptocurrencyExchange.Tests/Domain/WalletTests.cs",
+    "layer": "Tests",
+    "summary": "Unit tests for wallet aggregate buy/sell operations and balance validation.",
+    "keywords": ["test", "wallet", "trading"]
+  },
+  {
+    "path": "CryptocurrencyExchange.Tests/Domain/PasswordTests.cs",
+    "layer": "Tests",
+    "summary": "Unit tests for password value object validation and masking.",
+    "keywords": ["test", "password", "value-object"]
+  },
+  {
+    "path": "CryptocurrencyExchange.Tests/Domain/AuthDomainServiceTests.cs",
+    "layer": "Tests",
+    "summary": "Unit tests for user creation and password verification logic.",
+    "keywords": ["test", "auth", "domain"]
+  },
+  {
+    "path": "CryptocurrencyExchange.Tests/Domain/TransferTests.cs",
+    "layer": "Tests",
+    "summary": "Unit tests for fund transfer execution and verification code validation.",
+    "keywords": ["test", "transfer", "verification"]
+  },
+  {
+    "path": "CryptocurrencyExchange.Tests/Domain/StakingDomainServiceTests.cs",
+    "layer": "Tests",
+    "summary": "Unit tests for staking position creation and end date calculation.",
+    "keywords": ["test", "staking", "domain"]
+  },
+  {
+    "path": "CryptocurrencyExchange.Tests/ServicesTests/AuthServiceTests.cs",
+    "layer": "Tests",
+    "summary": "Unit tests for authentication service registration and login workflows.",
+    "keywords": ["test", "auth", "service"]
+  },
+  {
+    "path": "CryptocurrencyExchange.Tests/ServicesTests/UserServiceTests.cs",
+    "layer": "Tests",
+    "summary": "Unit tests for user service email retrieval.",
+    "keywords": ["test", "user", "service"]
+  },
+  {
+    "path": "CryptocurrencyExchange.Tests/ServicesTests/WalletServiceTests.cs",
+    "layer": "Tests",
+    "summary": "Unit tests for wallet service trading and balance operations.",
+    "keywords": ["test", "wallet", "service"]
+  },
+  {
+    "path": "CryptocurrencyExchange.Tests/ServicesTests/FuturesServiceTests.cs",
+    "layer": "Tests",
+    "summary": "Unit tests for futures service position creation and closure.",
+    "keywords": ["test", "futures", "service"]
+  },
+  {
+    "path": "CryptocurrencyExchange.Tests/ServicesTests/TransferServiceTests.cs",
+    "layer": "Tests",
+    "summary": "Unit tests for transfer service initiation and confirmation workflows.",
+    "keywords": ["test", "transfer", "service"]
+  },
+  {
+    "path": "CryptocurrencyExchange.Tests/ServicesTests/StakingServiceTests.cs",
+    "layer": "Tests",
+    "summary": "Unit tests for staking service expiry checking with filtered queries.",
+    "keywords": ["test", "staking", "service"]
+  },
+  {
+    "path": "CryptocurrencyExchange.Tests/ServicesTests/PingControllerTests.cs",
+    "layer": "Tests",
+    "summary": "Unit tests for ping health check endpoint.",
+    "keywords": ["test", "endpoint", "health"]
+  },
+  {
+    "path": "CryptocurrencyExchange.Tests/Infrastructure/SendVerificationEmailConsumerTests.cs",
+    "layer": "Tests",
+    "summary": "Unit tests for email verification command consumer.",
+    "keywords": ["test", "email", "verification"]
+  },
+  {
+    "path": "CryptocurrencyExchange.Tests/Infrastructure/StarterWalletConsumerTests.cs",
+    "layer": "Tests",
+    "summary": "Unit tests for starter wallet creation on user registration.",
+    "keywords": ["test", "wallet", "registration"]
+  },
+  {
+    "path": "CryptocurrencyExchange/Migrations/20260411000000_AddEmailIndexToUsers.cs",
+    "layer": "Infrastructure",
+    "summary": "Migration adding email column constraint and index for user lookups.",
+    "keywords": ["migration", "index", "user"]
+  }
+]
