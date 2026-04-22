@@ -1,4 +1,4 @@
-﻿using CryptocurrencyExchange.Core.Interfaces;
+using CryptocurrencyExchange.Core.Interfaces;
 
 namespace CryptocurrencyExchange.Infrastructure.Market
 {
@@ -14,22 +14,25 @@ namespace CryptocurrencyExchange.Infrastructure.Market
                 throw new InvalidOperationException("No market api clients registered");
         }
 
-        public Task<decimal> GetPriceInUsdt(string coinSymbol)
+        public async Task<decimal> GetPriceInUsdt(string coinSymbol)
         {
-            int next = GetNextClientIndexThreadSafe();
-            var client = _clients[GetRoundRobinClientIndex(next)];
+            int startIndex = Interlocked.Increment(ref _index);
+            Exception? lastException = null;
 
-            return client.GetUsdtPriceAsync(coinSymbol);
-        }
+            for (int i = 0; i < _clients.Count; i++)
+            {
+                var client = _clients[((startIndex + i) & int.MaxValue) % _clients.Count];
+                try
+                {
+                    return await client.GetUsdtPriceAsync(coinSymbol);
+                }
+                catch (Exception ex)
+                {
+                    lastException = ex;
+                }
+            }
 
-        private int GetNextClientIndexThreadSafe()
-        {
-            return Interlocked.Increment(ref _index);
-        }
-
-        private int GetRoundRobinClientIndex(int counter)
-        {
-            return counter % _clients.Count;
+            throw lastException!;
         }
     }
 }
