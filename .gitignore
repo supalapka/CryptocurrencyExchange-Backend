@@ -363,3 +363,4 @@ MigrationBackup/
 FodyWeavers.xsd
 CryptocurrencyExchange.EmailService/Properties/launchSettings.json
 docs/database-optimization.md
+/docs
