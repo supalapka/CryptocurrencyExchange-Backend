@@ -9,7 +9,7 @@ builder.Services.AddDatabaseLogging();
 
 // persistence & external APIs
 builder.Services.AddPersistenceInfrastructureServices(builder.Configuration);
-builder.Services.AddExternalApiInfrastructureServices();
+builder.Services.AddExternalApiInfrastructureServices(builder.Configuration);
 
 // messaging & background jobs
 builder.Services.AddMessagingInfrastructure(builder.Configuration);

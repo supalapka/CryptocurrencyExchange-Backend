@@ -1,3 +1,4 @@
+using System.Net;
 using CryptocurrencyExchange.Core.Interfaces;
 using CryptocurrencyExchange.Core.Interfaces.Repositories;
 using CryptocurrencyExchange.Core.Interfaces.Services;
@@ -11,6 +12,9 @@ using CryptocurrencyExchange.Options;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using Polly;
+using Polly.Extensions.Http;
+using Polly.Timeout;
 
 namespace CryptocurrencyExchange.Extensions
 {
@@ -39,16 +43,44 @@ namespace CryptocurrencyExchange.Extensions
             return services;
         }
 
-        public static IServiceCollection AddExternalApiInfrastructureServices(this IServiceCollection services)
+        public static IServiceCollection AddExternalApiInfrastructureServices(
+            this IServiceCollection services, IConfiguration configuration)
         {
-            services.AddHttpClient<IMarketApiClient, BinanceMarketApiClient>();
-            services.AddHttpClient<IMarketApiClient, BybitMarketApiClient>();
-            services.AddSingleton<IMarketPriceProvider, RoutingApiMarketPriceProvider>();
+            services
+                .AddOptions<MarketApiResilienceOptions>()
+                .Bind(configuration.GetSection("MarketApiResilience"))
+                .Validate(o => o.TimeoutMs > 0, "TimeoutMs must be positive")
+                .Validate(o => o.RetryDelayMs >= 0, "RetryDelayMs must be non-negative")
+                .ValidateOnStart();
 
+            services.AddResilientMarketApiClient<BinanceMarketApiClient>();
+            services.AddResilientMarketApiClient<BybitMarketApiClient>();
+
+            services.AddSingleton<IMarketPriceProvider, RoutingApiMarketPriceProvider>();
             services.AddScoped<ICryptoNewsUpdateRequester, CryptoNewsCrawlRequester>();
 
             return services;
         }
+
+        private static IServiceCollection AddResilientMarketApiClient<TImplementation>(
+            this IServiceCollection services)
+            where TImplementation : class, IMarketApiClient
+        {
+            services.AddHttpClient<IMarketApiClient, TImplementation>()
+                .AddPolicyHandler((sp, _) => BuildRetryPolicy(sp.GetRequiredService<IOptions<MarketApiResilienceOptions>>().Value))
+                .AddPolicyHandler((sp, _) => BuildTimeoutPolicy(sp.GetRequiredService<IOptions<MarketApiResilienceOptions>>().Value));
+            return services;
+        }
+
+        private static IAsyncPolicy<HttpResponseMessage> BuildRetryPolicy(MarketApiResilienceOptions options) =>
+            HttpPolicyExtensions
+                .HandleTransientHttpError()
+                .OrResult(r => r.StatusCode == HttpStatusCode.TooManyRequests)
+                .Or<TimeoutRejectedException>()
+                .WaitAndRetryAsync(1, _ => TimeSpan.FromMilliseconds(options.RetryDelayMs));
+
+        private static IAsyncPolicy<HttpResponseMessage> BuildTimeoutPolicy(MarketApiResilienceOptions options) =>
+            Policy.TimeoutAsync<HttpResponseMessage>(TimeSpan.FromMilliseconds(options.TimeoutMs));
 
         public static IServiceCollection AddMessagingInfrastructure(this IServiceCollection services, IConfiguration configuration)
         {
