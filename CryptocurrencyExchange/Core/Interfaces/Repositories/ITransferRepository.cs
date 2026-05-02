@@ -6,5 +6,6 @@ namespace CryptocurrencyExchange.Core.Interfaces.Repositories
     {
         Task AddAsync(Transfer transfer);
         Task<Transfer?> GetPendingByIdAndSenderAsync(int transferId, int senderId);
+        Task<Transfer?> GetCompletedByIdAndSenderAsync(int transferId, int senderId);
     }
 }
