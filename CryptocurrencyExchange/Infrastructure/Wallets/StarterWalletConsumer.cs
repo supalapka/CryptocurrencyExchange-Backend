@@ -4,6 +4,8 @@ using CryptocurrencyExchange.Core.Interfaces.Repositories;
 using CryptocurrencyExchange.Core.Models;
 using CryptocurrencyExchange.Core.ValueObject;
 using MassTransit;
+using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 
 namespace CryptocurrencyExchange.Infrastructure.Wallets
 {
@@ -22,8 +24,20 @@ namespace CryptocurrencyExchange.Infrastructure.Wallets
         {
             var walletItem = new WalletItem(context.Message.UserId, new CoinSymbol(CoinSymbol.Usdt.Value));
             walletItem.AddAmount(5000);
-            await _walletRepository.AddAsync(walletItem);
-            await _unitOfWork.CommitAsync();
+
+            try
+            {
+                await _walletRepository.AddAsync(walletItem);
+                await _unitOfWork.CommitAsync();
+            }
+            catch (DbUpdateException ex) when (IsDuplicateKeyException(ex))
+            {
+                // another consumer instance already created the wallet, don't need to throw an exception
+            }
         }
+
+        private static bool IsDuplicateKeyException(DbUpdateException ex) =>
+            ex.InnerException is SqlException sqlEx &&
+            (sqlEx.Number == 2627 || sqlEx.Number == 2601);
     }
 }
