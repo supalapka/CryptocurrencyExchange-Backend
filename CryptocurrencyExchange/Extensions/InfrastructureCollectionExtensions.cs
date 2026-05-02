@@ -40,6 +40,7 @@ namespace CryptocurrencyExchange.Extensions
             services.AddScoped<IUserRepository, EfUserRepository>();
             services.AddScoped<ITransferRepository, EfTransferRepository>();
             services.AddScoped<IUserRegistrationOutboxRepository, EfUserRegistrationOutboxRepository>();
+            services.AddScoped<ITransferVerificationOutboxRepository, EfTransferVerificationOutboxRepository>();
             services.AddScoped<IDatabaseHealthChecker, EfDatabaseHealthChecker>();
 
             return services;
@@ -135,6 +136,7 @@ namespace CryptocurrencyExchange.Extensions
         {
             services.AddHostedService<StakingScheduler>();
             services.AddHostedService<OutboxDispatcher>();
+            services.AddHostedService<TransferOutboxDispatcher>();
             return services;
         }
 

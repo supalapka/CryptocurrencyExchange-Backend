@@ -19,6 +19,7 @@ namespace CryptocurrencyExchange.Infrastructure.Persistence
         public DbSet<LogEntry> LogEntries { get; set; }
         public DbSet<Transfer> Transfers { get; set; }
         public DbSet<UserRegistrationOutbox> UserRegistrationOutbox { get; set; }
+        public DbSet<TransferVerificationOutbox> TransferVerificationOutbox { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -28,6 +29,7 @@ namespace CryptocurrencyExchange.Infrastructure.Persistence
             ConfigureFuture(modelBuilder);
             ConfigureLogEntry(modelBuilder);
             ConfigureUserRegistrationOutbox(modelBuilder);
+            ConfigureTransferVerificationOutbox(modelBuilder);
         }
 
         private static void ConfigureFuture(ModelBuilder modelBuilder)
@@ -101,6 +103,17 @@ namespace CryptocurrencyExchange.Infrastructure.Persistence
             {
                 b.HasKey(e => e.Id);
                 b.Property(e => e.Email).IsRequired().HasMaxLength(256);
+                b.HasIndex(e => e.ProcessedAt);
+            });
+        }
+
+        private static void ConfigureTransferVerificationOutbox(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<TransferVerificationOutbox>(b =>
+            {
+                b.HasKey(e => e.Id);
+                b.Property(e => e.Email).IsRequired().HasMaxLength(256);
+                b.Property(e => e.VerificationCode).IsRequired().HasMaxLength(6);
                 b.HasIndex(e => e.ProcessedAt);
             });
         }
