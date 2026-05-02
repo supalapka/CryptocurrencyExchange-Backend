@@ -1,11 +1,9 @@
-using CryptocurrencyExchange.Core.Events;
 using CryptocurrencyExchange.Core.Interfaces;
 using CryptocurrencyExchange.Core.Interfaces.Repositories;
 using CryptocurrencyExchange.Core.Interfaces.Services;
 using CryptocurrencyExchange.Core.Models;
 using CryptocurrencyExchange.Core.ValueObject.User;
 using CryptocurrencyExchange.Exceptions;
-using MassTransit;
 
 namespace CryptocurrencyExchange.Application.Auth
 {
@@ -15,7 +13,7 @@ namespace CryptocurrencyExchange.Application.Auth
         private readonly IAuthDomainService _authDomainService;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ITokenService _tokenService;
-        private readonly IPublishEndpoint _publishEndpoint;
+        private readonly IUserRegistrationOutboxRepository _outboxRepository;
         private readonly ILogger<AuthService> _logger;
 
         public AuthService(
@@ -23,14 +21,14 @@ namespace CryptocurrencyExchange.Application.Auth
             IUnitOfWork unitOfWork,
             IAuthDomainService authDomainService,
             ITokenService tokenService,
-            IPublishEndpoint publishEndpoint,
+            IUserRegistrationOutboxRepository outboxRepository,
             ILogger<AuthService> logger)
         {
             _userRepository = userRepository;
             _unitOfWork = unitOfWork;
             _authDomainService = authDomainService;
             _tokenService = tokenService;
-            _publishEndpoint = publishEndpoint;
+            _outboxRepository = outboxRepository;
             _logger = logger;
         }
 
@@ -67,9 +65,8 @@ namespace CryptocurrencyExchange.Application.Auth
             {
                 user = _authDomainService.CreateUser(email, password);
                 await _userRepository.AddUserAsync(user);
+                await _outboxRepository.AddAsync(new UserRegistrationOutbox(user.Id, user.Email));
             });
-
-            await _publishEndpoint.Publish(new UserRegisteredEvent(user.Id, user.Email));
 
             _logger.LogInformation("New user registered with email {Email}", email.Value);
         }
