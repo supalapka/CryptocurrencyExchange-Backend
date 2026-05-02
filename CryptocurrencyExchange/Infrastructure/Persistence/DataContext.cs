@@ -18,6 +18,7 @@ namespace CryptocurrencyExchange.Infrastructure.Persistence
         public DbSet<Staking> Staking { get; set; }
         public DbSet<LogEntry> LogEntries { get; set; }
         public DbSet<Transfer> Transfers { get; set; }
+        public DbSet<UserRegistrationOutbox> UserRegistrationOutbox { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -26,6 +27,7 @@ namespace CryptocurrencyExchange.Infrastructure.Persistence
             ConfigureUser(modelBuilder);
             ConfigureFuture(modelBuilder);
             ConfigureLogEntry(modelBuilder);
+            ConfigureUserRegistrationOutbox(modelBuilder);
         }
 
         private static void ConfigureFuture(ModelBuilder modelBuilder)
@@ -90,6 +92,16 @@ namespace CryptocurrencyExchange.Infrastructure.Persistence
                 b.Property(e => e.TimestampUtc).IsRequired();
                 b.HasIndex(e => e.TimestampUtc);
                 b.HasIndex(e => e.Level);
+            });
+        }
+
+        private static void ConfigureUserRegistrationOutbox(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<UserRegistrationOutbox>(b =>
+            {
+                b.HasKey(e => e.Id);
+                b.Property(e => e.Email).IsRequired().HasMaxLength(256);
+                b.HasIndex(e => e.ProcessedAt);
             });
         }
 
