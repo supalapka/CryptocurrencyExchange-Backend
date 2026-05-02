@@ -1,11 +1,9 @@
 using CryptocurrencyExchange.Application.Auth;
-using CryptocurrencyExchange.Core.Events;
 using CryptocurrencyExchange.Core.Interfaces;
 using CryptocurrencyExchange.Core.Interfaces.Repositories;
 using CryptocurrencyExchange.Core.Models;
 using CryptocurrencyExchange.Core.ValueObject.User;
 using CryptocurrencyExchange.Exceptions;
-using MassTransit;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using NUnit.Framework;
@@ -19,7 +17,7 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
         private Mock<IAuthDomainService> _authDomainService;
         private Mock<IUnitOfWork> _uow;
         private Mock<ITokenService> _tokenService;
-        private Mock<IPublishEndpoint> _publishEndpoint;
+        private Mock<IUserRegistrationOutboxRepository> _outboxRepo;
 
         private AuthService _service;
 
@@ -33,7 +31,7 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
             _authDomainService = new Mock<IAuthDomainService>();
             _uow = new Mock<IUnitOfWork>();
             _tokenService = new Mock<ITokenService>();
-            _publishEndpoint = new Mock<IPublishEndpoint>();
+            _outboxRepo = new Mock<IUserRegistrationOutboxRepository>();
 
             _uow.Setup(x => x.ExecuteInTransactionAsync(It.IsAny<Func<Task>>()))
                 .Returns<Func<Task>>(f => f());
@@ -43,7 +41,7 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
                 _uow.Object,
                 _authDomainService.Object,
                 _tokenService.Object,
-                _publishEndpoint.Object,
+                _outboxRepo.Object,
                 NullLogger<AuthService>.Instance
             );
         }
@@ -91,7 +89,7 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
         }
 
         [Test]
-        public async Task RegisterAsync_WhenNewUser_CreatesUserAndPublishesEvent()
+        public async Task RegisterAsync_WhenNewUser_CreatesUserAndWritesOutboxEntry()
         {
             var user = CreateTestUser();
             _userRepo.Setup(x => x.UserExists(TestEmailVo)).ReturnsAsync(false);
@@ -101,8 +99,9 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
 
             _userRepo.Verify(x => x.AddUserAsync(user), Times.Once);
             _uow.Verify(x => x.ExecuteInTransactionAsync(It.IsAny<Func<Task>>()), Times.Once);
-            _publishEndpoint.Verify(
-                x => x.Publish(It.IsAny<UserRegisteredEvent>(), It.IsAny<CancellationToken>()),
+            _outboxRepo.Verify(
+                x => x.AddAsync(It.Is<UserRegistrationOutbox>(e =>
+                    e.UserId == user.Id && e.Email == user.Email.Value)),
                 Times.Once);
         }
 
