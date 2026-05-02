@@ -4,6 +4,8 @@ using CryptocurrencyExchange.Core.Interfaces.Services;
 using CryptocurrencyExchange.Core.Models;
 using CryptocurrencyExchange.Core.ValueObject;
 using CryptocurrencyExchange.Exceptions;
+using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 
 namespace CryptocurrencyExchange.Application.Transfers
 {
@@ -14,6 +16,7 @@ namespace CryptocurrencyExchange.Application.Transfers
         private readonly IUserRepository _userRepository;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ITransferVerificationOutboxRepository _outboxRepository;
+        private readonly ITransferIdempotentRequestRepository _idempotentRequestRepository;
         private readonly ILogger<TransferService> _logger;
 
         public TransferService(
@@ -22,6 +25,7 @@ namespace CryptocurrencyExchange.Application.Transfers
             IUserRepository userRepository,
             IUnitOfWork unitOfWork,
             ITransferVerificationOutboxRepository outboxRepository,
+            ITransferIdempotentRequestRepository idempotentRequestRepository,
             ILogger<TransferService> logger)
         {
             _transferRepository = transferRepository;
@@ -29,11 +33,16 @@ namespace CryptocurrencyExchange.Application.Transfers
             _userRepository = userRepository;
             _unitOfWork = unitOfWork;
             _outboxRepository = outboxRepository;
+            _idempotentRequestRepository = idempotentRequestRepository;
             _logger = logger;
         }
 
-        public async Task<int> InitiateAsync(int senderId, InitiateTransferDto dto)
+        public async Task<int> InitiateAsync(int senderId, InitiateTransferDto dto, string idempotencyKey)
         {
+            var existing = await _idempotentRequestRepository.FindAsync(idempotencyKey, senderId);
+            if (existing is not null && !existing.IsExpired && existing.TransferId.HasValue)
+                return existing.TransferId.Value;
+
             var receiver = await _userRepository.GetByEmailAsync(dto.ReceiverEmail)
                 ?? throw new UserNotFoundException();
 
@@ -49,16 +58,30 @@ namespace CryptocurrencyExchange.Application.Transfers
                 throw new InsufficientFundsException();
 
             var code = GenerateCode();
+            var idempotentRequest = new TransferIdempotentRequest(idempotencyKey, senderId);
             Transfer transfer = null;
 
-            await _unitOfWork.ExecuteInTransactionAsync(async () =>
+            try
             {
-                transfer = Transfer.Create(senderId, receiver.Id, symbol, dto.Amount, code);
-                await _transferRepository.AddAsync(transfer);
-                await _outboxRepository.AddAsync(new TransferVerificationOutbox(senderItem.User.Email, code));
-            });
+                await _unitOfWork.ExecuteInTransactionAsync(async () =>
+                {
+                    await _idempotentRequestRepository.AddAsync(idempotentRequest);
+                    transfer = Transfer.Create(senderId, receiver.Id, symbol, dto.Amount, code);
+                    await _transferRepository.AddAsync(transfer);
+                    await _outboxRepository.AddAsync(new TransferVerificationOutbox(senderItem.User.Email, code));
+                    await _unitOfWork.CommitAsync();
+                    idempotentRequest.SetTransferId(transfer.Id);
+                });
+            }
+            catch (DbUpdateException ex) when (IsDuplicateKeyException(ex))
+            {
+                var conflict = await _idempotentRequestRepository.FindAsync(idempotencyKey, senderId);
+                if (conflict?.TransferId.HasValue == true)
+                    return conflict.TransferId.Value;
+                throw;
+            }
 
-            _logger.LogInformation("Transfer {TransferId} initiated by user {SenderId}", transfer.Id, senderId);
+            _logger.LogInformation("Transfer {TransferId} initiated by user {SenderId}", transfer!.Id, senderId);
 
             return transfer.Id;
         }
@@ -67,8 +90,16 @@ namespace CryptocurrencyExchange.Application.Transfers
         {
             var codeVo = new VerificationCode(dto.VerificationCode);
 
-            var transfer = await _transferRepository.GetPendingByIdAndSenderAsync(dto.TransferId, senderId)
-                ?? throw new TransferNotFoundException();
+            var transfer = await _transferRepository.GetPendingByIdAndSenderAsync(dto.TransferId, senderId);
+
+            if (transfer is null)
+            {
+                var completed = await _transferRepository.GetCompletedByIdAndSenderAsync(dto.TransferId, senderId);
+                if (completed is not null)
+                    return;
+
+                throw new TransferNotFoundException();
+            }
 
             await _unitOfWork.ExecuteInTransactionAsync(async () =>
             {
@@ -91,5 +122,9 @@ namespace CryptocurrencyExchange.Application.Transfers
         }
 
         private static string GenerateCode() => Random.Shared.Next(100_000, 1_000_000).ToString();
+
+        private static bool IsDuplicateKeyException(DbUpdateException ex) =>
+            ex.InnerException is SqlException sqlEx &&
+            (sqlEx.Number == 2627 || sqlEx.Number == 2601);
     }
 }
