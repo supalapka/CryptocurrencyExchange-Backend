@@ -1,12 +1,10 @@
 using CryptocurrencyExchange.Application.Transfers;
-using CryptocurrencyExchange.Core.Events;
 using CryptocurrencyExchange.Core.Interfaces;
 using CryptocurrencyExchange.Core.Interfaces.Repositories;
 using CryptocurrencyExchange.Core.Models;
 using CryptocurrencyExchange.Core.ValueObject;
 using CryptocurrencyExchange.Core.ValueObject.User;
 using CryptocurrencyExchange.Exceptions;
-using MassTransit;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using NUnit.Framework;
@@ -20,7 +18,7 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
         private Mock<IWalletItemRepository> _walletRepo;
         private Mock<IUserRepository> _userRepo;
         private Mock<IUnitOfWork> _uow;
-        private Mock<IPublishEndpoint> _publishEndpoint;
+        private Mock<ITransferVerificationOutboxRepository> _outboxRepo;
 
         private TransferService _service;
 
@@ -36,7 +34,7 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
             _walletRepo = new Mock<IWalletItemRepository>();
             _userRepo = new Mock<IUserRepository>();
             _uow = new Mock<IUnitOfWork>();
-            _publishEndpoint = new Mock<IPublishEndpoint>();
+            _outboxRepo = new Mock<ITransferVerificationOutboxRepository>();
 
             _uow.Setup(x => x.ExecuteInTransactionAsync(It.IsAny<Func<Task>>()))
                 .Returns<Func<Task>>(f => f());
@@ -46,13 +44,13 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
                 _walletRepo.Object,
                 _userRepo.Object,
                 _uow.Object,
-                _publishEndpoint.Object,
+                _outboxRepo.Object,
                 NullLogger<TransferService>.Instance
             );
         }
 
         [Test]
-        public async Task InitiateAsync_ValidRequest_ShouldCreateTransferAndPublishEmail()
+        public async Task InitiateAsync_ValidRequest_ShouldCreateTransferAndWriteOutboxEntry()
         {
             var receiver = new User(ReceiverEmail, new byte[] { 1 }, new byte[] { 2 });
             var senderItem = new WalletItem(SenderId, CoinSymbol.Btc);
@@ -66,8 +64,8 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
             var transferId = await _service.InitiateAsync(SenderId, dto);
 
             _transferRepo.Verify(x => x.AddAsync(It.IsAny<Transfer>()), Times.Once);
-            _publishEndpoint.Verify(
-                x => x.Publish(It.IsAny<SendVerificationEmailCommand>(), It.IsAny<CancellationToken>()),
+            _outboxRepo.Verify(
+                x => x.AddAsync(It.Is<TransferVerificationOutbox>(e => e.Email == SenderEmail.Value)),
                 Times.Once);
         }
 

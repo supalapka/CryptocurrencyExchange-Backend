@@ -1,11 +1,9 @@
-using CryptocurrencyExchange.Core.Events;
 using CryptocurrencyExchange.Core.Interfaces;
 using CryptocurrencyExchange.Core.Interfaces.Repositories;
 using CryptocurrencyExchange.Core.Interfaces.Services;
 using CryptocurrencyExchange.Core.Models;
 using CryptocurrencyExchange.Core.ValueObject;
 using CryptocurrencyExchange.Exceptions;
-using MassTransit;
 
 namespace CryptocurrencyExchange.Application.Transfers
 {
@@ -15,7 +13,7 @@ namespace CryptocurrencyExchange.Application.Transfers
         private readonly IWalletItemRepository _walletItemRepository;
         private readonly IUserRepository _userRepository;
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IPublishEndpoint _publishEndpoint;
+        private readonly ITransferVerificationOutboxRepository _outboxRepository;
         private readonly ILogger<TransferService> _logger;
 
         public TransferService(
@@ -23,14 +21,14 @@ namespace CryptocurrencyExchange.Application.Transfers
             IWalletItemRepository walletItemRepository,
             IUserRepository userRepository,
             IUnitOfWork unitOfWork,
-            IPublishEndpoint publishEndpoint,
+            ITransferVerificationOutboxRepository outboxRepository,
             ILogger<TransferService> logger)
         {
             _transferRepository = transferRepository;
             _walletItemRepository = walletItemRepository;
             _userRepository = userRepository;
             _unitOfWork = unitOfWork;
-            _publishEndpoint = publishEndpoint;
+            _outboxRepository = outboxRepository;
             _logger = logger;
         }
 
@@ -57,9 +55,8 @@ namespace CryptocurrencyExchange.Application.Transfers
             {
                 transfer = Transfer.Create(senderId, receiver.Id, symbol, dto.Amount, code);
                 await _transferRepository.AddAsync(transfer);
+                await _outboxRepository.AddAsync(new TransferVerificationOutbox(senderItem.User.Email, code));
             });
-
-            await _publishEndpoint.Publish(new SendVerificationEmailCommand(senderItem.User.Email, code));
 
             _logger.LogInformation("Transfer {TransferId} initiated by user {SenderId}", transfer.Id, senderId);
 
