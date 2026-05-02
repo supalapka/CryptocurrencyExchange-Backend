@@ -41,6 +41,7 @@ namespace CryptocurrencyExchange.Extensions
             services.AddScoped<ITransferRepository, EfTransferRepository>();
             services.AddScoped<IUserRegistrationOutboxRepository, EfUserRegistrationOutboxRepository>();
             services.AddScoped<ITransferVerificationOutboxRepository, EfTransferVerificationOutboxRepository>();
+            services.AddScoped<ITransferIdempotentRequestRepository, EfTransferIdempotentRequestRepository>();
             services.AddScoped<IDatabaseHealthChecker, EfDatabaseHealthChecker>();
 
             return services;

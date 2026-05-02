@@ -18,7 +18,10 @@ namespace CryptocurrencyExchange.Presentation.Controllers
         [HttpPost("auth/transfer/initiate")]
         public async Task<ActionResult<int>> Initiate([FromBody] InitiateTransferDto dto)
         {
-            var transferId = await _transferService.InitiateAsync(UserId, dto);
+            if (!Request.Headers.TryGetValue("Idempotency-Key", out var key) || string.IsNullOrWhiteSpace(key))
+                return BadRequest("Idempotency-Key header is required.");
+
+            var transferId = await _transferService.InitiateAsync(UserId, dto, key.ToString());
 
             return Ok(transferId);
         }

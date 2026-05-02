@@ -26,5 +26,14 @@ namespace CryptocurrencyExchange.Infrastructure.Persistence.Repositories
                     t.SenderId == senderId &&
                     t.Status == TransferStatus.Pending);
         }
+
+        public async Task<Transfer?> GetCompletedByIdAndSenderAsync(int transferId, int senderId)
+        {
+            return await _context.Transfers
+                .FirstOrDefaultAsync(t =>
+                    t.Id == transferId &&
+                    t.SenderId == senderId &&
+                    t.Status == TransferStatus.Completed);
+        }
     }
 }
