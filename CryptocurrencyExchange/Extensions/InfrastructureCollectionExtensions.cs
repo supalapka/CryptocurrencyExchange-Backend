@@ -7,6 +7,7 @@ using CryptocurrencyExchange.Infrastructure.News;
 using CryptocurrencyExchange.Infrastructure.Persistence;
 using CryptocurrencyExchange.Infrastructure.Persistence.Repositories;
 using CryptocurrencyExchange.Infrastructure.Schedulers;
+using CryptocurrencyExchange.Infrastructure.Outbox;
 using CryptocurrencyExchange.Infrastructure.Wallets;
 using CryptocurrencyExchange.Options;
 using MassTransit;
@@ -38,6 +39,7 @@ namespace CryptocurrencyExchange.Extensions
             services.AddScoped<ICryptoNewsRepository, NewPersistence>();
             services.AddScoped<IUserRepository, EfUserRepository>();
             services.AddScoped<ITransferRepository, EfTransferRepository>();
+            services.AddScoped<IUserRegistrationOutboxRepository, EfUserRegistrationOutboxRepository>();
             services.AddScoped<IDatabaseHealthChecker, EfDatabaseHealthChecker>();
 
             return services;
@@ -132,6 +134,7 @@ namespace CryptocurrencyExchange.Extensions
         public static IServiceCollection AddBackgroundJobs(this IServiceCollection services)
         {
             services.AddHostedService<StakingScheduler>();
+            services.AddHostedService<OutboxDispatcher>();
             return services;
         }
 
