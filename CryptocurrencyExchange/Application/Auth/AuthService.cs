@@ -65,6 +65,7 @@ namespace CryptocurrencyExchange.Application.Auth
             {
                 user = _authDomainService.CreateUser(email, password);
                 await _userRepository.AddUserAsync(user);
+                await _unitOfWork.CommitAsync();
                 await _outboxRepository.AddAsync(new UserRegistrationOutbox(user.Id, user.Email));
             });
 
