@@ -47,6 +47,7 @@ var host = Host.CreateDefaultBuilder(args)
             x.AddConsumer<SendVerificationEmailConsumer>();
             x.AddConsumer<SendWelcomeEmailConsumer>();
             x.AddConsumer<SendStakingPromotionEmailConsumer>();
+            x.AddConsumer<SendTransferNotificationEmailConsumer>();
 
             x.UsingRabbitMq((ctx, cfg) =>
             {
@@ -72,7 +73,7 @@ var host = Host.CreateDefaultBuilder(args)
 using (var scope = host.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<EmailDbContext>();
-    await db.Database.EnsureCreatedAsync();
+    await db.Database.MigrateAsync();
 }
 
 await host.RunAsync();
