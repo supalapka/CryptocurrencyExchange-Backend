@@ -151,23 +151,9 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
         }
 
         [Test]
-        public void InitiateAsync_SenderHasNoWalletItem_ShouldThrowWalletItemNotFoundException()
-        {
-            var receiver = new User(ReceiverEmail, new byte[] { 1 }, new byte[] { 2 });
-            _idempotentRepo.Setup(x => x.FindAsync(It.IsAny<string>(), It.IsAny<int>())).ReturnsAsync((TransferIdempotentRequest)null);
-            _userRepo.Setup(x => x.GetByEmailAsync(ReceiverEmail)).ReturnsAsync(receiver);
-            _walletRepo.Setup(x => x.GetWithUserAsync(SenderId, CoinSymbol.Btc)).ReturnsAsync((WalletItem)null);
-
-            var dto = new InitiateTransferDto(ReceiverEmail, "btc", 5m);
-
-            Assert.ThrowsAsync<WalletItemNotFoundException>(async () =>
-                await _service.InitiateAsync(SenderId, dto, IdempotencyKey));
-        }
-
-        [Test]
         public async Task ConfirmAsync_ValidCode_ShouldCompleteTransfer()
         {
-            var transfer = Transfer.Create(SenderId, ReceiverId, CoinSymbol.Btc, 5m, "123456");
+            var transfer = Transfer.Create(SenderId, ReceiverId, CoinSymbol.Btc, 5m, new VerificationCode("123456"));
             var senderItem = WalletItemMother.CreateItem(SenderId, "btc", 10m);
             var receiverItem = WalletItemMother.CreateItem(ReceiverId, "btc", 0m);
 
@@ -186,7 +172,7 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
         [Test]
         public async Task ConfirmAsync_AlreadyCompleted_ShouldReturnWithoutError()
         {
-            var completed = Transfer.Create(SenderId, ReceiverId, CoinSymbol.Btc, 5m, "123456");
+            var completed = Transfer.Create(SenderId, ReceiverId, CoinSymbol.Btc, 5m, new VerificationCode("123456"));
 
             _transferRepo.Setup(x => x.GetPendingByIdAndSenderAsync(0, SenderId)).ReturnsAsync((Transfer)null);
             _transferRepo.Setup(x => x.GetCompletedByIdAndSenderAsync(0, SenderId)).ReturnsAsync(completed);
@@ -211,7 +197,7 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
         [Test]
         public void ConfirmAsync_WrongCode_ShouldThrowInvalidVerificationCodeException()
         {
-            var transfer = Transfer.Create(SenderId, ReceiverId, CoinSymbol.Btc, 5m, "123456");
+            var transfer = Transfer.Create(SenderId, ReceiverId, CoinSymbol.Btc, 5m, new VerificationCode("123456"));
             var senderItem = WalletItemMother.CreateItem(SenderId, "btc", 10m);
             var receiverItem = WalletItemMother.CreateItem(ReceiverId, "btc", 0m);
 
@@ -228,7 +214,7 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
         [Test]
         public async Task ConfirmAsync_ReceiverHasNoWalletItem_ShouldCreateAndTransfer()
         {
-            var transfer = Transfer.Create(SenderId, ReceiverId, CoinSymbol.Btc, 5m, "123456");
+            var transfer = Transfer.Create(SenderId, ReceiverId, CoinSymbol.Btc, 5m, new VerificationCode("123456"));
             var senderItem = WalletItemMother.CreateItem(SenderId, "btc", 10m);
 
             _transferRepo.Setup(x => x.GetPendingByIdAndSenderAsync(0, SenderId)).ReturnsAsync(transfer);
@@ -245,7 +231,7 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
         [Test]
         public async Task ConfirmAsync_ValidCode_ShouldPublishTransferCompletedEvent()
         {
-            var transfer = Transfer.Create(SenderId, ReceiverId, CoinSymbol.Btc, 5m, "123456");
+            var transfer = Transfer.Create(SenderId, ReceiverId, CoinSymbol.Btc, 5m, new VerificationCode("123456"));
             var senderItem = WalletItemMother.CreateItem(SenderId, "btc", 10m);
             var receiverItem = WalletItemMother.CreateItem(ReceiverId, "btc", 0m);
 

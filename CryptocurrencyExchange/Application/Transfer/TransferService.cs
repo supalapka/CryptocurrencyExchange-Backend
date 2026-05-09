@@ -57,7 +57,7 @@ namespace CryptocurrencyExchange.Application.Transfers
             if (senderItem is null || !senderItem.HasSufficientBalance(dto.Amount))
                 throw new InsufficientFundsException();
 
-            var code = GenerateCode();
+            var code = VerificationCode.Generate();
             var idempotentRequest = new TransferIdempotentRequest(idempotencyKey, senderId);
             Transfer transfer = null;
 
@@ -68,7 +68,7 @@ namespace CryptocurrencyExchange.Application.Transfers
                     await _idempotentRequestRepository.AddAsync(idempotentRequest);
                     transfer = Transfer.Create(senderId, receiver.Id, symbol, dto.Amount, code);
                     await _transferRepository.AddAsync(transfer);
-                    await _outboxRepository.AddAsync(new TransferVerificationOutbox(senderItem.User.Email, code));
+                    await _outboxRepository.AddAsync(new TransferVerificationOutbox(senderItem.User.Email, code.Value));
                     await _unitOfWork.CommitAsync();
                     idempotentRequest.SetTransferId(transfer.Id);
                 });
@@ -125,8 +125,6 @@ namespace CryptocurrencyExchange.Application.Transfers
 
             _logger.LogInformation("Transfer {TransferId} completed by user {SenderId}", dto.TransferId, senderId);
         }
-
-        private static string GenerateCode() => Random.Shared.Next(100_000, 1_000_000).ToString();
 
         private static bool IsDuplicateKeyException(DbUpdateException ex) =>
             ex.InnerException is SqlException sqlEx &&
