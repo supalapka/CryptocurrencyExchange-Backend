@@ -1,12 +1,10 @@
 using CryptocurrencyExchange.Application.Transfers;
-using CryptocurrencyExchange.Core.Events;
 using CryptocurrencyExchange.Core.Interfaces;
 using CryptocurrencyExchange.Core.Interfaces.Repositories;
 using CryptocurrencyExchange.Core.Models;
 using CryptocurrencyExchange.Core.ValueObject;
 using CryptocurrencyExchange.Core.ValueObject.User;
 using CryptocurrencyExchange.Exceptions;
-using MassTransit;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -23,8 +21,8 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
         private Mock<IUserRepository> _userRepo;
         private Mock<IUnitOfWork> _uow;
         private Mock<ITransferVerificationOutboxRepository> _outboxRepo;
+        private Mock<ITransferCompletedOutboxRepository> _completedOutboxRepo;
         private Mock<ITransferIdempotentRequestRepository> _idempotentRepo;
-        private Mock<IPublishEndpoint> _publishEndpoint;
 
         private TransferService _service;
 
@@ -42,8 +40,8 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
             _userRepo = new Mock<IUserRepository>();
             _uow = new Mock<IUnitOfWork>();
             _outboxRepo = new Mock<ITransferVerificationOutboxRepository>();
+            _completedOutboxRepo = new Mock<ITransferCompletedOutboxRepository>();
             _idempotentRepo = new Mock<ITransferIdempotentRequestRepository>();
-            _publishEndpoint = new Mock<IPublishEndpoint>();
 
             _uow.Setup(x => x.ExecuteInTransactionAsync(It.IsAny<Func<Task>>()))
                 .Returns<Func<Task>>(f => f());
@@ -54,8 +52,8 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
                 _userRepo.Object,
                 _uow.Object,
                 _outboxRepo.Object,
+                _completedOutboxRepo.Object,
                 _idempotentRepo.Object,
-                _publishEndpoint.Object,
                 NullLogger<TransferService>.Instance
             );
         }
@@ -229,7 +227,7 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
         }
 
         [Test]
-        public async Task ConfirmAsync_ValidCode_ShouldPublishTransferCompletedEvent()
+        public async Task ConfirmAsync_ValidCode_ShouldWriteCompletionOutbox()
         {
             var transfer = Transfer.Create(SenderId, ReceiverId, CoinSymbol.Btc, 5m, new VerificationCode("123456"));
             var senderItem = WalletItemMother.CreateItem(SenderId, "btc", 10m);
@@ -244,16 +242,14 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
             var dto = new ConfirmTransferDto(0, "123456");
             await _service.ConfirmAsync(SenderId, dto);
 
-            _publishEndpoint.Verify(
-                x => x.Publish(
-                    It.Is<TransferCompletedEvent>(e =>
-                        e.SenderId == SenderId &&
-                        e.SenderEmail == SenderEmail.Value &&
-                        e.ReceiverId == ReceiverId &&
-                        e.ReceiverEmail == ReceiverEmail.Value &&
-                        e.Amount == 5m &&
-                        e.Symbol == "btc"),
-                    It.IsAny<CancellationToken>()),
+            _completedOutboxRepo.Verify(
+                x => x.AddAsync(It.Is<TransferCompletedOutbox>(e =>
+                    e.SenderId == SenderId &&
+                    e.SenderEmail == SenderEmail.Value &&
+                    e.ReceiverId == ReceiverId &&
+                    e.ReceiverEmail == ReceiverEmail.Value &&
+                    e.Amount == 5m &&
+                    e.Symbol == "btc")),
                 Times.Once);
         }
 

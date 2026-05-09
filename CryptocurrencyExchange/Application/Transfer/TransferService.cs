@@ -1,11 +1,9 @@
-using CryptocurrencyExchange.Core.Events;
 using CryptocurrencyExchange.Core.Interfaces;
 using CryptocurrencyExchange.Core.Interfaces.Repositories;
 using CryptocurrencyExchange.Core.Interfaces.Services;
 using CryptocurrencyExchange.Core.Models;
 using CryptocurrencyExchange.Core.ValueObject;
 using CryptocurrencyExchange.Exceptions;
-using MassTransit;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 
@@ -18,8 +16,8 @@ namespace CryptocurrencyExchange.Application.Transfers
         private readonly IUserRepository _userRepository;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ITransferVerificationOutboxRepository _outboxRepository;
+        private readonly ITransferCompletedOutboxRepository _completedOutboxRepository;
         private readonly ITransferIdempotentRequestRepository _idempotentRequestRepository;
-        private readonly IPublishEndpoint _publishEndpoint;
         private readonly ILogger<TransferService> _logger;
 
         public TransferService(
@@ -28,8 +26,8 @@ namespace CryptocurrencyExchange.Application.Transfers
             IUserRepository userRepository,
             IUnitOfWork unitOfWork,
             ITransferVerificationOutboxRepository outboxRepository,
+            ITransferCompletedOutboxRepository completedOutboxRepository,
             ITransferIdempotentRequestRepository idempotentRequestRepository,
-            IPublishEndpoint publishEndpoint,
             ILogger<TransferService> logger)
         {
             _transferRepository = transferRepository;
@@ -37,8 +35,8 @@ namespace CryptocurrencyExchange.Application.Transfers
             _userRepository = userRepository;
             _unitOfWork = unitOfWork;
             _outboxRepository = outboxRepository;
+            _completedOutboxRepository = completedOutboxRepository;
             _idempotentRequestRepository = idempotentRequestRepository;
-            _publishEndpoint = publishEndpoint;
             _logger = logger;
         }
 
@@ -116,12 +114,12 @@ namespace CryptocurrencyExchange.Application.Transfers
                 }
 
                 transfer.Execute(senderItem, receiverItem, codeVo);
-            });
 
-            var senderEmail = await _userRepository.GetEmailByIdAsync(senderId);
-            var receiverEmail = await _userRepository.GetEmailByIdAsync(transfer.ReceiverId);
-            await _publishEndpoint.Publish(new TransferCompletedEvent(
-                transfer.Id, senderId, senderEmail, transfer.ReceiverId, receiverEmail, transfer.Amount, transfer.Symbol.Value));
+                var senderEmail = await _userRepository.GetEmailByIdAsync(senderId);
+                var receiverEmail = await _userRepository.GetEmailByIdAsync(transfer.ReceiverId);
+                await _completedOutboxRepository.AddAsync(new TransferCompletedOutbox(
+                    transfer.Id, senderId, senderEmail, transfer.ReceiverId, receiverEmail, transfer.Amount, transfer.Symbol.Value));
+            });
 
             _logger.LogInformation("Transfer {TransferId} completed by user {SenderId}", dto.TransferId, senderId);
         }
