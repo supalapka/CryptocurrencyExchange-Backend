@@ -137,8 +137,12 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
         public void InitiateAsync_SelfTransfer_ShouldThrowSelfTransferException()
         {
             var sender = new User(SenderEmail, new byte[] { 1 }, new byte[] { 2 });
+            var senderItem = new WalletItem(sender.Id, CoinSymbol.Btc);
+            senderItem.AddAmount(10m);
+
             _idempotentRepo.Setup(x => x.FindAsync(It.IsAny<string>(), It.IsAny<int>())).ReturnsAsync((TransferIdempotentRequest)null);
             _userRepo.Setup(x => x.GetByEmailAsync(SenderEmail)).ReturnsAsync(sender);
+            _walletRepo.Setup(x => x.GetWithUserAsync(sender.Id, It.IsAny<CoinSymbol>())).ReturnsAsync(senderItem);
 
             var dto = new InitiateTransferDto(SenderEmail, "btc", 5m);
 

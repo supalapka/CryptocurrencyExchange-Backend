@@ -51,9 +51,6 @@ namespace CryptocurrencyExchange.Application.Transfers
             var receiver = await _userRepository.GetByEmailAsync(dto.ReceiverEmail)
                 ?? throw new UserNotFoundException();
 
-            if (receiver.Id == senderId)
-                throw new SelfTransferException();
-
             var symbol = new CoinSymbol(dto.CoinSymbol);
 
             var senderItem = await _walletItemRepository.GetWithUserAsync(senderId, symbol)

@@ -26,6 +26,8 @@ namespace CryptocurrencyExchange.Core.Models
             Amount = Balance.Zero;
         }
 
+        public bool HasSufficientBalance(decimal amount) => Amount.Value >= amount;
+
         public void AddAmount(decimal amount)
         {
             Amount += amount;

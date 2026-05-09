@@ -13,6 +13,13 @@ namespace CryptocurrencyExchange.Tests.Domain
         private const string Code = "123456";
 
         [Test]
+        public void Create_SenderEqualsReceiver_ShouldThrowSelfTransferException()
+        {
+            Assert.Throws<SelfTransferException>(() =>
+                Transfer.Create(SenderId, SenderId, CoinSymbol.Btc, 1m, Code));
+        }
+
+        [Test]
         public void Execute_CorrectCode_ShouldDeductSenderAndCreditReceiver()
         {
             var transfer = Transfer.Create(SenderId, ReceiverId, CoinSymbol.Btc, 1m, Code);

@@ -20,6 +20,9 @@ namespace CryptocurrencyExchange.Core.Models
 
         public static Transfer Create(int senderId, int receiverId, CoinSymbol symbol, decimal amount, string verificationCode)
         {
+            if (senderId == receiverId)
+                throw new SelfTransferException();
+
             return new Transfer
             {
                 SenderId = senderId,
