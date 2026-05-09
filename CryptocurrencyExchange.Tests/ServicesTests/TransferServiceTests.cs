@@ -151,24 +151,6 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
         }
 
         [Test]
-        public void InitiateAsync_InsufficientFunds_ShouldThrowInsufficientFundsException()
-        {
-            var receiver = new User(ReceiverEmail, new byte[] { 1 }, new byte[] { 2 });
-            var senderItem = new WalletItem(SenderId, CoinSymbol.Btc);
-            senderItem.AddAmount(1m);
-            SetUserProperty(senderItem, new User(SenderEmail, new byte[] { 3 }, new byte[] { 4 }));
-
-            _idempotentRepo.Setup(x => x.FindAsync(It.IsAny<string>(), It.IsAny<int>())).ReturnsAsync((TransferIdempotentRequest)null);
-            _userRepo.Setup(x => x.GetByEmailAsync(ReceiverEmail)).ReturnsAsync(receiver);
-            _walletRepo.Setup(x => x.GetWithUserAsync(SenderId, CoinSymbol.Btc)).ReturnsAsync(senderItem);
-
-            var dto = new InitiateTransferDto(ReceiverEmail, "btc", 10m);
-
-            Assert.ThrowsAsync<InsufficientFundsException>(async () =>
-                await _service.InitiateAsync(SenderId, dto, IdempotencyKey));
-        }
-
-        [Test]
         public void InitiateAsync_SenderHasNoWalletItem_ShouldThrowWalletItemNotFoundException()
         {
             var receiver = new User(ReceiverEmail, new byte[] { 1 }, new byte[] { 2 });

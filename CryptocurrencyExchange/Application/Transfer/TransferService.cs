@@ -53,10 +53,8 @@ namespace CryptocurrencyExchange.Application.Transfers
 
             var symbol = new CoinSymbol(dto.CoinSymbol);
 
-            var senderItem = await _walletItemRepository.GetWithUserAsync(senderId, symbol)
-                ?? throw new WalletItemNotFoundException();
-
-            if (senderItem.Amount.Value < dto.Amount)
+            var senderItem = await _walletItemRepository.GetWithUserAsync(senderId, symbol);
+            if (senderItem is null || !senderItem.HasSufficientBalance(dto.Amount))
                 throw new InsufficientFundsException();
 
             var code = GenerateCode();
