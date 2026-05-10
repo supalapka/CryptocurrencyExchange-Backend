@@ -1,7 +1,12 @@
+using CryptocurrencyExchange.Application.ApiKeys;
 using CryptocurrencyExchange.Core.Interfaces;
+using CryptocurrencyExchange.Core.Interfaces.Repositories;
+using CryptocurrencyExchange.Core.Interfaces.Services;
+using CryptocurrencyExchange.Infrastructure.Persistence.Repositories;
 using CryptocurrencyExchange.Infrastructure.Security;
 using CryptocurrencyExchange.Options;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using System.Threading.RateLimiting;
@@ -24,22 +29,30 @@ namespace CryptocurrencyExchange.Extensions
                 ?? throw new InvalidOperationException("Jwt configuration is missing");
 
             services
-                .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                .AddJwtBearer(options =>
-                {
-                    options.TokenValidationParameters = new TokenValidationParameters
+                .AddAuthentication()
+                    .AddJwtBearer(options =>
                     {
-                        ValidateIssuerSigningKey = true,
-                        IssuerSigningKey = new SymmetricSecurityKey(
-                            Encoding.UTF8.GetBytes(jwtOptions.SecretKey)),
-                        ValidateIssuer = false,
-                        ValidateAudience = false,
-                        ValidateLifetime = true,
-                        ClockSkew = TimeSpan.Zero
-                    };
-                });
+                        options.TokenValidationParameters = new TokenValidationParameters
+                        {
+                            ValidateIssuerSigningKey = true,
+                            IssuerSigningKey = new SymmetricSecurityKey(
+                                Encoding.UTF8.GetBytes(jwtOptions.SecretKey)),
+                            ValidateIssuer = false,
+                            ValidateAudience = false,
+                            ValidateLifetime = true,
+                            ClockSkew = TimeSpan.Zero
+                        };
+                    })
+                    .AddScheme<ApiKeyAuthenticationOptions, ApiKeyAuthenticationHandler>("ApiKey", _ => { });
 
             services.AddScoped<ITokenService, JwtTokenService>();
+            services.AddScoped<IApiKeyRepository, EfApiKeyRepository>();
+            services.AddScoped<IApiKeyService, ApiKeyService>();
+
+            services.AddAuthorizationBuilder()
+                .SetDefaultPolicy(new AuthorizationPolicyBuilder(JwtBearerDefaults.AuthenticationScheme, "ApiKey")
+                    .RequireAuthenticatedUser()
+                    .Build());
 
             return services;
         }
