@@ -22,6 +22,7 @@ namespace CryptocurrencyExchange.Infrastructure.Persistence
         public DbSet<TransferVerificationOutbox> TransferVerificationOutbox { get; set; }
         public DbSet<TransferCompletedOutbox> TransferCompletedOutbox { get; set; }
         public DbSet<TransferIdempotentRequest> TransferIdempotentRequests { get; set; }
+        public DbSet<ApiKey> ApiKeys { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -34,6 +35,7 @@ namespace CryptocurrencyExchange.Infrastructure.Persistence
             ConfigureTransferVerificationOutbox(modelBuilder);
             ConfigureTransferCompletedOutbox(modelBuilder);
             ConfigureTransferIdempotentRequest(modelBuilder);
+            ConfigureApiKey(modelBuilder);
         }
 
         private static void ConfigureFuture(ModelBuilder modelBuilder)
@@ -141,6 +143,19 @@ namespace CryptocurrencyExchange.Infrastructure.Persistence
                 b.HasKey(r => r.Id);
                 b.Property(r => r.Key).IsRequired().HasMaxLength(128);
                 b.HasIndex(r => new { r.Key, r.UserId }).IsUnique();
+            });
+        }
+
+        private static void ConfigureApiKey(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<ApiKey>(b =>
+            {
+                b.HasKey(k => k.Id);
+                b.Property(k => k.KeyHash).IsRequired();
+                b.Property(k => k.KeyPrefix).IsRequired().HasMaxLength(8);
+                b.HasIndex(k => k.UserId).IsUnique();
+                b.HasIndex(k => k.KeyHash);
+                b.HasOne<User>().WithMany().HasForeignKey(k => k.UserId).OnDelete(DeleteBehavior.Cascade);
             });
         }
 
