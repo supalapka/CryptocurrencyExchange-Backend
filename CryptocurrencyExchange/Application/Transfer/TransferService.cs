@@ -1,11 +1,9 @@
-using CryptocurrencyExchange.Core.Events;
 using CryptocurrencyExchange.Core.Interfaces;
 using CryptocurrencyExchange.Core.Interfaces.Repositories;
 using CryptocurrencyExchange.Core.Interfaces.Services;
 using CryptocurrencyExchange.Core.Models;
 using CryptocurrencyExchange.Core.ValueObject;
 using CryptocurrencyExchange.Exceptions;
-using MassTransit;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 
@@ -18,8 +16,8 @@ namespace CryptocurrencyExchange.Application.Transfers
         private readonly IUserRepository _userRepository;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ITransferVerificationOutboxRepository _outboxRepository;
+        private readonly ITransferCompletedOutboxRepository _completedOutboxRepository;
         private readonly ITransferIdempotentRequestRepository _idempotentRequestRepository;
-        private readonly IPublishEndpoint _publishEndpoint;
         private readonly ILogger<TransferService> _logger;
 
         public TransferService(
@@ -28,8 +26,8 @@ namespace CryptocurrencyExchange.Application.Transfers
             IUserRepository userRepository,
             IUnitOfWork unitOfWork,
             ITransferVerificationOutboxRepository outboxRepository,
+            ITransferCompletedOutboxRepository completedOutboxRepository,
             ITransferIdempotentRequestRepository idempotentRequestRepository,
-            IPublishEndpoint publishEndpoint,
             ILogger<TransferService> logger)
         {
             _transferRepository = transferRepository;
@@ -37,8 +35,8 @@ namespace CryptocurrencyExchange.Application.Transfers
             _userRepository = userRepository;
             _unitOfWork = unitOfWork;
             _outboxRepository = outboxRepository;
+            _completedOutboxRepository = completedOutboxRepository;
             _idempotentRequestRepository = idempotentRequestRepository;
-            _publishEndpoint = publishEndpoint;
             _logger = logger;
         }
 
@@ -51,18 +49,13 @@ namespace CryptocurrencyExchange.Application.Transfers
             var receiver = await _userRepository.GetByEmailAsync(dto.ReceiverEmail)
                 ?? throw new UserNotFoundException();
 
-            if (receiver.Id == senderId)
-                throw new SelfTransferException();
-
             var symbol = new CoinSymbol(dto.CoinSymbol);
 
-            var senderItem = await _walletItemRepository.GetWithUserAsync(senderId, symbol)
-                ?? throw new WalletItemNotFoundException();
-
-            if (senderItem.Amount.Value < dto.Amount)
+            var senderItem = await _walletItemRepository.GetWithUserAsync(senderId, symbol);
+            if (senderItem is null || !senderItem.HasSufficientBalance(dto.Amount))
                 throw new InsufficientFundsException();
 
-            var code = GenerateCode();
+            var code = VerificationCode.Generate();
             var idempotentRequest = new TransferIdempotentRequest(idempotencyKey, senderId);
             Transfer transfer = null;
 
@@ -73,7 +66,7 @@ namespace CryptocurrencyExchange.Application.Transfers
                     await _idempotentRequestRepository.AddAsync(idempotentRequest);
                     transfer = Transfer.Create(senderId, receiver.Id, symbol, dto.Amount, code);
                     await _transferRepository.AddAsync(transfer);
-                    await _outboxRepository.AddAsync(new TransferVerificationOutbox(senderItem.User.Email, code));
+                    await _outboxRepository.AddAsync(new TransferVerificationOutbox(senderItem.User.Email, code.Value));
                     await _unitOfWork.CommitAsync();
                     idempotentRequest.SetTransferId(transfer.Id);
                 });
@@ -121,17 +114,15 @@ namespace CryptocurrencyExchange.Application.Transfers
                 }
 
                 transfer.Execute(senderItem, receiverItem, codeVo);
-            });
 
-            var senderEmail = await _userRepository.GetEmailByIdAsync(senderId);
-            var receiverEmail = await _userRepository.GetEmailByIdAsync(transfer.ReceiverId);
-            await _publishEndpoint.Publish(new TransferCompletedEvent(
-                transfer.Id, senderId, senderEmail, transfer.ReceiverId, receiverEmail, transfer.Amount, transfer.Symbol.Value));
+                var senderEmail = await _userRepository.GetEmailByIdAsync(senderId);
+                var receiverEmail = await _userRepository.GetEmailByIdAsync(transfer.ReceiverId);
+                await _completedOutboxRepository.AddAsync(new TransferCompletedOutbox(
+                    transfer.Id, senderId, senderEmail, transfer.ReceiverId, receiverEmail, transfer.Amount, transfer.Symbol.Value));
+            });
 
             _logger.LogInformation("Transfer {TransferId} completed by user {SenderId}", dto.TransferId, senderId);
         }
-
-        private static string GenerateCode() => Random.Shared.Next(100_000, 1_000_000).ToString();
 
         private static bool IsDuplicateKeyException(DbUpdateException ex) =>
             ex.InnerException is SqlException sqlEx &&

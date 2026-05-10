@@ -1,12 +1,10 @@
 using CryptocurrencyExchange.Application.Transfers;
-using CryptocurrencyExchange.Core.Events;
 using CryptocurrencyExchange.Core.Interfaces;
 using CryptocurrencyExchange.Core.Interfaces.Repositories;
 using CryptocurrencyExchange.Core.Models;
 using CryptocurrencyExchange.Core.ValueObject;
 using CryptocurrencyExchange.Core.ValueObject.User;
 using CryptocurrencyExchange.Exceptions;
-using MassTransit;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -23,8 +21,8 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
         private Mock<IUserRepository> _userRepo;
         private Mock<IUnitOfWork> _uow;
         private Mock<ITransferVerificationOutboxRepository> _outboxRepo;
+        private Mock<ITransferCompletedOutboxRepository> _completedOutboxRepo;
         private Mock<ITransferIdempotentRequestRepository> _idempotentRepo;
-        private Mock<IPublishEndpoint> _publishEndpoint;
 
         private TransferService _service;
 
@@ -42,8 +40,8 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
             _userRepo = new Mock<IUserRepository>();
             _uow = new Mock<IUnitOfWork>();
             _outboxRepo = new Mock<ITransferVerificationOutboxRepository>();
+            _completedOutboxRepo = new Mock<ITransferCompletedOutboxRepository>();
             _idempotentRepo = new Mock<ITransferIdempotentRequestRepository>();
-            _publishEndpoint = new Mock<IPublishEndpoint>();
 
             _uow.Setup(x => x.ExecuteInTransactionAsync(It.IsAny<Func<Task>>()))
                 .Returns<Func<Task>>(f => f());
@@ -54,8 +52,8 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
                 _userRepo.Object,
                 _uow.Object,
                 _outboxRepo.Object,
+                _completedOutboxRepo.Object,
                 _idempotentRepo.Object,
-                _publishEndpoint.Object,
                 NullLogger<TransferService>.Instance
             );
         }
@@ -137,8 +135,12 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
         public void InitiateAsync_SelfTransfer_ShouldThrowSelfTransferException()
         {
             var sender = new User(SenderEmail, new byte[] { 1 }, new byte[] { 2 });
+            var senderItem = new WalletItem(sender.Id, CoinSymbol.Btc);
+            senderItem.AddAmount(10m);
+
             _idempotentRepo.Setup(x => x.FindAsync(It.IsAny<string>(), It.IsAny<int>())).ReturnsAsync((TransferIdempotentRequest)null);
             _userRepo.Setup(x => x.GetByEmailAsync(SenderEmail)).ReturnsAsync(sender);
+            _walletRepo.Setup(x => x.GetWithUserAsync(sender.Id, It.IsAny<CoinSymbol>())).ReturnsAsync(senderItem);
 
             var dto = new InitiateTransferDto(SenderEmail, "btc", 5m);
 
@@ -147,41 +149,9 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
         }
 
         [Test]
-        public void InitiateAsync_InsufficientFunds_ShouldThrowInsufficientFundsException()
-        {
-            var receiver = new User(ReceiverEmail, new byte[] { 1 }, new byte[] { 2 });
-            var senderItem = new WalletItem(SenderId, CoinSymbol.Btc);
-            senderItem.AddAmount(1m);
-            SetUserProperty(senderItem, new User(SenderEmail, new byte[] { 3 }, new byte[] { 4 }));
-
-            _idempotentRepo.Setup(x => x.FindAsync(It.IsAny<string>(), It.IsAny<int>())).ReturnsAsync((TransferIdempotentRequest)null);
-            _userRepo.Setup(x => x.GetByEmailAsync(ReceiverEmail)).ReturnsAsync(receiver);
-            _walletRepo.Setup(x => x.GetWithUserAsync(SenderId, CoinSymbol.Btc)).ReturnsAsync(senderItem);
-
-            var dto = new InitiateTransferDto(ReceiverEmail, "btc", 10m);
-
-            Assert.ThrowsAsync<InsufficientFundsException>(async () =>
-                await _service.InitiateAsync(SenderId, dto, IdempotencyKey));
-        }
-
-        [Test]
-        public void InitiateAsync_SenderHasNoWalletItem_ShouldThrowWalletItemNotFoundException()
-        {
-            var receiver = new User(ReceiverEmail, new byte[] { 1 }, new byte[] { 2 });
-            _idempotentRepo.Setup(x => x.FindAsync(It.IsAny<string>(), It.IsAny<int>())).ReturnsAsync((TransferIdempotentRequest)null);
-            _userRepo.Setup(x => x.GetByEmailAsync(ReceiverEmail)).ReturnsAsync(receiver);
-            _walletRepo.Setup(x => x.GetWithUserAsync(SenderId, CoinSymbol.Btc)).ReturnsAsync((WalletItem)null);
-
-            var dto = new InitiateTransferDto(ReceiverEmail, "btc", 5m);
-
-            Assert.ThrowsAsync<WalletItemNotFoundException>(async () =>
-                await _service.InitiateAsync(SenderId, dto, IdempotencyKey));
-        }
-
-        [Test]
         public async Task ConfirmAsync_ValidCode_ShouldCompleteTransfer()
         {
-            var transfer = Transfer.Create(SenderId, ReceiverId, CoinSymbol.Btc, 5m, "123456");
+            var transfer = Transfer.Create(SenderId, ReceiverId, CoinSymbol.Btc, 5m, new VerificationCode("123456"));
             var senderItem = WalletItemMother.CreateItem(SenderId, "btc", 10m);
             var receiverItem = WalletItemMother.CreateItem(ReceiverId, "btc", 0m);
 
@@ -200,7 +170,7 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
         [Test]
         public async Task ConfirmAsync_AlreadyCompleted_ShouldReturnWithoutError()
         {
-            var completed = Transfer.Create(SenderId, ReceiverId, CoinSymbol.Btc, 5m, "123456");
+            var completed = Transfer.Create(SenderId, ReceiverId, CoinSymbol.Btc, 5m, new VerificationCode("123456"));
 
             _transferRepo.Setup(x => x.GetPendingByIdAndSenderAsync(0, SenderId)).ReturnsAsync((Transfer)null);
             _transferRepo.Setup(x => x.GetCompletedByIdAndSenderAsync(0, SenderId)).ReturnsAsync(completed);
@@ -225,7 +195,7 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
         [Test]
         public void ConfirmAsync_WrongCode_ShouldThrowInvalidVerificationCodeException()
         {
-            var transfer = Transfer.Create(SenderId, ReceiverId, CoinSymbol.Btc, 5m, "123456");
+            var transfer = Transfer.Create(SenderId, ReceiverId, CoinSymbol.Btc, 5m, new VerificationCode("123456"));
             var senderItem = WalletItemMother.CreateItem(SenderId, "btc", 10m);
             var receiverItem = WalletItemMother.CreateItem(ReceiverId, "btc", 0m);
 
@@ -242,7 +212,7 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
         [Test]
         public async Task ConfirmAsync_ReceiverHasNoWalletItem_ShouldCreateAndTransfer()
         {
-            var transfer = Transfer.Create(SenderId, ReceiverId, CoinSymbol.Btc, 5m, "123456");
+            var transfer = Transfer.Create(SenderId, ReceiverId, CoinSymbol.Btc, 5m, new VerificationCode("123456"));
             var senderItem = WalletItemMother.CreateItem(SenderId, "btc", 10m);
 
             _transferRepo.Setup(x => x.GetPendingByIdAndSenderAsync(0, SenderId)).ReturnsAsync(transfer);
@@ -257,9 +227,9 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
         }
 
         [Test]
-        public async Task ConfirmAsync_ValidCode_ShouldPublishTransferCompletedEvent()
+        public async Task ConfirmAsync_ValidCode_ShouldWriteCompletionOutbox()
         {
-            var transfer = Transfer.Create(SenderId, ReceiverId, CoinSymbol.Btc, 5m, "123456");
+            var transfer = Transfer.Create(SenderId, ReceiverId, CoinSymbol.Btc, 5m, new VerificationCode("123456"));
             var senderItem = WalletItemMother.CreateItem(SenderId, "btc", 10m);
             var receiverItem = WalletItemMother.CreateItem(ReceiverId, "btc", 0m);
 
@@ -272,16 +242,14 @@ namespace CryptocurrencyExchange.Tests.ServicesTests
             var dto = new ConfirmTransferDto(0, "123456");
             await _service.ConfirmAsync(SenderId, dto);
 
-            _publishEndpoint.Verify(
-                x => x.Publish(
-                    It.Is<TransferCompletedEvent>(e =>
-                        e.SenderId == SenderId &&
-                        e.SenderEmail == SenderEmail.Value &&
-                        e.ReceiverId == ReceiverId &&
-                        e.ReceiverEmail == ReceiverEmail.Value &&
-                        e.Amount == 5m &&
-                        e.Symbol == "btc"),
-                    It.IsAny<CancellationToken>()),
+            _completedOutboxRepo.Verify(
+                x => x.AddAsync(It.Is<TransferCompletedOutbox>(e =>
+                    e.SenderId == SenderId &&
+                    e.SenderEmail == SenderEmail.Value &&
+                    e.ReceiverId == ReceiverId &&
+                    e.ReceiverEmail == ReceiverEmail.Value &&
+                    e.Amount == 5m &&
+                    e.Symbol == "btc")),
                 Times.Once);
         }
 

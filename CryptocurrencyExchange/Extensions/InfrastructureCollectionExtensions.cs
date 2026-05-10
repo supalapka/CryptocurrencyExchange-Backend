@@ -41,6 +41,7 @@ namespace CryptocurrencyExchange.Extensions
             services.AddScoped<ITransferRepository, EfTransferRepository>();
             services.AddScoped<IUserRegistrationOutboxRepository, EfUserRegistrationOutboxRepository>();
             services.AddScoped<ITransferVerificationOutboxRepository, EfTransferVerificationOutboxRepository>();
+            services.AddScoped<ITransferCompletedOutboxRepository, EfTransferCompletedOutboxRepository>();
             services.AddScoped<ITransferIdempotentRequestRepository, EfTransferIdempotentRequestRepository>();
             services.AddScoped<IDatabaseHealthChecker, EfDatabaseHealthChecker>();
 
@@ -138,6 +139,7 @@ namespace CryptocurrencyExchange.Extensions
             services.AddHostedService<StakingScheduler>();
             services.AddHostedService<OutboxDispatcher>();
             services.AddHostedService<TransferOutboxDispatcher>();
+            services.AddHostedService<TransferCompletedOutboxDispatcher>();
             return services;
         }
 

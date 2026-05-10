@@ -13,5 +13,8 @@ namespace CryptocurrencyExchange.Core.ValueObject
         }
 
         public override string ToString() => Value;
+
+        public static VerificationCode Generate() =>
+            new(Random.Shared.Next(100_000, 1_000_000).ToString());
     }
 }

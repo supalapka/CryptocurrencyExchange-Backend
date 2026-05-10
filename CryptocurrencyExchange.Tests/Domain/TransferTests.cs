@@ -10,7 +10,14 @@ namespace CryptocurrencyExchange.Tests.Domain
     {
         private const int SenderId = 1;
         private const int ReceiverId = 2;
-        private const string Code = "123456";
+        private static readonly VerificationCode Code = new("123456");
+
+        [Test]
+        public void Create_SenderEqualsReceiver_ShouldThrowSelfTransferException()
+        {
+            Assert.Throws<SelfTransferException>(() =>
+                Transfer.Create(SenderId, SenderId, CoinSymbol.Btc, 1m, Code));
+        }
 
         [Test]
         public void Execute_CorrectCode_ShouldDeductSenderAndCreditReceiver()
@@ -19,7 +26,7 @@ namespace CryptocurrencyExchange.Tests.Domain
             var senderItem = WalletItemMother.CreateItem(SenderId, "btc", 5m);
             var receiverItem = WalletItemMother.CreateItem(ReceiverId, "btc", 0m);
 
-            transfer.Execute(senderItem, receiverItem, new VerificationCode(Code));
+            transfer.Execute(senderItem, receiverItem, Code);
 
             Assert.That(senderItem.Amount.Value, Is.EqualTo(4m));
             Assert.That(receiverItem.Amount.Value, Is.EqualTo(1m));
@@ -44,10 +51,10 @@ namespace CryptocurrencyExchange.Tests.Domain
             var senderItem = WalletItemMother.CreateItem(SenderId, "btc", 5m);
             var receiverItem = WalletItemMother.CreateItem(ReceiverId, "btc", 0m);
 
-            transfer.Execute(senderItem, receiverItem, new VerificationCode(Code));
+            transfer.Execute(senderItem, receiverItem, Code);
 
             Assert.Throws<InvalidOperationException>(() =>
-                transfer.Execute(senderItem, receiverItem, new VerificationCode(Code)));
+                transfer.Execute(senderItem, receiverItem, Code));
         }
 
         [Test]
@@ -58,7 +65,7 @@ namespace CryptocurrencyExchange.Tests.Domain
             var receiverItem = WalletItemMother.CreateItem(ReceiverId, "btc", 0m);
 
             Assert.Throws<InsufficientFundsException>(() =>
-                transfer.Execute(senderItem, receiverItem, new VerificationCode(Code)));
+                transfer.Execute(senderItem, receiverItem, Code));
         }
     }
 }

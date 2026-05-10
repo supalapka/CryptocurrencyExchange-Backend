@@ -18,15 +18,18 @@ namespace CryptocurrencyExchange.Core.Models
 
         private Transfer() { }
 
-        public static Transfer Create(int senderId, int receiverId, CoinSymbol symbol, decimal amount, string verificationCode)
+        public static Transfer Create(int senderId, int receiverId, CoinSymbol symbol, decimal amount, VerificationCode code)
         {
+            if (senderId == receiverId)
+                throw new SelfTransferException();
+
             return new Transfer
             {
                 SenderId = senderId,
                 ReceiverId = receiverId,
                 Symbol = symbol,
                 Amount = amount,
-                Code = new VerificationCode(verificationCode),
+                Code = code,
                 Status = TransferStatus.Pending,
                 CreatedAt = DateTime.UtcNow
             };
