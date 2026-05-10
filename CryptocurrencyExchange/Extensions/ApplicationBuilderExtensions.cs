@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.HttpOverrides;
+﻿using CryptocurrencyExchange.Middleware;
+using Microsoft.AspNetCore.HttpOverrides;
 
 namespace CryptocurrencyExchange.Extensions
 {
@@ -6,6 +7,8 @@ namespace CryptocurrencyExchange.Extensions
     {
         public static WebApplication SetupWebPipeline(this WebApplication app)
         {
+            app.UseMiddleware<ExceptionHandlingMiddleware>();
+
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
