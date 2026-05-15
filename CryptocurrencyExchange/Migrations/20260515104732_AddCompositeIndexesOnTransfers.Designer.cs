@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CryptocurrencyExchange.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20260502181749_AddTransferIdempotentRequests")]
-    partial class AddTransferIdempotentRequests
+    [Migration("20260515104732_AddCompositeIndexesOnTransfers")]
+    partial class AddCompositeIndexesOnTransfers
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,6 +24,39 @@ namespace CryptocurrencyExchange.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("CryptocurrencyExchange.Core.Models.ApiKey", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<byte[]>("KeyHash")
+                        .IsRequired()
+                        .HasColumnType("varbinary(900)");
+
+                    b.Property<string>("KeyPrefix")
+                        .IsRequired()
+                        .HasMaxLength(8)
+                        .HasColumnType("nvarchar(8)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("KeyHash");
+
+                    b.HasIndex("UserId")
+                        .IsUnique();
+
+                    b.ToTable("ApiKeys");
+                });
 
             modelBuilder.Entity("CryptocurrencyExchange.Core.Models.Future", b =>
                 {
@@ -50,7 +83,8 @@ namespace CryptocurrencyExchange.Migrations
 
                     b.Property<string>("Symbol")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
 
                     b.Property<int>("UserId")
                         .HasColumnType("int");
@@ -205,7 +239,8 @@ namespace CryptocurrencyExchange.Migrations
 
                     b.Property<string>("Symbol")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
 
                     b.HasKey("Id");
 
@@ -225,7 +260,8 @@ namespace CryptocurrencyExchange.Migrations
 
                     b.Property<string>("Code")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(6)
+                        .HasColumnType("nvarchar(6)");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
@@ -238,19 +274,71 @@ namespace CryptocurrencyExchange.Migrations
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(16)
+                        .HasColumnType("nvarchar(16)");
 
                     b.Property<string>("Symbol")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ReceiverId");
+                    b.HasIndex("ReceiverId", "CreatedAt")
+                        .IsDescending(false, true);
 
-                    b.HasIndex("SenderId");
+                    b.HasIndex("SenderId", "CreatedAt")
+                        .IsDescending(false, true);
 
                     b.ToTable("Transfers");
+                });
+
+            modelBuilder.Entity("CryptocurrencyExchange.Core.Models.TransferCompletedOutbox", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("ProcessedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ReceiverEmail")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<int>("ReceiverId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("SenderEmail")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<int>("SenderId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Symbol")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
+
+                    b.Property<int>("TransferId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProcessedAt");
+
+                    b.ToTable("TransferCompletedOutbox");
                 });
 
             modelBuilder.Entity("CryptocurrencyExchange.Core.Models.TransferIdempotentRequest", b =>
@@ -340,7 +428,8 @@ namespace CryptocurrencyExchange.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Email");
+                    b.HasIndex("Email")
+                        .IsUnique();
 
                     b.ToTable("Users");
                 });
@@ -380,7 +469,8 @@ namespace CryptocurrencyExchange.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("Symbol")
-                        .HasColumnType("nvarchar(450)");
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
 
                     b.Property<decimal>("Amount")
                         .HasColumnType("decimal(18,2)");
@@ -388,6 +478,15 @@ namespace CryptocurrencyExchange.Migrations
                     b.HasKey("UserId", "Symbol");
 
                     b.ToTable("WalletItems");
+                });
+
+            modelBuilder.Entity("CryptocurrencyExchange.Core.Models.ApiKey", b =>
+                {
+                    b.HasOne("CryptocurrencyExchange.Core.Models.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("CryptocurrencyExchange.Core.Models.Future", b =>

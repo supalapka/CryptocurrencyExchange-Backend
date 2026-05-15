@@ -30,19 +30,32 @@ namespace CryptocurrencyExchange.Infrastructure.Persistence
             ConfigureRelationships(modelBuilder);
             ConfigureUser(modelBuilder);
             ConfigureFuture(modelBuilder);
+            ConfigureStakingCoin(modelBuilder);
             ConfigureLogEntry(modelBuilder);
             ConfigureUserRegistrationOutbox(modelBuilder);
             ConfigureTransferVerificationOutbox(modelBuilder);
             ConfigureTransferCompletedOutbox(modelBuilder);
             ConfigureTransferIdempotentRequest(modelBuilder);
             ConfigureApiKey(modelBuilder);
+            ConfigureTransfer(modelBuilder);
         }
 
         private static void ConfigureFuture(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Future>()
+                .Property(f => f.Symbol)
+                .HasMaxLength(10);
+
+            modelBuilder.Entity<Future>()
                 .HasIndex(f => f.UserId)
                 .IncludeProperties(f => new { f.Symbol, f.Margin });
+        }
+
+        private static void ConfigureStakingCoin(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<StakingCoin>()
+                .Property(s => s.Symbol)
+                .HasMaxLength(10);
         }
 
         private static void ConfigureUser(ModelBuilder modelBuilder)
@@ -52,7 +65,8 @@ namespace CryptocurrencyExchange.Infrastructure.Persistence
                 .HasMaxLength(256);
 
             modelBuilder.Entity<User>()
-                .HasIndex(u => u.Email);
+                .HasIndex(u => u.Email)
+                .IsUnique();
         }
 
         private static void ConfigureRelationships(ModelBuilder modelBuilder)
@@ -131,7 +145,7 @@ namespace CryptocurrencyExchange.Infrastructure.Persistence
                 b.HasKey(e => e.Id);
                 b.Property(e => e.SenderEmail).IsRequired().HasMaxLength(256);
                 b.Property(e => e.ReceiverEmail).IsRequired().HasMaxLength(256);
-                b.Property(e => e.Symbol).IsRequired().HasMaxLength(16);
+                b.Property(e => e.Symbol).IsRequired().HasMaxLength(10);
                 b.HasIndex(e => e.ProcessedAt);
             });
         }
@@ -144,6 +158,17 @@ namespace CryptocurrencyExchange.Infrastructure.Persistence
                 b.Property(r => r.Key).IsRequired().HasMaxLength(128);
                 b.HasIndex(r => new { r.Key, r.UserId }).IsUnique();
             });
+        }
+
+        private static void ConfigureTransfer(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Transfer>()
+                .HasIndex(t => new { t.SenderId, t.CreatedAt })
+                .IsDescending(false, true);
+
+            modelBuilder.Entity<Transfer>()
+                .HasIndex(t => new { t.ReceiverId, t.CreatedAt })
+                .IsDescending(false, true);
         }
 
         private static void ConfigureApiKey(ModelBuilder modelBuilder)
@@ -166,7 +191,8 @@ namespace CryptocurrencyExchange.Infrastructure.Persistence
              .HasConversion(
                  v => v.Value,
                  v => new CoinSymbol(v)
-             );
+             )
+             .HasMaxLength(10);
 
             modelBuilder.Entity<WalletItem>()
                .Property(x => x.Amount)
@@ -187,18 +213,21 @@ namespace CryptocurrencyExchange.Infrastructure.Persistence
                 .HasConversion(
                     v => v.Value,
                     v => new CoinSymbol(v)
-                );
+                )
+                .HasMaxLength(10);
 
             modelBuilder.Entity<Transfer>()
                 .Property(x => x.Code)
                 .HasConversion(
                     v => v.Value,
                     v => new VerificationCode(v)
-                );
+                )
+                .HasMaxLength(6);
 
             modelBuilder.Entity<Transfer>()
                 .Property(x => x.Status)
-                .HasConversion<string>();
+                .HasConversion<string>()
+                .HasMaxLength(16);
         }
     }
 }

@@ -80,7 +80,8 @@ namespace CryptocurrencyExchange.Migrations
 
                     b.Property<string>("Symbol")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
 
                     b.Property<int>("UserId")
                         .HasColumnType("int");
@@ -235,7 +236,8 @@ namespace CryptocurrencyExchange.Migrations
 
                     b.Property<string>("Symbol")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
 
                     b.HasKey("Id");
 
@@ -255,7 +257,8 @@ namespace CryptocurrencyExchange.Migrations
 
                     b.Property<string>("Code")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(6)
+                        .HasColumnType("nvarchar(6)");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
@@ -268,17 +271,21 @@ namespace CryptocurrencyExchange.Migrations
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(16)
+                        .HasColumnType("nvarchar(16)");
 
                     b.Property<string>("Symbol")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ReceiverId");
+                    b.HasIndex("ReceiverId", "CreatedAt")
+                        .IsDescending(false, true);
 
-                    b.HasIndex("SenderId");
+                    b.HasIndex("SenderId", "CreatedAt")
+                        .IsDescending(false, true);
 
                     b.ToTable("Transfers");
                 });
@@ -318,8 +325,8 @@ namespace CryptocurrencyExchange.Migrations
 
                     b.Property<string>("Symbol")
                         .IsRequired()
-                        .HasMaxLength(16)
-                        .HasColumnType("nvarchar(16)");
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
 
                     b.Property<int>("TransferId")
                         .HasColumnType("int");
@@ -418,7 +425,8 @@ namespace CryptocurrencyExchange.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Email");
+                    b.HasIndex("Email")
+                        .IsUnique();
 
                     b.ToTable("Users");
                 });
@@ -458,7 +466,8 @@ namespace CryptocurrencyExchange.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("Symbol")
-                        .HasColumnType("nvarchar(450)");
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
 
                     b.Property<decimal>("Amount")
                         .HasColumnType("decimal(18,2)");
