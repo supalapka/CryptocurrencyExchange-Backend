@@ -37,6 +37,7 @@ namespace CryptocurrencyExchange.Infrastructure.Persistence
             ConfigureTransferCompletedOutbox(modelBuilder);
             ConfigureTransferIdempotentRequest(modelBuilder);
             ConfigureApiKey(modelBuilder);
+            ConfigureTransfer(modelBuilder);
         }
 
         private static void ConfigureFuture(ModelBuilder modelBuilder)
@@ -157,6 +158,17 @@ namespace CryptocurrencyExchange.Infrastructure.Persistence
                 b.Property(r => r.Key).IsRequired().HasMaxLength(128);
                 b.HasIndex(r => new { r.Key, r.UserId }).IsUnique();
             });
+        }
+
+        private static void ConfigureTransfer(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Transfer>()
+                .HasIndex(t => new { t.SenderId, t.CreatedAt })
+                .IsDescending(false, true);
+
+            modelBuilder.Entity<Transfer>()
+                .HasIndex(t => new { t.ReceiverId, t.CreatedAt })
+                .IsDescending(false, true);
         }
 
         private static void ConfigureApiKey(ModelBuilder modelBuilder)
