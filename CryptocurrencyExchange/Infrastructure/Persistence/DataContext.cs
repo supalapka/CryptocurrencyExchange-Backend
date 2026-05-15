@@ -64,7 +64,8 @@ namespace CryptocurrencyExchange.Infrastructure.Persistence
                 .HasMaxLength(256);
 
             modelBuilder.Entity<User>()
-                .HasIndex(u => u.Email);
+                .HasIndex(u => u.Email)
+                .IsUnique();
         }
 
         private static void ConfigureRelationships(ModelBuilder modelBuilder)
